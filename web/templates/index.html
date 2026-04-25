@@ -56,6 +56,7 @@
               <option value="lama" {% if cfg.get('inpaint_engine', 'lama' )=='lama' %}selected{% endif %}>LaMa (MIT Default)</option>
               <option value="aot" {% if cfg.get('inpaint_engine')=='aot' %}selected{% endif %}>🎨 AOT-GAN (Koharu, High Detail)</option>
               <option value="panelcleaner" {% if cfg.get('inpaint_engine')=='panelcleaner' %}selected{% endif %}>🧹 PanelCleaner (High Quality)</option>
+              <option value="solid" {% if cfg.get('inpaint_engine')=='solid' %}selected{% endif %}>⚪ Solid Fill (Clear White Bubbles)</option>
               <option value="none" {% if cfg.get('inpaint_engine')=='none' %}selected{% endif %}>❌ None (Keep Original)</option>
             </select>
           </div>

@@ -163,7 +163,40 @@ class Inpainter:
         engine = self.cfg.get("inpaint_engine", "lama").lower()
         if engine == "aot":
             return self._run_aot_inpaint(image, regions)
+        elif engine == "panelcleaner":
+            return self._run_panelcleaner_inpaint(image, regions)
+        elif engine == "solid":
+            result = image.copy()
+            for r in regions:
+                self._clean_region(result, r)
+            return result
         return self._run_mit_inpaint(image, regions)
+
+    def _run_panelcleaner_inpaint(self, image: Image.Image, regions: List[BubbleRegion]) -> Image.Image:
+        """
+        Use PanelCleaner's LaMa model for inpainting.
+        """
+        try:
+            import numpy as np
+            from core.panelcleaner_wrapper import PanelCleanerPipeline
+            
+            # Create a full-page mask
+            mask = np.zeros((image.height, image.width), dtype=np.uint8)
+            for r in regions:
+                mask[r.y:r.y+r.h, r.x:r.x+r.w] = 255
+
+            if np.max(mask) == 0:
+                return image
+
+            np_img = np.array(image)
+            pipeline = PanelCleanerPipeline(device=self._device)
+            inpainted = pipeline.inpaint_lama(np_img, mask)
+            
+            logger.info("[PanelCleaner] Inpainting complete.")
+            return Image.fromarray(inpainted)
+        except Exception as exc:
+            logger.warning("[PanelCleaner] Inpainting failed (%s). Falling back to MIT inpainting.", exc)
+            return self._run_mit_inpaint(image, regions)
 
     def render_text(
         self,
@@ -379,40 +412,58 @@ class Inpainter:
 
         try:
             import onnxruntime as ort
+            import numpy as np
 
-            # Build mask from bubble regions
-            np_img = np.array(image.convert("RGB")).astype(np.float32) / 255.0
-            mask = np.zeros(np_img.shape[:2], dtype=np.float32)
+            # Create a full-page mask
+            mask = np.zeros((image.height, image.width), dtype=np.uint8)
             for r in regions:
-                x1, y1, x2, y2 = r.bbox
-                mask[y1:y2, x1:x2] = 1.0
+                mask[r.y:r.y+r.h, r.x:r.x+r.w] = 255
 
-            # Dilate mask slightly to cover text edges
-            from PIL import ImageFilter
-            mask_pil = Image.fromarray((mask * 255).astype(np.uint8))
-            mask_pil = mask_pil.filter(ImageFilter.MaxFilter(size=9))
-            mask = np.array(mask_pil).astype(np.float32) / 255.0
+            # If nothing to inpaint, return image
+            if np.max(mask) == 0:
+                return image
 
+            # Convert to numpy arrays
+            original = np.array(image)
+            mask_3ch = np.stack([mask]*3, axis=-1) / 255.0
+
+            # Preprocess image
+            np_img = original.astype(np.float32) / 255.0
+            
             h, w = np_img.shape[:2]
+            
+            # AOT-GAN requires dimensions to be multiples of 8
+            pad_h = (8 - h % 8) % 8
+            pad_w = (8 - w % 8) % 8
+            if pad_h > 0 or pad_w > 0:
+                np_img = np.pad(np_img, ((0, pad_h), (0, pad_w), (0, 0)), mode='reflect')
+                mask_padded = np.pad(mask, ((0, pad_h), (0, pad_w)), mode='constant', constant_values=0)
+            else:
+                mask_padded = mask
 
-            # AOT expects [1, 3, H, W] image and [1, 1, H, W] mask, values in [-1, 1]
+            # AOT expects [1, 3, H, W] image and [1, 1, H, W] mask
+            # Image is scaled to [-1, 1], Mask is scaled to [0, 1]
             img_tensor  = (np_img * 2.0 - 1.0).transpose(2, 0, 1)[np.newaxis].astype(np.float32)
-            mask_tensor = mask[np.newaxis, np.newaxis].astype(np.float32)
+            mask_tensor = (mask_padded / 255.0)[np.newaxis, np.newaxis].astype(np.float32)
 
             providers = ["CUDAExecutionProvider", "CPUExecutionProvider"]
             sess = ort.InferenceSession(str(aot_model_path), providers=providers)
 
             inp_name  = sess.get_inputs()[0].name
             mask_name = sess.get_inputs()[1].name
-            outputs   = sess.run(None, {inp_name: img_tensor, mask_name: mask_tensor})
+            out_name  = sess.get_outputs()[0].name
 
-            # Output is [-1, 1] → [0, 255]
-            out = outputs[0][0].transpose(1, 2, 0)
-            out = np.clip((out + 1.0) / 2.0 * 255.0, 0, 255).astype(np.uint8)
+            # Run inference
+            out_tensor = sess.run([out_name], {inp_name: img_tensor, mask_name: mask_tensor})[0]
 
-            # Composite: only replace masked regions with inpainted result
-            original = np.array(image.convert("RGB"))
-            mask_3ch = np.stack([mask, mask, mask], axis=-1)
+            # Crop padding back off
+            if pad_h > 0 or pad_w > 0:
+                out_tensor = out_tensor[:, :, :h, :w]
+
+            # Post-process [-1, 1] back to [0, 255]
+            out = (out_tensor[0].transpose(1, 2, 0) + 1.0) / 2.0 * 255.0
+            out = np.clip(out, 0, 255)
+
             composite = (original * (1 - mask_3ch) + out * mask_3ch).astype(np.uint8)
 
             logger.info("[AOT] Inpainting complete via AOT-GAN ONNX.")
@@ -834,24 +885,19 @@ class Inpainter:
         line_h    = font_size + 2
         total_h   = len(lines) * line_h
 
-        # Vertical centering (clamped so start_y is never above bubble top)
-        start_y       = region.y + max(0, (region.h - total_h) // 2)
-        bubble_top    = region.y + padding
-        bubble_bottom = region.y + region.h - padding
+        # Vertical centering: if text is taller than bubble, it will naturally spill equally 
+        # out of the top and bottom. We no longer clamp to bubble_top, allowing it to overflow.
+        start_y       = region.y + (region.h - total_h) // 2
+        
+        # We only need horizontal boundaries for clamping
         bubble_left   = region.x + padding
         bubble_right  = region.x + region.w - padding
-
-        # Clamp start_y — rare edge case where centering goes negative
-        start_y = max(start_y, bubble_top)
 
         # Contrasting outline color
         outline_color = "#000000" if color.upper() in ("#FFFFFF", "#FFF", "WHITE") else "#FFFFFF"
 
         for i, line in enumerate(lines):
             y = start_y + i * line_h
-            # Drop any line that would paint below the bubble bottom
-            if y + font_size > bubble_bottom:
-                break
 
             line_w = int(draw.textlength(line, font=font))
             # Centre the line; clamp so it stays inside left/right padding

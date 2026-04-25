@@ -899,6 +899,10 @@ def rerender_cbz(cbz_name: str):
             with open(session_path, "r", encoding="utf-8") as f:
                 session = json.load(f)
 
+            # Instantly update UI so the user sees a progress bar during extraction
+            estimated_total = session.get("chunk_meta", {}).get("num_chunks", 0)
+            _tq.update(jid, status="processing", progress=0, total=estimated_total)
+
             cfg = _load_cfg()
             inpainter = Inpainter(cfg=cfg)
             font_cfg = {

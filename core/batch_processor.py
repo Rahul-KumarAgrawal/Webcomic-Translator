@@ -344,7 +344,7 @@ def process_cbz(
         if use_koharu:
             # ── KOHARU FULL PIPELINE ───────────────────────────────────────────
             all_bubble_results = _process_pages_koharu(
-                images, output_tmp, crops_dir, cbz_name,
+                images, output_tmp, crops_dir, bg_cache_dir, cbz_name,
                 cfg, logger, progress_callback, total_pages,
                 chunk_meta=chunk_meta,
             )
@@ -365,7 +365,7 @@ def process_cbz(
 
         # 5. Reassemble chunks: trim overlap so output has no duplicated content
         if chunk_meta and chunk_meta.get("chunk_overlap", 0) > 0:
-            _reassemble_chunks(output_tmp, chunk_meta, logger)
+            _reassemble_chunks(output_tmp, chunk_meta, logger, all_bubble_results)
 
         # 6. Repack translated images into output CBZ
         os.makedirs(output_dir, exist_ok=True)
@@ -398,7 +398,7 @@ def process_cbz(
 
 # ── Chunk reassembly (trim overlap for clean output) ────────────────────────
 
-def _reassemble_chunks(output_dir: str, chunk_meta: dict, logger: logging.Logger):
+def _reassemble_chunks(output_dir: str, chunk_meta: dict, logger: logging.Logger, all_bubble_results: list = None):
     """
     After translating overlapping chunks, trim the overlap regions so the
     final output has no duplicated content.
@@ -418,9 +418,84 @@ def _reassemble_chunks(output_dir: str, chunk_meta: dict, logger: logging.Logger
     if num_chunks <= 1 or overlap <= 0:
         return
 
-    half_overlap = overlap // 2
-    logger.info("Reassembling %d chunks: trimming %dpx overlap (split at midpoint %dpx)...",
-                num_chunks, overlap, half_overlap)
+    # Helper: Pre-calculate safe seams for each overlap zone
+    def _find_safe_seam(h_A: int, actual_overlap: int, bubbles_A: list, bubbles_B: list) -> int:
+        if actual_overlap <= 0:
+            return 0
+            
+        # Try decreasing padding until we find a gap. 
+        # Large padding (50) ensures we never cut through overflowing English text.
+        for padding in [50, 30, 15, 0]:
+            intervals = []
+            
+            for region in bubbles_A:
+                y_start = region.y - (h_A - actual_overlap) - padding
+                y_end = (region.y + region.h) - (h_A - actual_overlap) + padding
+                if y_end > 0 and y_start < actual_overlap:
+                    intervals.append([max(0, y_start), min(actual_overlap, y_end)])
+                    
+            for region in bubbles_B:
+                y_start = region.y - padding
+                y_end = (region.y + region.h) + padding
+                if y_end > 0 and y_start < actual_overlap:
+                    intervals.append([max(0, y_start), min(actual_overlap, y_end)])
+                    
+            if not intervals:
+                return actual_overlap // 2
+                
+            intervals.sort(key=lambda x: x[0])
+            merged = []
+            for iv in intervals:
+                if not merged:
+                    merged.append(iv)
+                else:
+                    last = merged[-1]
+                    if iv[0] <= last[1]:
+                        last[1] = max(last[1], iv[1])
+                    else:
+                        merged.append(iv)
+                        
+            gaps = []
+            if merged[0][0] > 0:
+                gaps.append((0, merged[0][0]))
+            for i in range(len(merged) - 1):
+                gaps.append((merged[i][1], merged[i+1][0]))
+            if merged[-1][1] < actual_overlap:
+                gaps.append((merged[-1][1], actual_overlap))
+                
+            if gaps:
+                best_gap = max(gaps, key=lambda g: g[1] - g[0])
+                return (best_gap[0] + best_gap[1]) // 2
+                
+        # If no gaps found even with 0 padding, fallback to exact midpoint
+        return actual_overlap // 2
+
+    # Map bubbles to chunks
+    bubbles_by_chunk = {i: [] for i in range(num_chunks)}
+    if all_bubble_results:
+        for br, region, page_num, crop_url in all_bubble_results:
+            idx = page_num - 1
+            if 0 <= idx < num_chunks:
+                bubbles_by_chunk[idx].append(region)
+
+    seams = []
+    for idx in range(num_chunks - 1):
+        cinfo_A = chunks_info[idx]
+        cinfo_B = chunks_info[idx + 1]
+        
+        h_A = cinfo_A["y_end"] - cinfo_A["y_start"]
+        actual_overlap = cinfo_A["y_end"] - cinfo_B["y_start"]
+        
+        if actual_overlap <= 0:
+            seams.append(0)
+            continue
+            
+        bubbles_A = bubbles_by_chunk[idx]
+        bubbles_B = bubbles_by_chunk[idx + 1]
+        seam = _find_safe_seam(h_A, actual_overlap, bubbles_A, bubbles_B)
+        seams.append(seam)
+
+    logger.info("Reassembling %d chunks using dynamic seam carving...", num_chunks)
 
     reassembled_paths = []
 
@@ -449,18 +524,16 @@ def _reassemble_chunks(output_dir: str, chunk_meta: dict, logger: logging.Logger
                 if idx > 0:
                     # Trim top half of the overlap with the previous chunk
                     prev_cinfo = chunks_info[idx - 1]
-                    # overlap size is how much the previous chunk extends past our start
                     actual_overlap = prev_cinfo["y_end"] - cinfo["y_start"]
                     if actual_overlap > 0:
-                        crop_top = actual_overlap // 2
+                        crop_top = seams[idx - 1]
 
                 if idx < num_chunks - 1:
                     # Trim bottom half of the overlap with the next chunk
                     next_cinfo = chunks_info[idx + 1]
-                    # overlap size is how much we extend past the next chunk's start
                     actual_overlap = cinfo["y_end"] - next_cinfo["y_start"]
                     if actual_overlap > 0:
-                        crop_bottom = h - (actual_overlap - (actual_overlap // 2))
+                        crop_bottom = h - (actual_overlap - seams[idx])
 
                 if crop_top == 0 and crop_bottom == h:
                     continue
@@ -662,7 +735,7 @@ def _process_pages_standard(
                 mask = panelcleaner.detect_text_mask(np_img)
                 inpainted_np = panelcleaner.inpaint_lama(np_img, mask)
                 inpainted = Image.fromarray(inpainted_np)
-            elif inpaint_engine in ("lama", "aot") and regions:
+            elif inpaint_engine in ("lama", "aot", "solid") and regions:
                 logger.debug("    Inpainting via %s...", inpaint_engine.upper())
                 inpainted = inpainter.inpaint(image, regions)
             else:
@@ -692,7 +765,7 @@ def _process_pages_standard(
 
 
 def _process_pages_koharu(
-    images, output_tmp, crops_dir, cbz_name,
+    images, output_tmp, crops_dir, bg_cache_dir, cbz_name,
     cfg, logger, progress_callback, total_pages,
     chunk_meta=None,
 ):
@@ -720,9 +793,13 @@ def _process_pages_koharu(
             # 1. Detect, 2. OCR, 3. Font Analysis, 4. Inpaint
             result_image, raw_bubbles = pipeline.process_page(img_path, page_num)
 
-            # Save the inpainted image
-            out_page = os.path.join(output_tmp, Path(img_path).stem + ".png")
-            result_image.save(out_page, format="PNG")
+            # Save the inpainted image to bg_cache for instant re-rendering
+            bg_cache_path = os.path.join(bg_cache_dir, f"page_{page_num:04d}.png")
+            result_image.save(bg_cache_path, format="PNG")
+
+            from core.translator import _get_font_cfg
+            font_cfg = _get_font_cfg(cfg, series)
+            render_regions = []
 
             # 5. Translate & 6. Setup for Rendering
             for b_idx, mb in enumerate(raw_bubbles):
@@ -773,6 +850,22 @@ def _process_pages_koharu(
 
                 # Store for review/DB
                 all_bubble_results.append((result, mb, page_num, crop_url))
+
+                from core.inpainter import BubbleRegion
+                br = BubbleRegion(
+                    x=mb.x, y=mb.y, w=mb.w, h=mb.h,
+                    source_text=mb.source_text,
+                    translated_text=mb.translated_text,
+                    font_cfg=font_cfg
+                )
+                render_regions.append(br)
+
+            # 7. Render text onto the final image
+            from core.inpainter import Inpainter
+            inpainter_instance = Inpainter(cfg=cfg)
+            out_page = os.path.join(output_tmp, Path(img_path).stem + ".png")
+            final = inpainter_instance.render_text(result_image, render_regions)
+            final.save(out_page, format="PNG", optimize=False)
 
             if progress_callback:
                 progress_callback(page_idx + 1, total_pages)
