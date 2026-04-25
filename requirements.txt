@@ -1,0 +1,84 @@
+# CBZ Translator — Python Dependencies
+# Install with: pip install -r requirements.txt
+# Requires: Python 3.10+, CUDA 11.8+ drivers, NVIDIA RTX GPU
+
+# ── Core ML ───────────────────────────────────────────────────────────────────
+torch>=2.1.0
+torchvision>=0.16.0
+transformers>=4.38.0
+peft>=0.9.0
+sentencepiece>=0.1.99
+accelerate>=0.27.0
+bitsandbytes>=0.42.0             # 4-bit quantisation fallback
+timm
+open_clip_torch
+safetensors
+einops
+torch-summary
+
+# ── OCR & Detection ───────────────────────────────────────────────────────────
+manga-ocr
+paddlepaddle-gpu
+paddleocr==2.8.1
+easyocr>=1.7.0
+pyclipper
+shapely
+
+# ── Inpainting / Masks ────────────────────────────────────────────────────────
+opencv-python>=4.9.0.80
+Pillow>=10.0.0
+numpy==1.26.4
+scikit-image
+ImageHash
+# segment-anything is installed from github in setup.bat
+# pydensecrf is installed from github in setup.bat
+# rusty-manga-image-translator is installed in setup.bat
+
+# ── Language Detection & NLP ──────────────────────────────────────────────────
+langdetect>=1.0.9
+py3langid==0.2.2
+langcodes
+editdistance
+arabic-reshaper
+python-bidi
+pyhyphen
+
+# ── Translation APIs ──────────────────────────────────────────────────────────
+deepl>=1.16.0
+groq
+google-genai
+openai==1.63.0
+tiktoken
+
+# ── Web UI & Server ───────────────────────────────────────────────────────────
+Flask>=3.0.0
+Flask-CORS>=4.0.0
+uvicorn
+fastapi
+python-multipart
+websockets
+requests
+httpx==0.27.2
+
+# ── Config & Utils ────────────────────────────────────────────────────────────
+PyYAML>=6.0.1
+tqdm>=4.66.0
+omegaconf
+pydantic==2.5.0
+marshmallow
+protobuf<6.0.0
+huggingface_hub>=0.21.0
+datasets>=2.18.0                 
+win10toast>=0.9                  
+plyer>=2.1.0                     
+pandas
+networkx
+tensorboardX
+cryptography
+python-dotenv
+backports.cached-property
+cython
+nest-asyncio
+aiohttp
+aiofiles
+aioshutil

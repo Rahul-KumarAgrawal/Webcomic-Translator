@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CBZ Translator</title>
+  <meta name="description"
+    content="Local CBZ manga/manhwa/manhua translator — upload, translate, and review your comics offline.">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+  <div class="layout">
+    {% include '_nav.html' %}
+    <main class="main-content">
+      <div class="page-header">
+        <h2>📖 Upload &amp; Translate</h2>
+        <p>Drop CBZ files below to queue them for translation.</p>
+      </div>
+
+      <!-- Upload card -->
+      <div class="card mb-16">
+        <div class="card-title">Add Files</div>
+        <div class="form-group">
+          <label for="series-input">Series Name</label>
+          <input type="text" id="series-input" placeholder="e.g. Solo Leveling" list="series-list">
+          <datalist id="series-list">
+            {% for s in series_list %}
+            <option value="{{ s }}">
+              {% endfor %}
+          </datalist>
+        </div>
+
+        <!-- Modular Engine Selection -->
+        <div id="standard-pipeline-opts" class="form-row">
+          <div class="form-group">
+            <label for="ocr-engine-select">OCR Engine</label>
+            <select id="ocr-engine-select">
+              <option value="mit" {% if cfg.get('ocr_engine','mit')=='mit' %}selected{% endif %}>MIT (manga-ocr/48px)</option>
+              <option value="paddle" {% if cfg.get('ocr_engine')=='paddle' %}selected{% endif %}>PaddleOCR (Local)</option>
+              <option value="manga-ocr" {% if cfg.get('ocr_engine')=='manga-ocr' %}selected{% endif %}>🌸 MangaOCR (Koharu)</option>
+              <option value="none" {% if cfg.get('ocr_engine')=='none' %}selected{% endif %}>❌ None (Skip OCR)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="detection-engine-select">Detection Engine</label>
+            <select id="detection-engine-select">
+              <option value="mit" {% if cfg.get('detection_engine','mit')=='mit' %}selected{% endif %}>MIT Default</option>
+              <option value="yolo" {% if cfg.get('detection_engine')=='yolo' %}selected{% endif %}>🌸 YOLO (Koharu)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="inpaint-engine-select">Inpainting Engine</label>
+            <select id="inpaint-engine-select" name="inpaint_engine">
+              <option value="lama" {% if cfg.get('inpaint_engine', 'lama' )=='lama' %}selected{% endif %}>LaMa (MIT Default)</option>
+              <option value="aot" {% if cfg.get('inpaint_engine')=='aot' %}selected{% endif %}>🎨 AOT-GAN (Koharu, High Detail)</option>
+              <option value="panelcleaner" {% if cfg.get('inpaint_engine')=='panelcleaner' %}selected{% endif %}>🧹 PanelCleaner (High Quality)</option>
+              <option value="none" {% if cfg.get('inpaint_engine')=='none' %}selected{% endif %}>❌ None (Keep Original)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="engine-select">Translation Engine</label>
+            <select id="engine-select">
+              <option value="manual" {% if cfg.get('translation_engine')=='manual' %}selected{% endif %}>✍️ Manual (Skip
+                Translation)</option>
+              <option value="nllb" {% if cfg.get('translation_engine','nllb')=='nllb' %}selected{% endif %}>NLLB-200
+                (Local Model)</option>
+              <option value="deepl" {% if cfg.get('translation_engine')=='deepl' %}selected{% endif %}>DeepL API
+              </option>
+              <option value="google" {% if cfg.get('translation_engine')=='google' %}selected{% endif %}>🤖 Gemini
+                (Google AI Studio)</option>
+              <option value="baidu" {% if cfg.get('translation_engine')=='baidu' %}selected{% endif %}>🀄 Baidu
+                Translate API</option>
+              <option value="sarvam" {% if cfg.get('translation_engine')=='sarvam' %}selected{% endif %}>🇮🇳 Sarvam AI
+                (Indian Languages)</option>
+              <option value="papago" {% if cfg.get('translation_engine')=='papago' %}selected{% endif %}>🅿️ Papago
+                (Naver — No API Key)</option>
+              <option value="ollama" {% if cfg.get('translation_engine')=='ollama' %}selected{% endif %}>🦙 Ollama ({{
+                cfg.get('ollama_model', 'llama3') }})</option>
+              <option value="koharu" {% if cfg.get('translation_engine')=='koharu' or cfg.get('use_koharu_pipeline')
+                %}selected{% endif %}>🌸 Koharu Pipeline (End-to-End)</option>
+              <option value="mit" {% if cfg.get('translation_engine')=='mit' or cfg.get('use_mit_pipeline') %}selected{%
+                endif %}>🧪 MIT Pipeline (End-to-End)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="source-lang-select">Source Language</label>
+            <select id="source-lang-select">
+              {% for code, name in SUPPORTED_LANGUAGES.items() %}
+              <option value="{{ code }}" {% if cfg.get('source_lang', '') == code %}selected{% endif %}>{{ name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="target-lang-select">Target Language</label>
+            <select id="target-lang-select">
+              {% for code, name in SUPPORTED_LANGUAGES.items() %}
+                {% if code != "" %}
+                  <option value="{{ code }}" {% if cfg.get('target_lang', 'eng_Latn') == code %}selected{% endif %}>{{ name }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <!-- MIT pipeline options (shown when MIT is ON) -->
+        {% set mit = cfg.get('mit', {}) %}
+        <div id="mit-pipeline-opts" class="form-row" style="display:none">
+          <div class="form-group">
+            <label for="mit-translator-select">Pipeline Translator</label>
+            <select id="mit-translator-select">
+              <optgroup label="Offline (local GPU)">
+                <option value="sugoi" {% if mit.get('translator','sugoi')=='sugoi' %}selected{% endif %}>Sugoi (JPN→ENG)
+                </option>
+                <option value="nllb" {% if mit.get('translator')=='nllb' %}selected{% endif %}>NLLB</option>
+                <option value="nllb_big" {% if mit.get('translator')=='nllb_big' %}selected{% endif %}>NLLB Big</option>
+                <option value="m2m100" {% if mit.get('translator')=='m2m100' %}selected{% endif %}>M2M-100</option>
+                <option value="mbart50" {% if mit.get('translator')=='mbart50' %}selected{% endif %}>mBART-50</option>
+              </optgroup>
+              <optgroup label="Cloud (needs API key)">
+                <option value="chatgpt" {% if mit.get('translator')=='chatgpt' %}selected{% endif %}>ChatGPT / OpenAI
+                </option>
+                <option value="gemini" {% if mit.get('translator')=='gemini' %}selected{% endif %}>Gemini</option>
+                <option value="deepl" {% if mit.get('translator')=='deepl' %}selected{% endif %}>DeepL</option>
+                <option value="deepseek" {% if mit.get('translator')=='deepseek' %}selected{% endif %}>DeepSeek</option>
+                <option value="groq" {% if mit.get('translator')=='groq' %}selected{% endif %}>Groq</option>
+                <option value="sakura" {% if mit.get('translator')=='sakura' %}selected{% endif %}>Sakura</option>
+              </optgroup>
+              <optgroup label="Special">
+                <option value="none" {% if mit.get('translator')=='none' %}selected{% endif %}>None (inpaint only)
+                </option>
+                <option value="original" {% if mit.get('translator')=='original' %}selected{% endif %}>Original (keep
+                  text)</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="mit-target-lang-select">Pipeline Target Lang</label>
+            <select id="mit-target-lang-select">
+              <option value="ENG" {% if mit.get('target_lang','ENG')=='ENG' %}selected{% endif %}>English</option>
+              <option value="JPN" {% if mit.get('target_lang')=='JPN' %}selected{% endif %}>Japanese</option>
+              <option value="CHS" {% if mit.get('target_lang')=='CHS' %}selected{% endif %}>Chinese (Simplified)
+              </option>
+              <option value="CHT" {% if mit.get('target_lang')=='CHT' %}selected{% endif %}>Chinese (Traditional)
+              </option>
+              <option value="KOR" {% if mit.get('target_lang')=='KOR' %}selected{% endif %}>Korean</option>
+              <option value="FRA" {% if mit.get('target_lang')=='FRA' %}selected{% endif %}>French</option>
+              <option value="DEU" {% if mit.get('target_lang')=='DEU' %}selected{% endif %}>German</option>
+              <option value="ESP" {% if mit.get('target_lang')=='ESP' %}selected{% endif %}>Spanish</option>
+              <option value="RUS" {% if mit.get('target_lang')=='RUS' %}selected{% endif %}>Russian</option>
+              <option value="PTB" {% if mit.get('target_lang')=='PTB' %}selected{% endif %}>Portuguese</option>
+              <option value="ITA" {% if mit.get('target_lang')=='ITA' %}selected{% endif %}>Italian</option>
+              <option value="ARA" {% if mit.get('target_lang')=='ARA' %}selected{% endif %}>Arabic</option>
+              <option value="THA" {% if mit.get('target_lang')=='THA' %}selected{% endif %}>Thai</option>
+              <option value="VIN" {% if mit.get('target_lang')=='VIN' %}selected{% endif %}>Vietnamese</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Force re-translate option -->
+        <div class="form-group" style="margin-bottom:12px">
+          <div class="toggle-row">
+            <label class="toggle-switch" style="width:40px;height:22px">
+              <input type="checkbox" id="force-retranslate-toggle">
+              <span class="toggle-slider" style="--slider-size:16px"></span>
+            </label>
+            <span class="toggle-label" style="font-size:0.84rem">
+              <strong>Force Re-translate</strong>
+              <small class="text-muted" style="display:block;margin-top:1px">
+                Overwrite existing output instead of skipping already-translated files
+              </small>
+            </span>
+          </div>
+        </div>
+
+        <!-- Manhwa Chunking Options -->
+        <div class="form-group" style="margin-bottom:12px">
+          <div class="toggle-row">
+            <label class="toggle-switch" style="width:40px;height:22px">
+              <input type="checkbox" id="chunk-enable-toggle">
+              <span class="toggle-slider" style="--slider-size:16px"></span>
+            </label>
+            <span class="toggle-label" style="font-size:0.84rem">
+              <strong>Manhwa Chunking</strong>
+              <small class="text-muted" style="display:block;margin-top:1px">
+                Stitch pages vertically &amp; slice into overlapping chunks for better bubble detection at page boundaries
+              </small>
+            </span>
+          </div>
+        </div>
+        <div id="chunk-options" class="form-row" style="display:none; margin-bottom:12px;">
+          <div class="form-group">
+            <label for="chunk-height-input">Chunk Height (px)</label>
+            <input type="number" id="chunk-height-input" value="4000" min="1000" step="500"
+                   placeholder="e.g. 4000">
+            <small class="text-muted" style="margin-top:4px;display:block">
+              Height of each output chunk. Recommended: 4000–6000px.
+            </small>
+          </div>
+          <div class="form-group">
+            <label for="chunk-overlap-input">Overlap (px)</label>
+            <input type="number" id="chunk-overlap-input" value="500" min="0" step="100"
+                   placeholder="e.g. 500">
+            <small class="text-muted" style="margin-top:4px;display:block">
+              Pixels shared between consecutive chunks. Ensures bubbles at boundaries are fully captured.
+            </small>
+          </div>
+        </div>
+
+        <div id="drop-zone" class="drop-zone">
+          <div class="drop-zone-icon">📁</div>
+          <h3>Drop CBZ files here</h3>
+          <p>or click to browse</p>
+        </div>
+        <input type="file" id="cbz-file-input" accept=".cbz" multiple style="display:none">
+      </div>
+
+      <!-- Queue card -->
+      <div class="card mb-16">
+        <div class="flex-between mb-16">
+          <div class="card-title" style="margin:0">Action Required / Processing Queue</div>
+          <span class="text-muted text-sm">Updates live via SSE</span>
+        </div>
+
+        <!-- Processing Queue List -->
+        <div id="queue-list">
+          {% for job in jobs %}
+          {% if job.translation_engine != 'Rerender' %}
+          <div id="job-{{ job.id }}" class="card mb-16">
+            <div class="flex-between">
+              <div class="flex-gap-8">
+                <span style="font-weight:600">{{ job.cbz_name }}</span>
+                <span
+                  class="badge {% if job.status == 'done' %}badge-done{% elif job.status == 'error' %}badge-error{% else %}badge-processing{% endif %}">{{
+                  job.status }}</span>
+              </div>
+              <div class="flex-gap-8">
+                {% if job.status == 'done' %}
+                <a class="btn btn-outline btn-sm" href="/review/{{ job.cbz_name }}">Review →</a>
+                <button class="btn btn-danger btn-sm delete-output-btn" data-cbz="{{ job.cbz_name }}"
+                  title="Delete output & session data">🗑️ Delete</button>
+                {% endif %}
+              </div>
+            </div>
+            {% if job.series %}<div class="text-sm text-muted mt-8">Series: {{ job.series }}</div>{% endif %}
+            {% if job.error %}<div class="text-danger text-sm mt-8">Error: {{ job.error }}</div>{% endif %}
+            {% if job.status == 'processing' %}
+            <div class="progress-bar-wrap mt-8">
+              <div class="progress-bar-fill" style="width:{{ (job.progress / job.total * 100) if job.total else 0 }}%">
+              </div>
+            </div>
+            <div class="text-muted text-sm mt-4">Page {{ job.progress }} / {{ job.total }}</div>
+            {% endif %}
+          </div>
+          {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Completed Final Renderings Card -->
+      <div class="card">
+        <div class="flex-between mb-16">
+          <div class="card-title" style="margin:0; color:#4ade80;">Completed Final Renderings</div>
+        </div>
+
+        <!-- Completed Renderings List -->
+        <div id="completed-list">
+          {% for job in jobs %}
+          {% if job.translation_engine == 'Rerender' %}
+          <div id="job-{{ job.id }}" class="card mb-16" style="border-left: 3px solid #4ade80;">
+            <div class="flex-between">
+              <div class="flex-gap-8">
+                <span style="font-weight:600">{{ job.cbz_name }}</span>
+                <span
+                  class="badge {% if job.status == 'done' %}badge-done{% elif job.status == 'error' %}badge-error{% else %}badge-processing{% endif %}">{{
+                  job.status }}</span>
+              </div>
+              <div class="flex-gap-8">
+                {% if job.status == 'done' %}
+                <span class="badge badge-done" style="font-weight:bold;">✅ Final CBZ Ready in /output!</span>
+                <a class="btn btn-outline btn-sm" href="/review/{{ job.cbz_name }}">Review →</a>
+                <button class="btn btn-sm" style="background:#4ade80;color:#000;font-weight:600;" onclick="rerenderFromCard(this)" data-cbz="{{ job.cbz_name }}">🔄 Re-render</button>
+                <button class="btn btn-danger btn-sm delete-output-btn" data-cbz="{{ job.cbz_name }}" title="Delete output & session data">🗑️ Delete</button>
+                {% endif %}
+              </div>
+            </div>
+            {% if job.series %}<div class="text-sm text-muted mt-8">Series: {{ job.series }}</div>{% endif %}
+            {% if job.error %}<div class="text-danger text-sm mt-8">Error: {{ job.error }}</div>{% endif %}
+            {% if job.status == 'processing' %}
+            <div class="progress-bar-wrap mt-8">
+              <div class="progress-bar-fill" style="width:{{ (job.progress / job.total * 100) if job.total else 0 }}%">
+              </div>
+            </div>
+            <div class="text-muted text-sm mt-4">Page {{ job.progress }} / {{ job.total }}</div>
+            {% endif %}
+          </div>
+          {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </main>
+  </div>
+  <div id="toast-container"></div>
+  <script src="/static/main.js"></script>
+</body>
+
+</html>

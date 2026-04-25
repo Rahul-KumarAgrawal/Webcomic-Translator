@@ -1,0 +1,1948 @@
+D:\Translate\Translator\err.txt
+D:\Translate\Translator\license_key.txt
+D:\Translate\Translator\mit_requirements.txt
+D:\Translate\Translator\out.txt
+D:\Translate\Translator\README.md
+D:\Translate\Translator\requirements.txt
+D:\Translate\Translator\test_error.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\CHANGELOG.md
+D:\Translate\Translator\mit_test\manga-image-translator-main\CHANGELOG_CN.md
+D:\Translate\Translator\mit_test\manga-image-translator-main\README.md
+D:\Translate\Translator\mit_test\manga-image-translator-main\README_CN.md
+D:\Translate\Translator\mit_test\manga-image-translator-main\requirements-dev.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\requirements.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\sakura_dict.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\dict\galtransl_dict.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\dict\mit_glossary.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\dict\post_dict.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\dict\pre_dict.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\dict\sakura_dict.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\front\README.md
+D:\Translate\Translator\mit_test\manga-image-translator-main\front\README_CN.md
+D:\Translate\Translator\mit_test\manga-image-translator-main\MangaStudio_Data\README.md
+D:\Translate\Translator\mit_test\manga-image-translator-main\MangaStudio_Data\dicts\example_post_dict.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\MangaStudio_Data\dicts\example_pre_dict.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\models\ocr\alphabet-all-v7.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\models\translators\jparacrawl\big-en-ja\source_vocabulary.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\models\translators\jparacrawl\big-en-ja\target_vocabulary.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\models\translators\jparacrawl\big-ja-en\source_vocabulary.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\models\translators\jparacrawl\big-ja-en\target_vocabulary.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\models\translators\nllb\models--facebook--nllb-200-distilled-600M\snapshots\f8d333a098d19b4fd9a8b18f94170487ad3f821d\README.md
+D:\Translate\Translator\mit_test\manga-image-translator-main\models\translators\nllb_big\models--facebook--nllb-200-distilled-1.3B\snapshots\7be3e24664b38ce1cac29b8aeed6911aa0cf0576\README.md
+D:\Translate\Translator\mit_test\manga-image-translator-main\models\translators\sugoi\big-ja-en\source_vocabulary.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\models\translators\sugoi\big-ja-en\target_vocabulary.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260330141746.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260330143324.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260330143846.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260330193818.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260330194836.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260330223623.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260330225210.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260330225439.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260330230733.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260330230957.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260330231954.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260330232407.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260330232414.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260330232421.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260330232426.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260330232430.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260330232436.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260330232441.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260330232445.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260330232451.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260330232457.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260330233557.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260330234205.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260330234439.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331005526.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331010019.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331112907.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331112916.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331112917.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331112923.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331112930.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331112938.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331112944.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331112951.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331112958.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113004.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113012.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113017.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113023.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113029.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113033.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113039.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113049.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113056.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113104.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113109.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113115.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113122.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113127.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113133.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113138.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113145.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113150.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113159.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113203.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113210.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113216.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113223.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113230.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113237.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113241.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113248.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113253.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113257.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113302.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113312.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113321.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113329.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113335.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113341.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331113345.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331114714.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331114724.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331114732.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331114737.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331114742.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331114747.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331114753.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331114758.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331114804.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331114810.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331115055.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331115103.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331115112.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331115117.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331115122.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331115128.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331115134.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331115139.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331115145.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331115151.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260331121815.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408164857.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408170246.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408170301.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408170307.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408170315.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408170321.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408170331.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408170635.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408170644.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408170655.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408170702.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408170711.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408170718.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408170727.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408170734.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408170742.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408170752.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408170803.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408170812.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408170822.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408170829.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408170833.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408170845.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408170852.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408170857.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408170904.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408171527.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408171645.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408171751.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408171831.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408171956.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408172100.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408172136.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408172201.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408172213.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408172237.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408172256.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408172319.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408172335.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408172355.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408172417.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408172441.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408172500.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408172525.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408172539.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408172546.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408172615.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408172631.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408172641.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408172656.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408175451.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408175511.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408175523.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408175530.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408175539.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408175546.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408175553.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408175559.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408175606.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408175613.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408175624.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408175631.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408175639.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408175645.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408175650.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408175704.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408175710.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408175715.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408175722.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408182126.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408182203.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408182214.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408182221.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408182231.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408182237.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408182245.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408182250.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408182259.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408182302.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408182305.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408182308.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408184010.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408184036.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408184043.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408184049.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408184056.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408184103.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408184405.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408184537.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408184554.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408184555.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408184602.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408184609.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408184616.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408184623.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408184624.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408184632.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408184640.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408184647.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408184655.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408184703.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193206.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193424.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193432.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193438.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193439.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193445.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193452.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193500.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193507.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193513.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193520.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193521.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193527.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193534.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193541.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193548.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193549.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193557.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193604.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193605.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193612.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193613.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193614.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193615.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193634.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193641.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193647.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193648.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193649.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193656.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193703.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193704.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193705.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193712.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193719.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193727.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193728.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193729.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193730.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193731.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193732.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193733.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193734.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193740.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193748.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193754.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193801.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193805.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193806.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193807.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193808.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193814.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193821.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193822.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193823.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193824.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408193910.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408194803.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408194804.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408194811.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408194817.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408194913.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408194925.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408194934.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408194947.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408194958.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408195007.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408195017.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408195029.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408195039.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408195049.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408195057.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408195100.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408195101.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408195419.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408195919.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408195927.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408195940.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408200026.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408200035.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408200041.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408200051.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408200059.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408200105.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408200112.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408200122.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408200129.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408200135.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408200141.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408200144.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408224141.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408224441.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408224446.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408224456.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408224503.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408224510.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408224518.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408224529.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408224539.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408224547.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408224552.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408224555.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408224638.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408224655.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408224704.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408224716.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408224724.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408224733.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408224741.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408224752.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408224802.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408224812.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408224823.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408224826.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408225627.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408225640.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408225649.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408225702.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408225829.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408225842.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408225851.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408225905.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408225915.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408225924.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408225934.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408225948.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408225959.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408230010.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408230018.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408230021.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408230022.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408230435.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408230503.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408230524.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408230613.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408230649.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408230715.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408230749.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408230840.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408230924.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408230958.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408231013.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408231016.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408231017.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408231347.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408231406.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408231418.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408231438.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408231452.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408231505.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408231521.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408231538.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408231551.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408231604.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408231616.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408231619.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408232016.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408232032.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408232042.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408232054.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408232104.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408232112.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408232121.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408232135.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408232146.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408232157.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408232204.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408232206.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408232749.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408232805.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408232813.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408232826.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408232835.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408232844.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408232852.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408232905.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408232915.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408232923.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408232932.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408232934.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408232935.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408233456.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408233507.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408233516.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408233528.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408233538.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408233546.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408233556.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408233608.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408233617.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408233626.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408233635.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408234356.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408234408.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408234417.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408234429.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408234437.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408234446.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408234455.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408234506.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408234516.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408234525.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408234533.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408234536.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408234756.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408234808.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408234816.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408234828.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408234837.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408234845.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408234853.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408234906.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408234915.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408234924.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408234932.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408235421.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408235434.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408235441.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408235453.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408235501.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408235509.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408235518.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408235530.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408235540.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408235548.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408235556.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408235559.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408235600.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408235915.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408235931.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408235932.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408235938.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408235944.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408235945.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408235951.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260408235958.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000005.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000013.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000019.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000026.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000027.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000034.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000040.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000047.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000054.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000055.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000104.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000112.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000120.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000121.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000122.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000132.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000133.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000139.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000145.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000146.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000147.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000153.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000159.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000200.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000201.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000208.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000209.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000216.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000217.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000224.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000225.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000226.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000227.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000228.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000229.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000230.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000231.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000237.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000244.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000251.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000257.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000302.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000303.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000304.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000311.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000318.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000319.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000320.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000321.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000327.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000328.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000329.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000336.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000337.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000347.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000353.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000400.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000401.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000409.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000415.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000416.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000417.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000418.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000419.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000423.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000430.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000436.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000442.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000443.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000449.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000450.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000457.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000458.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000459.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000505.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000511.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000518.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000524.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000525.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000526.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000532.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000538.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000544.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000545.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000552.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000553.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000554.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000601.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000608.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000609.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000610.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000611.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000619.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000620.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000627.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000634.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000635.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000641.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000647.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000648.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000655.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000702.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000707.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000713.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000714.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000715.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000721.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000726.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000727.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000728.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000734.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000741.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000749.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000750.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000751.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000757.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000758.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000808.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000813.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000820.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000827.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000828.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000829.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000836.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000841.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000848.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000856.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000857.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000903.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000908.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000909.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000914.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000915.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000916.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000917.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000923.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000924.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000930.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000934.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000935.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000941.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000946.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000947.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000948.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409000955.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001001.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001006.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001007.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001008.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001013.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001019.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001020.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001027.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001028.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001037.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001044.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001051.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001057.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001058.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001059.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001104.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001105.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001112.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001113.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001119.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001120.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001121.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001128.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001134.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001135.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001141.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001142.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001148.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001155.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001200.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001201.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001206.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001210.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001211.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001216.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001225.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001230.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001236.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001243.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001251.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001252.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001253.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001530.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001543.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001550.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001556.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001602.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001609.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001615.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001622.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001629.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001635.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001641.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001648.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001655.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001702.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001710.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001716.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001723.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001730.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001737.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001746.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001752.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001758.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409001805.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409002116.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409002132.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409002144.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409002152.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409002200.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409002208.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409002216.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409002224.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409002233.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409002242.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409002253.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409002302.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409002311.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409002319.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409002326.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409002341.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409002349.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409002355.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409003210.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409003227.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409003240.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409003605.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409003619.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409003632.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409003640.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409003648.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409003656.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409003705.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409003713.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409003722.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409003732.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409003742.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409003751.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409003802.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409003810.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409003816.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409003832.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409003840.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409003847.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409003856.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409004851.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409004907.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409004920.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409004928.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409004936.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409004944.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409004953.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005001.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005010.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005020.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005032.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005040.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005050.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005058.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005105.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005120.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005128.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005136.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005144.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005423.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005442.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005453.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005500.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005509.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005517.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005524.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005532.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005546.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005555.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005604.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005612.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005630.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005638.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005648.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005657.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005705.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005712.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409005722.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409010939.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409010955.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409010958.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011009.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011016.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011017.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011024.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011031.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011032.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011038.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011045.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011052.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011059.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011100.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011107.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011114.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011115.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011121.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011122.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011128.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011135.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011142.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011149.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011158.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011204.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011212.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011219.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011220.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011228.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011229.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011230.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011237.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011245.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011252.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011300.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011307.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011313.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011320.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011330.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011337.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011344.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011351.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011358.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011404.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011405.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011412.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011413.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011421.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011427.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011428.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011435.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011443.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011449.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011455.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011503.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011510.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011512.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011518.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011525.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011526.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011533.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011536.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011544.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011550.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011558.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011606.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011613.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011620.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011626.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011627.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011634.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011640.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011646.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011647.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011655.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011701.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011702.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011707.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011708.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011714.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011724.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011730.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011737.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011744.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011749.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011751.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011759.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011804.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011812.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011820.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011826.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011832.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011839.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011845.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011846.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011852.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011853.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011859.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011904.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011911.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011918.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011924.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011930.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011936.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011943.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011950.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011957.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011958.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409011959.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409012000.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409012005.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409012011.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409012012.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409012018.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409012025.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409012035.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409012036.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409012043.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409012050.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409012057.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409012058.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409012105.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409090852.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409090913.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409090925.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409090932.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409090951.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091006.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091015.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091028.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091040.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091055.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091105.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091117.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091126.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091139.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091149.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091158.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091207.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091218.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091228.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091243.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091300.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091317.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091335.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091345.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091355.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091404.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091413.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091421.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091432.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091443.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091456.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091508.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409091520.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409123407.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409123428.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409123436.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409123443.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409123449.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409123500.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165513.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165528.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165529.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165531.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165537.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165538.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165655.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165707.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165708.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165710.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165716.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165717.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165720.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165721.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165725.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165729.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165730.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165733.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165738.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165742.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165746.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165747.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165751.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165755.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165756.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165800.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165804.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165807.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165812.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165816.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165820.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165823.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165828.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165831.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165832.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165837.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165838.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165839.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165840.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165844.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165849.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165853.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165856.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165901.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165904.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165908.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165909.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165939.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165953.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409165956.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170006.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170007.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170012.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170018.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170024.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170030.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170035.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170041.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170047.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170049.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170056.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170101.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170102.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170107.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170108.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170113.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170414.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170429.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170430.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170432.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170442.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170444.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170449.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170450.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170455.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170501.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170502.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170506.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170512.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170513.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170518.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170524.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170530.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170535.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170536.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170541.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170542.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170546.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170552.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170557.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170602.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170608.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170612.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170619.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170624.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170625.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170631.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170632.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170633.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170634.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170639.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170645.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170651.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170655.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170701.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170707.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170712.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170713.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170719.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170720.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170725.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170731.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170736.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170741.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170747.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170753.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170754.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170800.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170805.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170806.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170811.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170812.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170817.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170822.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170827.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170833.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170839.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170842.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170846.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170852.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170853.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170858.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170901.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170907.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170912.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170913.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170919.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170925.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170931.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170937.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170942.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170948.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170952.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170957.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409170958.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171004.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171010.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171014.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171015.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171020.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171028.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171033.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171038.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171043.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171047.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171050.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171056.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171059.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171106.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171112.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171117.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171121.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171126.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171131.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171132.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171137.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171138.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171143.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171146.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171152.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171157.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171158.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171202.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171207.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171212.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171217.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171223.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171229.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171230.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171231.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171234.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171239.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171240.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171245.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171251.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171256.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171257.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171303.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171308.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171313.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171314.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171315.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409171320.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409172503.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409172525.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409172541.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409172551.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409172610.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409172627.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409172640.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409172655.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409172710.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409172726.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409172737.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409172748.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409172757.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409172811.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409172822.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409172832.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409172843.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409172856.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409172908.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409172926.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409172947.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409173010.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409173028.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409173041.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409173054.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409173107.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409173120.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409173131.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409173146.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409173201.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409173218.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409173234.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409173250.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409180852.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409180946.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409181215.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409181428.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409181640.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409181853.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409182107.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409182333.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409182559.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409182810.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409183044.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409183253.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409183529.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409183803.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409184010.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409184233.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409184431.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409184645.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409190844.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409190907.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409191121.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409191131.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409191141.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409191147.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409191153.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409191202.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409191345.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409191355.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409191402.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409191408.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409191413.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409191421.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409191517.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409191527.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409191534.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409191540.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409191545.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409191553.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409191824.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409191838.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409191903.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409191923.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409191944.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409192011.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193407.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193419.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193420.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193433.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193445.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193453.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193504.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193515.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193522.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193533.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193540.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193551.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193603.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193611.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193618.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193627.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193639.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193647.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193657.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193707.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193714.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193721.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193722.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193729.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193739.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193750.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193758.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193804.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193814.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193823.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193832.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193841.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193849.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193856.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193906.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193914.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193922.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193930.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193939.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193947.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193953.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409193959.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194007.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194017.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194024.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194031.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194038.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194046.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194052.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194053.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194103.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194111.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194119.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194126.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194133.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194140.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194146.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194155.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194202.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194209.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194214.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194219.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194225.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194232.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194240.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194250.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194258.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194306.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194313.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194321.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194322.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194332.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194341.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194353.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194401.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409194408.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211327.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211337.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211342.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211344.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211351.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211359.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211404.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211412.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211420.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211425.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211433.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211439.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211448.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211457.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211503.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211509.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211517.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211525.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211531.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211538.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211546.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211551.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211556.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211558.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211604.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211610.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211618.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211624.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211629.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211637.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211643.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211649.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211655.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211700.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211705.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211712.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211719.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211725.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211731.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211738.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211744.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211749.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211756.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211802.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211810.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211815.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211821.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211826.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211831.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211837.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211839.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211847.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211853.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211858.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211904.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211909.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211915.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211920.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211926.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211931.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211936.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211941.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211945.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211950.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409211955.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409212001.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409212008.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409212014.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409212020.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409212026.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409212031.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409212033.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409212041.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409212047.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409212055.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409212100.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260409212106.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\result\log_20260424135358.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\server\index.html
+D:\Translate\Translator\mit_test\manga-image-translator-main\server\manual.html
+D:\Translate\Translator\mit_test\manga-image-translator-main\test\api_test.html
+D:\Translate\Translator\mit_test\manga-image-translator-main\test\README.md
+D:\Translate\Translator\mit_test\manga-image-translator-main\training\all-fonts.txt
+D:\Translate\Translator\mit_test\manga-image-translator-main\training\inpainting\README.md
+D:\Translate\Translator\mit_test\manga-image-translator-main\training\ocr\README.md
+D:\Translate\Translator\model\base\README.md
+D:\Translate\Translator\Pipeline Koharu\Font Analysis\yuzumarker-font-detection\README.md
+D:\Translate\Translator\Pipeline Koharu\Inpainting\aot-inpainting\README.md
+D:\Translate\Translator\Pipeline Koharu\Inpainting\lama-manga\README.md
+D:\Translate\Translator\Pipeline Koharu\OCR\manga-ocr-base\README.md
+D:\Translate\Translator\Pipeline Koharu\OCR\manga-ocr-base\vocab.txt
+D:\Translate\Translator\Pipeline Koharu\OCR\PaddleOCR-VL-1.5\README.md
+D:\Translate\Translator\python\LICENSE.txt
+D:\Translate\Translator\web\templates\backup.html
+D:\Translate\Translator\web\templates\index.html
+D:\Translate\Translator\web\templates\memory.html
+D:\Translate\Translator\web\templates\review.html
+D:\Translate\Translator\web\templates\settings.html
+D:\Translate\Translator\web\templates\train.html
+D:\Translate\Translator\web\templates\_nav.html
+D:\Translate\Translator\mit_test\manga-image-translator-main\front\docs\img\no_image.png
+D:\Translate\Translator\mit_test\manga-image-translator-main\front\docs\img\present_image.png
+D:\Translate\Translator\python\images\imagehash.png
+D:\Translate\Translator\web\sessions\bg_cache\002\page_0001.png
+D:\Translate\Translator\web\sessions\bg_cache\002\page_0002.png
+D:\Translate\Translator\web\sessions\bg_cache\002\page_0003.png
+D:\Translate\Translator\web\sessions\bg_cache\002\page_0004.png
+D:\Translate\Translator\web\sessions\bg_cache\002\page_0005.png
+D:\Translate\Translator\web\sessions\bg_cache\002\page_0006.png
+D:\Translate\Translator\web\sessions\crops\002\p0001_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\002\p0001_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\002\p0001_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\002\p0001_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\002\p0001_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\002\p0002_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\002\p0002_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\002\p0002_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\002\p0003_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\002\p0003_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\002\p0003_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\002\p0003_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\002\p0004_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\002\p0004_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\002\p0005_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\002\p0005_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\002\p0005_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\002\p0005_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\002\p0005_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\002\p0006_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\002\p0006_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\002\p0006_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\002\p0006_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\2\p0001_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\2\p0001_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\2\p0001_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\2\p0001_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\2\p0001_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\2\p0001_b0005.jpg
+D:\Translate\Translator\web\sessions\crops\2\p0001_b0006.jpg
+D:\Translate\Translator\web\sessions\crops\2\p0001_b0007.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0001_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0004_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0004_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0004_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0004_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0005_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0005_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0005_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0005_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0005_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0006_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0006_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0006_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0006_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0006_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0007_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0007_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0007_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0007_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0007_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0008_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0008_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0008_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0008_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0008_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0009_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0009_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0009_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0009_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0010_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0010_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0010_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0010_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0010_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0010_b0005.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0011_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0011_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0011_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0011_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0011_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0012_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0012_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0012_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0012_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0012_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0012_b0005.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0013_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0013_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0013_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0013_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0013_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0014_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0014_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0014_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0015_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0015_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0015_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0016_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0016_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0016_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0016_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0016_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0017_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0017_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0017_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0017_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0017_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0017_b0005.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0017_b0006.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0018_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0018_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0018_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0018_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0019_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0019_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0019_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0019_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0019_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0020_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0020_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0021_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0021_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0021_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0021_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0021_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0022_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0022_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0022_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0022_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0022_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0023_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0023_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0024_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0024_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0024_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0024_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0025_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0025_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0026_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0026_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0026_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0026_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0026_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0027_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0027_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0028_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0028_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0028_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0028_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0028_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0028_b0005.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0028_b0006.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0029_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0029_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0030_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0030_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0030_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0030_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0030_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0030_b0005.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0030_b0006.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0031_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0031_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0031_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0031_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0031_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0031_b0005.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0032_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0032_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0032_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0032_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0032_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0033_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0033_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0033_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0033_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0033_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0033_b0005.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0034_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0034_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0034_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0034_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0034_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0034_b0005.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0035_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0036_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0036_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0036_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0036_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0037_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0037_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0037_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0038_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0039_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0039_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0039_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0040_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0040_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0040_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0040_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0040_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0040_b0005.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0040_b0006.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0040_b0007.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0041_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0041_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0041_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0041_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0041_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0041_b0005.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0041_b0006.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0042_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0042_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0042_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0042_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0043_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0043_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0043_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0043_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0044_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0044_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0044_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0044_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0045_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0046_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0046_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\3864913_v1_ [18master] Tonari no Mineko-san 3\p0046_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0002_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0004_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0004_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0004_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0004_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0006_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0007_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0008_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0008_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0009_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0010_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0012_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0012_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0014_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0018_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0018_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0019_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0021_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0021_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0023_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0024_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0024_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0026_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0027_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0028_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0029_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0029_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0030_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0030_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0032_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0032_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0033_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0035_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0035_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0037_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0039_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0039_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0040_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0040_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0040_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0042_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0043_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0044_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0044_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0046_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0048_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0048_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0049_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0050_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0050_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0051_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0052_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0052_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0053_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0053_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0054_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0055_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0055_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0056_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0057_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0057_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0057_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0058_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0058_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0060_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0060_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0060_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0062_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0063_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0065_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0066_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0067_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0067_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0068_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0069_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0072_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0073_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0074_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0075_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0075_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0079_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0082_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0083_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0085_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0085_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0086_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0086_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0088_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0089_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0091_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0093_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0095_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0095_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0099_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0101_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0103_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0103_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0104_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0105_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0106_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0107_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0108_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0108_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0110_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0110_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0110_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0112_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0119_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0120_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0121_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0123_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0124_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0124_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0128_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0129_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0132_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0135_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0136_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0138_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0139_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Fated Villain\p0142_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0001_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0002_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0002_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0002_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0002_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0002_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0002_b0005.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0002_b0006.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0002_b0007.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0003_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0003_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0003_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0003_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0003_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0004_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0004_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0004_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0004_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0004_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0004_b0005.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0004_b0006.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0004_b0007.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0005_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0005_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0005_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0005_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0005_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0006_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0007_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Jap\p0008_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0001_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0001_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0001_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0001_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0001_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0001_b0005.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0002_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0002_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0002_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0002_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0002_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0003_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0003_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0003_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0004_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0004_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0004_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0004_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0004_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0004_b0005.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0004_b0006.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0005_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0005_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0005_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0005_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0005_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0006_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0006_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0006_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0006_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0006_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0006_b0005.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0006_b0006.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0007_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0007_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0007_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0007_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0008_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0008_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0008_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0008_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0008_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0009_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0009_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0009_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0009_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0009_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0009_b0005.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0010_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0010_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0010_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0010_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0010_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\Japenese\p0010_b0005.jpg
+D:\Translate\Translator\web\sessions\crops\YAjqu\p0001_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\YAjqu\p0001_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\YAjqu\p0001_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0001_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0001_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0002_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0002_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0003_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0003_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0003_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0003_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0003_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0004_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0004_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0004_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0004_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0004_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0005_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0005_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0005_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0006_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0006_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0006_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0006_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0006_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0007_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0007_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0007_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0007_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0007_b0004.jpg
+D:\Translate\Translator\web\sessions\crops\世界终源篇-最终对决！\p0007_b0005.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0001_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0003_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0004_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0006_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0007_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0009_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0010_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0011_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0012_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0014_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0015_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0015_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0016_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0017_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0017_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0019_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0019_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0020_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0022_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0027_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0027_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0029_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0030_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0034_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0035_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0040_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0042_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0044_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0058_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0059_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0060_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0061_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0062_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0068_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0070_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0076_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0082_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0082_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0084_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0085_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0086_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0088_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0089_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0097_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0098_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0099_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0100_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0100_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0103_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0105_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0105_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0109_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0110_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0111_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0112_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0116_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0118_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0119_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0122_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0126_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0127_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0135_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0135_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0138_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0140_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0144_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0145_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0148_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0150_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0152_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0153_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0156_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0157_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0162_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0164_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0165_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0165_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0165_b0002.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0165_b0003.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0169_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0172_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0174_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0175_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0176_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0182_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0183_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0185_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0187_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0187_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0189_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0190_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0190_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0193_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0200_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0202_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0203_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0205_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0207_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0213_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0214_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0215_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0220_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0221_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0224_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0226_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0227_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0228_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0229_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0234_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0236_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0236_b0001.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0238_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0242_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0244_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0247_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0250_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0251_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0252_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0254_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0255_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0258_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0260_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0261_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0263_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0264_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0265_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0271_b0000.jpg
+D:\Translate\Translator\web\sessions\crops\第191话 天魔（2）\p0271_b0001.jpg

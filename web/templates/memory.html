@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translation Memory</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="layout">
+        {% include '_nav.html' %}
+        <main class="main-content">
+            <div class="page-header">
+                <div class="flex-between">
+                    <div>
+                        <h2>🧠 Translation Memory</h2>
+                        <p>Browse, search, and edit all stored translation pairs.</p>
+                    </div>
+                    <div class="flex-gap-8">
+                        <a href="/memory/export?series={{ selected }}" class="btn btn-outline btn-sm">⬇ Export JSON</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn {% if tab == 'global' %}active{% endif %}"
+                    onclick="location.href='/memory?series=global'">🌍 Global Memory</button>
+                <button class="tab-btn {% if tab == 'series' %}active{% endif %}"
+                    onclick="location.href='/memory?series=series'" id="series-tab-btn">
+                    📗 Series Memory
+                </button>
+                {% if series_list %}
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <select id="series-select" onchange="location.href='/memory?series='+this.value"
+                        style="max-width:200px; padding:6px 10px;">
+                        <option value="global">— select series —</option>
+                        {% for s in series_list %}
+                        <option value="{{ s }}" {% if s==selected %}selected{% endif %}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if selected and selected != 'global' and selected != 'series' %}
+                    <button class="btn btn-outline btn-sm" onclick="deleteSeries('{{ selected }}')" style="color: #ef4444; border-color: #ef4444;" title="Delete this entire series memory">🗑️ Delete</button>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Search -->
+            <div class="search-bar">
+                <span class="search-icon">🔎</span>
+                <input type="text" id="memory-search" placeholder="Search source text, translation...">
+            </div>
+
+            <!-- Table -->
+            {% if entries %}
+            <div class="table-wrap">
+                <table id="memory-table">
+                    <thead>
+                        <tr>
+                            <th>Lang</th>
+                            <th>Source Text</th>
+                            <th>Translation</th>
+                            <th>Conf %</th>
+                            <th>Approved</th>
+                            <th>Edited</th>
+                            <th>Used</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for e in entries %}
+                        <tr>
+                            <td><span class="badge badge-queued font-mono" style="font-size:0.72rem">{{ e.source_lang
+                                    }}</span></td>
+                            <td class="source-text" title="{{ e.source_text }}">{{ e.source_text }}</td>
+                            <td class="translated-text" title="{{ e.translated_text }}">{{ e.translated_text }}</td>
+                            <td>
+                                {% set conf = e.confidence_score|float %}
+                                {% set cc = 'conf-high' if conf >= 80 else ('conf-medium' if conf >= 60 else 'conf-low')
+                                %}
+                                <span class="conf-badge {{ cc }}">{{ conf|round(1) }}%</span>
+                            </td>
+                            <td>{% if e.approved %}<span class="text-success">✅</span>{% else %}<span
+                                    class="text-muted">—</span>{% endif %}</td>
+                            <td>{% if e.edited %}<span class="text-amber">✏️</span>{% else %}<span
+                                    class="text-muted">—</span>{% endif %}</td>
+                            <td class="text-muted font-mono">{{ e.times_used }}</td>
+                            <td>
+                                <button class="btn btn-outline btn-sm mem-edit-btn" data-id="{{ e.id }}"
+                                    data-series="{{ selected if selected != 'global' else '' }}">Edit</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-muted text-sm mt-8">{{ entries|length }} entries total</div>
+            {% else %}
+            <div class="card">
+                <div class="flex-center"
+                    style="padding:60px 0; flex-direction:column; gap:12px; color:var(--text-muted);">
+                    <div style="font-size:3rem">📭</div>
+                    <p>No entries in this memory yet. Process and approve some translations first.</p>
+                </div>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+    <div id="toast-container"></div>
+    <script src="/static/main.js"></script>
+</body>
+
+</html>
