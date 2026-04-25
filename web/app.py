@@ -339,7 +339,13 @@ def _run_job(job: dict):
 
     _tq.update(job["id"], status="processing", progress=0)
 
+    class JobCancelledError(Exception): pass
+
     def progress(current, total):
+        # Check if job was cancelled
+        for j in _tq.jobs():
+            if j["id"] == job["id"] and j["status"] == "cancelled":
+                raise JobCancelledError("Cancelled by user")
         _tq.update(job["id"], progress=current, total=total)
 
     result = process_cbz(
@@ -351,12 +357,25 @@ def _run_job(job: dict):
         progress_callback=progress,
     )
 
+    current_job = next((j for j in _tq.jobs() if j["id"] == job["id"]), None)
+    
     if result.get("success"):
-        _tq.update(job["id"], status="done", progress=result.get("num_bubbles", 0))
+        if current_job and current_job["status"] != "cancelled":
+            _tq.update(job["id"], status="done", progress=result.get("num_bubbles", 0))
     else:
-        _tq.update(job["id"], status="error", error=result.get("error", "Unknown"))
+        if current_job and current_job["status"] == "cancelled":
+            pass # Keep it as cancelled
+        else:
+            _tq.update(job["id"], status="error", error=result.get("error", "Unknown"))
 
 # ── Routes ────────────────────────────────────────────────────────────────────
+
+@app.route("/cancel_job/<job_id>", methods=["POST"])
+def cancel_job(job_id):
+    """Marks a job as cancelled. The worker will pick this up and abort."""
+    _tq.update(job_id, status="cancelled")
+    return jsonify({"ok": True})
+
 
 @app.route("/")
 def index():
@@ -636,7 +655,6 @@ def edit_bubble_bulk():
                             b["translated_text"] = new_text
                             b["approved"] = True
                             b["edited"] = True
-                            break
                             
                 with open(session_path, "w", encoding="utf-8") as f:
                     json.dump(session, f, ensure_ascii=False, indent=2)
@@ -900,7 +918,8 @@ def rerender_cbz(cbz_name: str):
                 session = json.load(f)
 
             # Instantly update UI so the user sees a progress bar during extraction
-            estimated_total = session.get("chunk_meta", {}).get("num_chunks", 0)
+            cm = session.get("chunk_meta")
+            estimated_total = cm.get("num_chunks", 0) if cm else 0
             _tq.update(jid, status="processing", progress=0, total=estimated_total)
 
             cfg = _load_cfg()
@@ -951,6 +970,8 @@ def rerender_cbz(cbz_name: str):
             if has_cache:
                 logger.info("Re-render: found instant bg_cache for %s", cbz_name)
 
+            all_regions = []
+            
             for page_idx, img_path in enumerate(images):
                 page_num = page_idx + 1
                 page_bubbles = bubbles_by_page.get(page_num, [])
@@ -975,12 +996,14 @@ def rerender_cbz(cbz_name: str):
                                  y = sb.get("y", 0)
                                  w = sb.get("w", 0)
                                  h = sb.get("h", 0)
-                                 regions.append(BubbleRegion(
+                                 br = BubbleRegion(
                                      x=x, y=y, w=w, h=h,
                                      source_text=sb.get("source_text", ""),
                                      translated_text=sb.get("translated_text", ""),
                                      font_cfg=font_cfg
-                                 ))
+                                 )
+                                 regions.append(br)
+                                 all_regions.append((None, br, page_num, ""))
                              
                              final = inpainter.render_text(inpainted_image, regions)
                              final.save(out_page, format="PNG", optimize=False)
@@ -1000,6 +1023,7 @@ def rerender_cbz(cbz_name: str):
                                     break
                             else:
                                 region.font_cfg = font_cfg
+                            all_regions.append((None, region, page_num, ""))
 
                         inpainter.process_page(img_path, detected_regions, out_page)
                 
@@ -1020,7 +1044,7 @@ def rerender_cbz(cbz_name: str):
                     chunk_meta = json.load(_f)
                 from core.batch_processor import _reassemble_chunks
                 logger.info("Re-render: Trimming overlaps for %d chunks...", chunk_meta.get("num_chunks", 0))
-                _reassemble_chunks(output_tmp, chunk_meta, logger)
+                _reassemble_chunks(output_tmp, chunk_meta, logger, all_regions)
 
             # Remove old output if exists
             if os.path.exists(output_cbz):
@@ -1149,7 +1173,6 @@ def _update_session_bubble(cbz_name: str, source_text: str, translated_text: str
                 b["translated_text"] = translated_text
                 b["approved"] = approved
                 b["edited"] = edited
-                break
         with open(session_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
     except Exception as exc:

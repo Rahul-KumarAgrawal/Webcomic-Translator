@@ -113,7 +113,9 @@ function upsertJobCard(job) {
                 <a class="btn btn-outline btn-sm" href="/review/${encodeURIComponent(job.cbz_name)}">Review →</a>
                 <button class="btn btn-danger btn-sm delete-output-btn" data-cbz="${escAttr(job.cbz_name)}" title="Delete output & session data">🗑️ Delete</button>
                </div>`)
-      : ""}
+      : (job.status === "queued" || job.status === "processing" 
+          ? `<button class="btn btn-danger btn-sm" onclick="cancelJob('${job.id}')" title="Cancel this job">Cancel</button>` 
+          : "")}
     </div>
     ${job.series ? `<div class="text-sm text-muted mt-8">Series: ${escHtml(job.series)}</div>` : ""}
     ${job.error ? `<div class="text-danger text-sm mt-8">Error: ${escHtml(job.error)}</div>` : ""}
@@ -127,6 +129,13 @@ function upsertJobCard(job) {
 
   // Re-attach delete handlers for newly rendered buttons
   initDeleteOutput();
+}
+
+function cancelJob(jobId) {
+  if (confirm("Are you sure you want to cancel this job?")) {
+    fetch(`/cancel_job/${jobId}`, { method: 'POST' })
+      .catch(err => console.error("Cancel failed", err));
+  }
 }
 
 // ── Drag-and-drop upload ──────────────────────────────────────────────────────
