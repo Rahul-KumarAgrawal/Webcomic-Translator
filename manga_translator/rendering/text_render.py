@@ -211,6 +211,9 @@ FALLBACK_FONTS = [
     os.path.join(BASE_PATH, 'fonts/Arial-Unicode-Regular.ttf'),
     os.path.join(BASE_PATH, 'fonts/msyh.ttc'),
     os.path.join(BASE_PATH, 'fonts/msgothic.ttc'),
+    'C:/Windows/Fonts/seguiemj.ttf',
+    'C:/Windows/Fonts/symbola.ttf',
+    'C:/Windows/Fonts/arialuni.ttf',
 ]
 FONT_SELECTION: List[freetype.Face] = []
 font_cache = {}

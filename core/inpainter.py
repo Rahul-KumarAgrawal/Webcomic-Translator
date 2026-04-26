@@ -948,22 +948,41 @@ class Inpainter:
 
     def _load_emoji_font(self, size: int) -> ImageFont.FreeTypeFont:
         """Load a system emoji font as a fallback."""
-        # Common Windows emoji fonts
-        fallbacks = ["seguiemj.ttf", "symbola.ttf", "arialuni.ttf"]
+        # Project root
+        root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        
+        # Priority fallback list
+        fallbacks = [
+            os.path.join(root, "fonts", "Arial-Unicode-Regular.ttf"), # Local priority
+            "C:/Windows/Fonts/seguiemj.ttf",  # Segoe UI Emoji
+            "C:/Windows/Fonts/symbola.ttf",   # Symbola
+            "C:/Windows/Fonts/arialuni.ttf",  # Arial Unicode MS
+            "C:/Windows/Fonts/msgothic.ttc",  # MS Gothic
+            "seguiemj.ttf",
+            "symbola.ttf",
+            "arialuni.ttf"
+        ]
         for f in fallbacks:
             try:
-                return ImageFont.truetype(f, size)
-            except OSError:
+                if os.path.exists(f) or not os.path.isabs(f):
+                    return ImageFont.truetype(f, size)
+            except Exception:
                 continue
         return ImageFont.load_default()
 
     def _is_emoji(self, char: str) -> bool:
         """Detect if a character is a heart or common manga symbol."""
-        # Hearts and sparkles
-        if char in "♥♡❤✨💢⭐🌟💫💨💦💧🔥":
+        # Expanded list of hearts and common manga symbols
+        if char in "♥♡❤💔❣🖤💕💞💓💗💖💘💝✨💢⭐🌟💫💨💦💧🔥💨💤":
+            return True
+        # Symbols and Dingbats ranges (includes many hearts)
+        code = ord(char)
+        if 0x2600 <= code <= 0x26FF: # Miscellaneous Symbols
+            return True
+        if 0x2700 <= code <= 0x27BF: # Dingbats
             return True
         # Basic emoji range
-        return ord(char) > 0x2000
+        return code > 0x2000
 
     def _draw_mixed_line(
         self,
@@ -979,7 +998,19 @@ class Inpainter:
         """Draw a line of text, switching fonts for emoji/symbols."""
         current_x = x
         for char in line:
-            font = emoji_font if self._is_emoji(char) else primary_font
+            # Determine if we should use the emoji fallback
+            use_emoji = self._is_emoji(char)
+            
+            # Additional check: if primary font doesn't have the glyph, use emoji font
+            if not use_emoji:
+                try:
+                    # getmask().getbbox() is None if the glyph is missing
+                    if primary_font.getmask(char).getbbox() is None:
+                        use_emoji = True
+                except Exception:
+                    use_emoji = True
+
+            font = emoji_font if use_emoji else primary_font
             
             # Draw outline
             for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
@@ -995,7 +1026,14 @@ class Inpainter:
         """Calculate length of a string using multiple fonts."""
         total = 0.0
         for char in text:
-            font = emoji_font if self._is_emoji(char) else primary_font
+            use_emoji = self._is_emoji(char)
+            if not use_emoji:
+                try:
+                    if primary_font.getmask(char).getbbox() is None:
+                        use_emoji = True
+                except Exception:
+                    use_emoji = True
+            font = emoji_font if use_emoji else primary_font
             total += draw.textlength(char, font=font)
         return total
 
