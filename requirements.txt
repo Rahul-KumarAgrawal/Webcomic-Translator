@@ -18,9 +18,17 @@ torch-summary
 
 # ── OCR & Detection ───────────────────────────────────────────────────────────
 manga-ocr
-paddlepaddle-gpu
-paddleocr==2.8.1
+paddlepaddle-gpu==3.0.0b2
+paddleocr==3.5.0
 easyocr>=1.7.0
+nvidia-cudnn-cu11==8.9.4.19
+nvidia-cublas-cu11
+nvidia-cuda-runtime-cu11
+nvidia-curand-cu11
+nvidia-cusolver-cu11
+nvidia-cusparse-cu11
+nvidia-cufft-cu11
+nvidia-cuda-nvrtc-cu11
 pyclipper
 shapely
 

@@ -98,6 +98,9 @@ class Inpainter:
         elif str(ocr_engine).lower() == "manga-ocr":
             regions = self._run_manga_ocr_on_regions(image, regions)
 
+        # ── 3. Final Deduplication & Merging ───────────────────────────
+        regions = self._merge_nearby_regions(regions)
+
         return image, regions
 
     # ── Koharu engine methods ─────────────────────────────────────────────────
@@ -110,7 +113,8 @@ class Inpainter:
             self._yolo_model = YOLO(str(model_path))
             logger.info("[Modular] YOLO text detector loaded.")
 
-        results = self._yolo_model(image_path, verbose=False)
+        # Run detection with a slightly lower confidence to catch more text
+        results = self._yolo_model(image_path, verbose=False, conf=0.20, iou=0.45)
         regions = []
         for r in results:
             for box in r.boxes:
@@ -370,35 +374,101 @@ class Inpainter:
         current = regions[0]
 
         for next_r in regions[1:]:
-            # Check horizontal overlap: do the two regions share X-range?
+            # Check overlap and gaps
             cur_x1, cur_x2 = current.x, current.x + current.w
+            cur_y1, cur_y2 = current.y, current.y + current.h
             nxt_x1, nxt_x2 = next_r.x, next_r.x + next_r.w
+            nxt_y1, nxt_y2 = next_r.y, next_r.y + next_r.h
+
             overlap_x = min(cur_x2, nxt_x2) - max(cur_x1, nxt_x1)
-            min_width = min(current.w, next_r.w)
+            overlap_y = min(cur_y2, nxt_y2) - max(cur_y1, nxt_y1)
+            
+            min_w = min(current.w, next_r.w)
+            min_h = min(current.h, next_r.h)
 
-            # Vertical gap between bottom of current and top of next
-            v_gap = next_r.y - (current.y + current.h)
+            v_gap = next_r.y - cur_y2
+            h_gap = next_r.x - cur_x2 if not is_vertical else cur_x1 - nxt_x2
 
-            # Merge if they overlap horizontally (≥30%) and are close vertically
-            if overlap_x > 0.3 * min_width and v_gap < gap_threshold:
-                # Expand bounding box to encompass both
-                new_x1 = min(current.x, next_r.x)
-                new_y1 = min(current.y, next_r.y)
-                new_x2 = max(current.x + current.w, next_r.x + next_r.w)
-                new_y2 = max(current.y + current.h, next_r.y + next_r.h)
-                # Concatenate text
-                combined_text = (current.source_text.strip() + " " + next_r.source_text.strip()).strip()
+            # Determine if we should merge
+            should_merge = False
+            
+            if is_vertical:
+                # For CJK vertical text: ONLY merge side-by-side columns (horizontal merge)
+                # We want to merge if they overlap vertically and are close horizontally
+                if overlap_y > 0.5 * min_h and abs(h_gap) < 25:
+                    should_merge = True
+                # Vertical stacking merge is DISABLED for CJK to prevent giant strips.
+            else:
+                # For horizontal text: rows are stacked (merging vertically)
+                if overlap_x > 0.5 * min_w and v_gap < 15:
+                    should_merge = True
+                # Or side-by-side fragments
+                elif overlap_y > 0.5 * min_h and abs(h_gap) < 10:
+                    should_merge = True
+
+            if should_merge:
+                # Expand bounding box
+                new_x1 = min(cur_x1, nxt_x1)
+                new_y1 = min(cur_y1, nxt_y1)
+                new_x2 = max(cur_x2, nxt_x2)
+                new_y2 = max(cur_y2, nxt_y2)
+                
+                # Concatenate text (right-to-left for vertical, left-to-right for horizontal)
+                if is_vertical and nxt_x1 > cur_x1:
+                    combined_source = (next_r.source_text.strip() + " " + current.source_text.strip()).strip()
+                    combined_trans  = (next_r.translated_text.strip() + " " + current.translated_text.strip()).strip()
+                else:
+                    combined_source = (current.source_text.strip() + " " + next_r.source_text.strip()).strip()
+                    combined_trans  = (current.translated_text.strip() + " " + next_r.translated_text.strip()).strip()
+
                 current = BubbleRegion(
                     x=new_x1, y=new_y1,
                     w=new_x2 - new_x1, h=new_y2 - new_y1,
-                    source_text=combined_text,
+                    source_text=combined_source,
+                    translated_text=combined_trans
                 )
             else:
                 merged.append(current)
                 current = next_r
 
         merged.append(current)
-        return merged
+        return self._deduplicate_contained_regions(merged)
+
+    def _deduplicate_contained_regions(self, regions: List[BubbleRegion]) -> List[BubbleRegion]:
+        """Remove larger regions that contain smaller, better-defined sub-regions."""
+        if not regions:
+            return []
+            
+        # Sort by area ascending so we check smaller bubbles first
+        sorted_regions = sorted(regions, key=lambda r: r.w * r.h)
+        remove_indices = set()
+        
+        for i, r_small in enumerate(sorted_regions):
+            if i in remove_indices: continue
+            
+            for j, r_large in enumerate(sorted_regions):
+                if i == j or j in remove_indices: continue
+                if r_large.w * r_large.h <= r_small.w * r_small.h: continue
+                
+                # Check if r_small is inside r_large
+                inter_x1 = max(r_small.x, r_large.x)
+                inter_y1 = max(r_small.y, r_large.y)
+                inter_x2 = min(r_small.x + r_small.w, r_large.x + r_large.w)
+                inter_y2 = min(r_small.y + r_small.h, r_large.y + r_large.h)
+                
+                inter_w = max(0, inter_x2 - inter_x1)
+                inter_h = max(0, inter_y2 - inter_y1)
+                inter_area = inter_w * inter_h
+                small_area = r_small.w * r_small.h
+                
+                # If >80% of small bubble is inside large bubble, the large bubble 
+                # is likely a redundant container. Remove it to allow better OCR on pieces.
+                if inter_area > 0.8 * small_area:
+                    remove_indices.add(j)
+            
+        keep = [r for idx, r in enumerate(sorted_regions) if idx not in remove_indices]
+        # Return in original top-to-bottom order
+        return sorted(keep, key=lambda r: (r.y, r.x))
 
     def _run_aot_inpaint(self, image: Image.Image, regions: List[BubbleRegion]) -> Image.Image:
         """
@@ -819,17 +889,29 @@ class Inpainter:
             font = self._load_font(font_path, mid)
 
             # ── Constraint 1: every word must fit on its own line ──────────
+            emoji_font = self._load_emoji_font(mid)
             longest_word_w = max(
-                (tmp_draw.textlength(w, font=font) for w in words), default=0
+                (self._get_mixed_textlength(w, font, emoji_font, tmp_draw) for w in words), default=0
             )
             if longest_word_w > max_w:
                 hi = mid - 1
                 continue
 
             # ── Constraint 2: all wrapped lines must fit in height ─────────
-            lines   = self._wrap_text(text, font, max_w, tmp_draw)
+            # Wrap text using mixed length calculation
+            wrap_lines: List[str] = []
+            current = ""
+            for word in words:
+                test = (current + " " + word).strip()
+                if self._get_mixed_textlength(test, font, emoji_font, tmp_draw) <= max_w:
+                    current = test
+                else:
+                    if current: wrap_lines.append(current)
+                    current = word
+            if current: wrap_lines.append(current)
+
             line_h  = mid + 2
-            total_h = len(lines) * line_h
+            total_h = len(wrap_lines) * line_h
             if total_h <= max_h:
                 best = mid
                 lo   = mid + 1
@@ -864,6 +946,59 @@ class Inpainter:
             lines.append(current)
         return lines or [text]
 
+    def _load_emoji_font(self, size: int) -> ImageFont.FreeTypeFont:
+        """Load a system emoji font as a fallback."""
+        # Common Windows emoji fonts
+        fallbacks = ["seguiemj.ttf", "symbola.ttf", "arialuni.ttf"]
+        for f in fallbacks:
+            try:
+                return ImageFont.truetype(f, size)
+            except OSError:
+                continue
+        return ImageFont.load_default()
+
+    def _is_emoji(self, char: str) -> bool:
+        """Detect if a character is a heart or common manga symbol."""
+        # Hearts and sparkles
+        if char in "♥♡❤✨💢⭐🌟💫💨💦💧🔥":
+            return True
+        # Basic emoji range
+        return ord(char) > 0x2000
+
+    def _draw_mixed_line(
+        self,
+        draw: ImageDraw.ImageDraw,
+        x: int,
+        y: int,
+        line: str,
+        primary_font: ImageFont.FreeTypeFont,
+        emoji_font: ImageFont.FreeTypeFont,
+        color: str,
+        outline_color: str
+    ) -> None:
+        """Draw a line of text, switching fonts for emoji/symbols."""
+        current_x = x
+        for char in line:
+            font = emoji_font if self._is_emoji(char) else primary_font
+            
+            # Draw outline
+            for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                draw.text((current_x + dx, y + dy), char, font=font, fill=outline_color)
+            
+            # Draw main text
+            draw.text((current_x, y), char, font=font, fill=color)
+            
+            # Advance X
+            current_x += int(draw.textlength(char, font=font))
+
+    def _get_mixed_textlength(self, text: str, primary_font: ImageFont.FreeTypeFont, emoji_font: ImageFont.FreeTypeFont, draw: ImageDraw.ImageDraw) -> float:
+        """Calculate length of a string using multiple fonts."""
+        total = 0.0
+        for char in text:
+            font = emoji_font if self._is_emoji(char) else primary_font
+            total += draw.textlength(char, font=font)
+        return total
+
     def _draw_text_in_bubble(
         self,
         draw: ImageDraw.ImageDraw,
@@ -872,39 +1007,40 @@ class Inpainter:
         font: ImageFont.FreeTypeFont,
         color: str,
     ) -> None:
-        """Draw word-wrapped, centred text inside a bubble region.
-
-        - Text is word-wrapped (never broken mid-word).
-        - Any line whose bottom edge would exceed the bubble bottom is dropped.
-        - x is clamped so text never starts outside the left/right edges.
-        """
+        """Draw word-wrapped, centred text inside a bubble region with emoji support."""
         padding   = 6
         max_w     = max(region.w - padding * 2, 10)
-        lines     = self._wrap_text(text, font, max_w, draw)
+        
+        # Load emoji fallback at same size
         font_size = font.size if hasattr(font, "size") else 12
+        emoji_font = self._load_emoji_font(font_size)
+
+        # Wrap text using mixed length calculation
+        words = text.split()
+        lines: List[str] = []
+        current = ""
+        for word in words:
+            test = (current + " " + word).strip()
+            if self._get_mixed_textlength(test, font, emoji_font, draw) <= max_w:
+                current = test
+            else:
+                if current: lines.append(current)
+                current = word
+        if current: lines.append(current)
+        
         line_h    = font_size + 2
         total_h   = len(lines) * line_h
 
-        # Vertical centering: if text is taller than bubble, it will naturally spill equally 
-        # out of the top and bottom. We no longer clamp to bubble_top, allowing it to overflow.
         start_y       = region.y + (region.h - total_h) // 2
-        
-        # We only need horizontal boundaries for clamping
         bubble_left   = region.x + padding
         bubble_right  = region.x + region.w - padding
-
-        # Contrasting outline color
         outline_color = "#000000" if color.upper() in ("#FFFFFF", "#FFF", "WHITE") else "#FFFFFF"
 
         for i, line in enumerate(lines):
             y = start_y + i * line_h
-
-            line_w = int(draw.textlength(line, font=font))
-            # Centre the line; clamp so it stays inside left/right padding
+            line_w = int(self._get_mixed_textlength(line, font, emoji_font, draw))
+            
             x = region.x + (region.w - line_w) // 2
             x = max(bubble_left, min(x, bubble_right - line_w))
 
-            # Draw thin contrasting outline for readability
-            for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-                draw.text((x + dx, y + dy), line, font=font, fill=outline_color)
-            draw.text((x, y), line, font=font, fill=color)
+            self._draw_mixed_line(draw, x, y, line, font, emoji_font, color, outline_color)

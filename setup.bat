@@ -215,7 +215,11 @@ REM -- ML / Compute --
 
 REM -- OCR --
 "%PYTHON%" -m pip install manga-ocr --quiet 2>nul
-"%PYTHON%" -m pip install paddlepaddle-gpu paddleocr==2.8.1 --quiet 2>nul
+"%PYTHON%" -m pip install paddlepaddle-gpu==3.0.0b2 paddleocr==3.5.0 --quiet 2>nul
+
+REM -- NVIDIA GPU Binaries (cuDNN 8, CUDA 11) --
+echo [SETUP] Installing NVIDIA runtime binaries for GPU acceleration...
+"%PYTHON%" -m pip install nvidia-cudnn-cu11==8.9.4.19 nvidia-cublas-cu11 nvidia-cuda-runtime-cu11 nvidia-curand-cu11 nvidia-cusolver-cu11 nvidia-cusparse-cu11 nvidia-cufft-cu11 nvidia-cuda-nvrtc-cu11 --quiet 2>nul
 
 REM -- Image processing --
 "%PYTHON%" -m pip install scikit-image opencv-python Pillow ImageHash --quiet 2>nul

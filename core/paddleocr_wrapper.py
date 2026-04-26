@@ -18,6 +18,25 @@ os.environ["HUB_HOME"]      = _PADDLE_CACHE           # PaddleHub cache
 os.environ["FLAGS_model_dir"] = _PADDLE_CACHE          # Paddle inference cache
 os.environ["PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK"] = "True"  # skip slow connectivity check
 
+# ── DLL Fix: Add NVIDIA bin folders to PATH ──────────────────────────────────
+# This fixes Error 126 (cudnn64_8.dll not found) by linking the 'nvidia-cudnn-cu11' 
+# and related packages installed via pip.
+import site
+for s_path in site.getsitepackages():
+    nvidia_dir = os.path.join(s_path, "nvidia")
+    if os.path.exists(nvidia_dir):
+        for sub in os.listdir(nvidia_dir):
+            bin_path = os.path.join(nvidia_dir, sub, "bin")
+            if os.path.exists(bin_path):
+                # Add to PATH for legacy DLL loading
+                os.environ["PATH"] = bin_path + os.pathsep + os.environ["PATH"]
+                # Add to DLL Directory for Python 3.8+
+                if hasattr(os, "add_dll_directory"):
+                    try:
+                        os.add_dll_directory(bin_path)
+                    except Exception:
+                        pass
+
 # Fallback: if paddleocr isn't installed via pip, try loading from the user's downloaded repo
 try:
     from paddleocr import PaddleOCR
@@ -49,10 +68,8 @@ def get_paddle_ocr(lang="japan"):
         
     if _paddle_ocr_instance is None or _paddle_last_lang != lang:
         logger.info(f"Initializing PaddleOCR for language: {lang}")
-        # Disable GPU for OCR because it causes WinError 126 missing cuDNN dlls, 
-        # and we need to save GPU VRAM for the heavy SAM/LaMa models anyway.
-        # CPU OCR on small text crops is extremely fast.
-        _paddle_ocr_instance = PaddleOCR(use_angle_cls=True, lang=lang, show_log=False, use_gpu=False)
+        # Enabled GPU for OCR (using Paddle 3.0.0b2 auto-dependencies).
+        _paddle_ocr_instance = PaddleOCR(use_angle_cls=True, lang=lang, show_log=False, use_gpu=True, gpu_mem=500)
         _paddle_last_lang = lang
         
     return _paddle_ocr_instance

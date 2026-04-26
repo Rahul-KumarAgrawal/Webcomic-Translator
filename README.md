@@ -29,6 +29,12 @@ Runs on **Windows** with an **NVIDIA RTX 3050 (4 GB VRAM)**.
 - NVIDIA GPU drivers with CUDA 11.8+
 - Git (optional, for cloning)
 
+### 2. NVIDIA GPU & DLL Support
+The project now includes an automated **Super-Linker** to handle common Windows DLL issues (like `cudnn64_8.dll` not found).
+- **Automated Dependency Management:** `setup.bat` installs all required NVIDIA binaries directly into the local environment.
+- **Dynamic Linking:** The application automatically discovers and links `cuDNN`, `cuBLAS`, and other CUDA components at startup.
+- **Hardware Optimization:** PaddleOCR 3.5.0 is pre-configured for RTX GPUs to ensure maximum throughput.
+
 ### 2. First-time Setup
 Double-click **`setup.bat`** (or run in PowerShell):
 ```

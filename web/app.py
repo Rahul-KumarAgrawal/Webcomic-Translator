@@ -28,11 +28,58 @@ import logging
 import os
 import queue
 import shutil
+import site
 import sys
-import threading
-import time
 from datetime import datetime
 from pathlib import Path
+
+# ── DLL Fix: Deep NVIDIA & Dependency Discovery ─────────────────────────────
+# Fixes 'cudnn64_8.dll not found' (Error 126) by linking all required binaries.
+def _link_dlls():
+    search_paths = site.getsitepackages()
+    linked_count = 0
+    
+    for s_path in search_paths:
+        if not os.path.exists(s_path): continue
+        
+        # 1. Link NVIDIA packages (cudnn, cublas, etc.)
+        nv_root = os.path.join(s_path, "nvidia")
+        if os.path.exists(nv_root):
+            for sub in os.listdir(nv_root):
+                bp = os.path.join(nv_root, sub, "bin")
+                if os.path.exists(bp):
+                    os.environ["PATH"] = bp + os.pathsep + os.environ["PATH"]
+                    if hasattr(os, "add_dll_directory"):
+                        try:
+                            os.add_dll_directory(bp)
+                            linked_count += 1
+                        except Exception: pass
+        
+        # 2. Link Torch/lib (contains zlibwapi.dll which cuDNN depends on)
+        torch_lib = os.path.join(s_path, "torch", "lib")
+        if os.path.exists(torch_lib):
+            os.environ["PATH"] = torch_lib + os.pathsep + os.environ["PATH"]
+            if hasattr(os, "add_dll_directory"):
+                try:
+                    os.add_dll_directory(torch_lib)
+                    linked_count += 1
+                except Exception: pass
+
+        # 3. Link Paddle libs (just in case)
+        paddle_libs = os.path.join(s_path, "paddle", "libs")
+        if os.path.exists(paddle_libs):
+            os.environ["PATH"] = paddle_libs + os.pathsep + os.environ["PATH"]
+            if hasattr(os, "add_dll_directory"):
+                try:
+                    os.add_dll_directory(paddle_libs)
+                    linked_count += 1
+                except Exception: pass
+
+    logging.info(f"Super-Linker: Registered {linked_count} DLL directories.")
+
+_link_dlls()
+import threading
+import time
 
 import yaml
 from flask import (
