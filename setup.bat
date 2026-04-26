@@ -215,7 +215,7 @@ REM -- ML / Compute --
 
 REM -- OCR --
 "%PYTHON%" -m pip install manga-ocr --quiet 2>nul
-"%PYTHON%" -m pip install paddlepaddle-gpu==3.0.0b2 paddleocr==3.5.0 --quiet 2>nul
+"%PYTHON%" -m pip install paddlepaddle-gpu==2.6.1 -i https://www.paddlepaddle.org.cn/packages/stable/cu118/ paddleocr==2.8.1 --quiet 2>nul
 
 REM -- NVIDIA GPU Binaries (cuDNN 8, CUDA 11) --
 echo [SETUP] Installing NVIDIA runtime binaries for GPU acceleration...
