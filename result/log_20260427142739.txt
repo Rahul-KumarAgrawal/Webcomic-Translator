@@ -1,0 +1,13 @@
+[manga-translator.DefaultDetector] Detection resolution: 1536x2048
+[manga-translator.DefaultDetector] Detection resolution: 1536x2048
+[manga-translator.Model48pxOCR] prob: 0.9985450506210327 おっ♡ fg: (7, 7, 2) bg: (7, 7, 2)
+[manga-translator.Model48pxOCR] prob: 0.5738756656646729 あち〜 fg: (1, 1, 0) bg: (1, 1, 0)
+[manga-translator.Model48pxOCR] prob: 0.9910450577735901 チリン♪ fg: (61, 61, 60) bg: (115, 110, 104)
+[manga-translator.Model48pxOCR] prob: 0.9999714493751526 夏美さん fg: (1, 3, 0) bg: (1, 3, 0)
+[manga-translator.Model48pxOCR] prob: 0.9928393959999084 気がきくぅ fg: (1, 3, 0) bg: (1, 3, 0)
+[manga-translator.Model48pxOCR] prob: 0.9996774792671204 それ食べたら fg: (0, 1, 0) bg: (0, 1, 0)
+[manga-translator.Model48pxOCR] prob: 0.9998891353607178 俺君との夏は fg: (1, 0, 0) bg: (1, 0, 0)
+[manga-translator.Model48pxOCR] prob: 0.9932748675346375 何言ってんの！ fg: (0, 0, 0) bg: (0, 0, 0)
+[manga-translator.Model48pxOCR] prob: 0.9968473315238953 そんなわけで… fg: (0, 0, 0) bg: (0, 0, 0)
+[manga-translator.Model48pxOCR] prob: 0.9962714910507202 まだ続きそうです… fg: (0, 0, 0) bg: (0, 0, 0)
+[manga-translator.Model48pxOCR] prob: 0.3718429207801819 すぐ2回戦だからね！ fg: (0, 2, 1) bg: (0, 2, 1)

@@ -1,0 +1,7 @@
+[manga-translator.DefaultDetector] Detection resolution: 1536x2048
+[manga-translator.Model48pxOCR] prob: 0.9998554587364197 所以只能 fg: (0, 3, 1) bg: (0, 3, 1)
+[manga-translator.Model48pxOCR] prob: 0.9814983010292053 嚐嚐喔… fg: (4, 3, 3) bg: (4, 3, 3)
+[manga-translator.Model48pxOCR] prob: 0.2518242597579956 喝沒啦…> fg: (46, 26, 32) bg: (46, 26, 32)
+[manga-translator.Model48pxOCR] prob: 0.9386071562767029 讓你喝幾口 fg: (1, 3, 4) bg: (1, 3, 4)
+[manga-translator.Model48pxOCR] prob: 0.9945986270904541 太過上頭的話 fg: (0, 1, 1) bg: (0, 1, 1)
+[manga-translator.Model48pxOCR] prob: 0.9764238595962524 會把寶寶的份 fg: (0, 0, 0) bg: (0, 0, 0)

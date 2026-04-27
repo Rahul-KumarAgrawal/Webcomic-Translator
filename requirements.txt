@@ -15,3 +15,10 @@ openai
 google-generativeai
 anthropic
 deep-translator
+easyocr
+langdetect
+langcodes
+py3langid==0.2.2
+editdistance
+PyYAML
+pillow-avif-plugin

@@ -123,7 +123,9 @@ function upsertJobCard(job) {
       <div class="progress-bar-wrap mt-8">
         <div class="progress-bar-fill" style="width:${pct}%"></div>
       </div>
-      <div class="text-sm text-muted mt-8">Page ${job.progress} / ${job.total}</div>
+      <div class="text-sm text-muted mt-8">
+        ${job.progress_text ? escHtml(job.progress_text) : (job.total > 0 ? `Page ${job.progress} / ${job.total}` : "")}
+      </div>
     ` : ""}
   `;
 

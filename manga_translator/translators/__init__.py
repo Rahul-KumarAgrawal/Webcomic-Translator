@@ -5,7 +5,10 @@ import py3langid as langid
 from .common import *
 from .baidu import BaiduTranslator
 from .deepseek import DeepseekTranslator
-# from .google import GoogleTranslator
+try:
+    from .google import GoogleTranslator
+except ImportError:
+    GoogleTranslator = None
 from .youdao import YoudaoTranslator
 from .deepl import DeeplTranslator
 from .papago import PapagoTranslator
@@ -54,7 +57,6 @@ GPT_TRANSLATORS = {
 
 
 TRANSLATORS = {
-    # 'google': GoogleTranslator,
     Translator.youdao: YoudaoTranslator,
     Translator.baidu: BaiduTranslator,
     Translator.deepl: DeeplTranslator,
@@ -66,6 +68,8 @@ TRANSLATORS = {
     **GPT_TRANSLATORS,
     **OFFLINE_TRANSLATORS,
 }
+if GoogleTranslator:
+    TRANSLATORS[Translator.google] = GoogleTranslator
 translator_cache = {}
 
 def get_translator(key: Translator, *args, **kwargs) -> CommonTranslator:

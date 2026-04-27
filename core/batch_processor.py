@@ -20,6 +20,7 @@ import tempfile
 import time
 from datetime import datetime
 from pathlib import Path
+from typing import Optional, Tuple
 
 from PIL import Image
 
@@ -31,6 +32,7 @@ from core.cbz_handler import extract_cbz, repack_cbz
 from core.inpainter import Inpainter
 from core.notifier import notify_batch_done, notify_finetune_done
 from core.translator import Translator
+from core.google_vision import GoogleVisionDetector, GOOGLE_TO_NLLB
 from memory.memory_manager import MemoryManager
 
 # ── Logging setup ──────────────────────────────────────────────────────────────
@@ -131,84 +133,118 @@ LANGDETECT_TO_NLLB = {
     "tl": "tgl_Latn",
 }
 
-def _auto_detect_language(images: list, logger: logging.Logger) -> str:
+def _auto_detect_language(images: list, logger: logging.Logger, cfg: dict = None) -> Tuple[Optional[str], float]:
     """
-    Samples up to the first 3 pages using EasyOCR to extract text,
-    then uses langdetect to identify the language with >= 90% confidence.
-
-    EasyOCR has strict compatibility rules — CJK languages can each only
-    be paired with English. So we cascade through language groups one at
-    a time, trying the most common manga/manhwa/manhua languages first.
-    Each reader is loaded, used, then unloaded before the next group.
+    Identifies the language of the comic.
+    Respects 'auto_detect_engine' from settings.
     """
-    try:
-        import easyocr
-        from langdetect import detect_langs
-    except ImportError:
-        logger.error("easyocr or langdetect not installed. Cannot auto-detect language.")
-        return None
-
-    easyocr_dir = os.path.join(_ROOT, "models", "easyocr")
-    os.makedirs(easyocr_dir, exist_ok=True)
-    _kwargs = dict(gpu=True, model_storage_directory=easyocr_dir, verbose=False)
-
-    # Language groups ordered by likelihood for manga/manhwa/manhua.
-    # EasyOCR rule: CJK languages can ONLY be loaded with English.
-    # Latin-script languages CAN be grouped together.
-    LANG_GROUPS = [
-        (['ja', 'en'],                          "Japanese + English"),
-        (['ko', 'en'],                          "Korean + English"),
-        (['ch_sim', 'en'],                      "Chinese (Simplified) + English"),
-        (['ch_tra', 'en'],                      "Chinese (Traditional) + English"),
-        (['en', 'fr', 'es', 'de', 'ru'],        "Latin + Cyrillic"),
-    ]
-
     sample_pages = images[:min(3, len(images))]
-    best_overall_lang = None
-    best_overall_prob = 0.0
+    engine = cfg.get("auto_detect_engine", "gemini") if cfg else "gemini"
 
-    for lang_list, group_name in LANG_GROUPS:
-        logger.info("  Auto-detect: trying %s ...", group_name)
-        try:
-            reader = easyocr.Reader(lang_list, **_kwargs)
-        except Exception as e:
-            logger.warning("  Skipping group %s: %s", group_name, e)
-            continue
-
-        # Run OCR on sample pages with this reader
-        group_text = ""
-        for img_path in sample_pages:
+    # ── Choice 1: Gemini Multimodal (Recommended) ───────────────────────────
+    if engine == "gemini":
+        google_key = cfg.get("google_api_key") if cfg else None
+        if google_key:
+            logger.info("  Auto-detect: using Google Gemini Multimodal API...")
             try:
-                results = reader.readtext(img_path, detail=0)
-                group_text += "\n" + "\n".join(results)
+                from core.google_translator import GoogleTranslator
+                detector = GoogleTranslator(api_key=google_key)
+                test_img = sample_pages[1] if len(sample_pages) > 1 else sample_pages[0]
+                detected = detector.detect_language_from_image(test_img)
+                if detected and detected != "unknown":
+                    logger.info("  Auto-detect: Gemini detected '%s'", detected)
+                    return detected, 1.0
+            except Exception as e:
+                logger.warning("  Gemini auto-detect failed: %s.", e)
+        else:
+            logger.warning("  Auto-detect: Gemini selected but no API key found.")
+
+    # ── Choice 2: Google Cloud Vision API ────────────────────────────────────
+    if engine == "google":
+        vision_key = os.path.join(_ROOT, "config", "google_vision_key.json")
+        if os.path.exists(vision_key):
+            logger.info("  Auto-detect: using Google Cloud Vision API...")
+            try:
+                detector = GoogleVisionDetector(vision_key)
+                test_img = sample_pages[1] if len(sample_pages) > 1 else sample_pages[0]
+                detected = detector.detect_language(test_img)
+                if detected:
+                    logger.info("  Auto-detect: Google Vision detected '%s'", detected)
+                    return detected, 1.0
+            except Exception as e:
+                logger.warning("  Google Vision auto-detect failed: %s.", e)
+        else:
+            logger.warning("  Auto-detect: Google Cloud Vision selected but no JSON key found in config/.")
+
+    # ── Choice 3: Fallback / Manual Selection: Local EasyOCR ─────────────────
+    if engine == "local" or True: # Fallback to local if others fail
+        if engine != "local":
+            logger.info("  Auto-detect: falling back to local OCR...")
+        
+        try:
+            import easyocr
+            from langdetect import detect_langs
+        except ImportError:
+            logger.error("easyocr or langdetect not installed. Cannot auto-detect language.")
+            return None, 0.0
+
+        easyocr_dir = os.path.join(_ROOT, "models", "easyocr")
+        os.makedirs(easyocr_dir, exist_ok=True)
+        _kwargs = dict(gpu=True, model_storage_directory=easyocr_dir, verbose=False)
+
+        # Language groups ordered by likelihood for manga/manhwa/manhua.
+        LANG_GROUPS = [
+            (['ja', 'en'],                          "Japanese + English"),
+            (['ko', 'en'],                          "Korean + English"),
+            (['ch_sim', 'en'],                      "Chinese (Simplified) + English"),
+            (['ch_tra', 'en'],                      "Chinese (Traditional) + English"),
+        ]
+
+        best_overall_lang = None
+        best_overall_prob = 0.0
+
+        for lang_list, group_name in LANG_GROUPS:
+            logger.info("  Auto-detect: trying %s ...", group_name)
+            try:
+                reader = easyocr.Reader(lang_list, **_kwargs)
+            except Exception as e:
+                logger.warning("  Skipping group %s: %s", group_name, e)
+                continue
+
+            # Run OCR on sample pages with this reader
+            group_text = ""
+            for img_path in sample_pages:
+                try:
+                    results = reader.readtext(img_path, detail=0)
+                    group_text += "\n" + "\n".join(results)
+                except Exception:
+                    pass
+
+            # Free this reader before potentially loading the next one
+            del reader
+            try:
+                import torch
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
             except Exception:
                 pass
 
-        # Free this reader before potentially loading the next one
-        del reader
-        try:
-            import torch
-            if torch.cuda.is_available():
-                torch.cuda.empty_cache()
-        except Exception:
-            pass
+            # Check this group's text independently
+            if len(group_text.strip()) > 15:
+                try:
+                    langs = detect_langs(group_text)
+                    best_lang = langs[0]
+                    logger.info("  Auto-detect result for %s: %s (%.1f%%)",
+                                group_name, best_lang.lang, best_lang.prob * 100)
+                    
+                    if best_lang.prob > best_overall_prob:
+                        best_overall_prob = best_lang.prob
+                        best_overall_lang = best_lang.lang
 
-        # Check this group's text independently (do NOT accumulate across groups)
-        if len(group_text.strip()) > 15:
-            try:
-                langs = detect_langs(group_text)
-                best_lang = langs[0]
-                logger.info("  Auto-detect result for %s: %s (%.1f%%)",
-                            group_name, best_lang.lang, best_lang.prob * 100)
-                
-                if best_lang.prob > best_overall_prob:
-                    best_overall_prob = best_lang.prob
-                    best_overall_lang = best_lang.lang
-
-                if best_overall_prob >= 0.90:
-                    break
-            except Exception:
-                pass
+                    if best_overall_prob >= 0.90:
+                        break
+                except Exception:
+                    pass
 
     if best_overall_prob >= 0.90:
         return best_overall_lang, best_overall_prob
@@ -288,7 +324,7 @@ def process_cbz(
         source_lang_override = cfg.get("source_lang_override")
         if not source_lang_override or source_lang_override == "auto":
             logger.info("Source language is set to Auto-Detect. Starting detection phase...")
-            detected_iso, prob = _auto_detect_language(images, logger)
+            detected_iso, prob = _auto_detect_language(images, logger, cfg)
             if not detected_iso or prob < 0.50:
                 return {
                     "success": False,
@@ -648,116 +684,140 @@ def _process_pages_standard(
 
     all_bubble_results = []
     seen_bubbles = []  # list of (global_y, source_text) for dedup
+    
+    # We'll store intermediate results per page to process in phases
+    # Phase Data: { page_num, img_path, regions, pil_image }
+    page_data_list = []
 
+    # ── Phase 1: OCR All Pages ───────────────────────────────────────────────
+    logger.info("━━━ Phase 1: Extracting text from all pages...")
     for page_idx, img_path in enumerate(images):
         page_num = page_idx + 1
-        logger.info("  Page %d/%d: %s", page_num, total_pages, Path(img_path).name)
-
+        logger.info("  OCR Page %d/%d: %s", page_num, total_pages, Path(img_path).name)
         try:
             image = Image.open(img_path).convert("RGB")
-            
-            # 1. Detect text regions + OCR
             _, regions = inpainter.detect_and_ocr(img_path)
-
-            if not regions and inpaint_engine != "panelcleaner":
-                out_page = os.path.join(output_tmp, Path(img_path).name)
-                import shutil as _sh
-                _sh.copy2(img_path, out_page)
-                logger.debug("    No text regions, copied as-is.")
-                if progress_callback:
-                    progress_callback(page_idx + 1, total_pages)
-                continue
-
-            # 2. Translate each bubble
+            
+            # Filter non-empty and non-duplicate regions immediately
+            valid_regions_for_page = []
             for b_idx, region in enumerate(regions):
-                if not region.source_text.strip():
+                if not region.source_text.strip(): continue
+                if chunk_meta and _is_duplicate_bubble(region.y, region.source_text, page_idx, chunk_meta, seen_bubbles):
                     continue
-
-                # ── Chunk deduplication ────────────────────────────────
-                if chunk_meta and _is_duplicate_bubble(
-                    region.y, region.source_text,
-                    page_idx, chunk_meta, seen_bubbles,
-                ):
-                    logger.debug("    DEDUP skip: %r (overlap duplicate)",
-                                 region.source_text[:40])
-                    continue
-
-                if cfg.get("translation_engine") == "manual":
-                    region.translated_text = ""
-                    result_confidence = 0.0
-                else:
-                    result = translator.translate_text(region.source_text)
-                    region.translated_text = result.translated_text
-                    result_confidence = result.confidence
-
+                
                 region.font_cfg = font_cfg
-
-                # Record for future dedup
+                valid_regions_for_page.append(region)
+                
                 if chunk_meta:
                     global_y = _bubble_to_global_y(region.y, page_idx, chunk_meta)
                     seen_bubbles.append((global_y, region.source_text))
 
-                crop_url = ""
-                try:
-                    crop = image.crop(region.bbox)
-                    crop_name = f"p{page_num:04d}_b{b_idx:04d}.jpg"
-                    crop.save(os.path.join(crops_dir, crop_name), format="JPEG", quality=85)
-                    crop_url = f"/session_crop/{cbz_name.replace('.cbz', '')}/{crop_name}"
-                except Exception as crop_exc:
-                    logger.debug("Crop save failed: %s", crop_exc)
+            page_data_list.append({
+                "page_num": page_num,
+                "img_path": img_path,
+                "regions": regions, # keep all for inpainting
+                "valid_regions": valid_regions_for_page,
+                "image": image
+            })
+        except Exception as e:
+            logger.error("  OCR Error on page %d: %s", page_num, e)
+            page_data_list.append({"page_num": page_num, "img_path": img_path, "regions": [], "valid_regions": [], "image": None})
 
-                if cfg.get("translation_engine") != "manual":
-                    all_bubble_results.append((result, region, page_num, crop_url))
-                else:
-                    from core.translator import BubbleResult
-                    # Create dummy result for manual
-                    dummy_result = BubbleResult(
-                        source_text=region.source_text,
-                        translated_text="",
-                        source_lang="",
-                        confidence=0.0,
-                        source="manual",
-                        approved=False,
-                        edited=False,
-                        memory_id=None
-                    )
-                    all_bubble_results.append((dummy_result, region, page_num, crop_url))
-                    
-                logger.debug("    Bubble: %r → %r",
-                             region.source_text[:30],
-                             region.translated_text[:30])
+        if progress_callback:
+            # First half of progress for OCR
+            progress_callback(page_idx + 1, total_pages * 2, text=f"Scanning Page {page_num}/{total_pages}")
 
-            # 3. Inpaint background
+    # ── Phase 2: Chapter-Wide Batch Translation ──────────────────────────────
+    logger.info("━━━ Phase 2: Translating entire chapter batch...")
+    all_texts_to_translate = []
+    region_map = [] # To map back results: (page_data_idx, region_idx)
+
+    for p_idx, p_data in enumerate(page_data_list):
+        for r_idx, region in enumerate(p_data["valid_regions"]):
+            all_texts_to_translate.append(region.source_text)
+            region_map.append((p_idx, r_idx))
+
+    if all_texts_to_translate:
+        if progress_callback:
+            progress_callback(total_pages, total_pages * 2, text=f"Translating {len(all_texts_to_translate)} bubbles...")
+
+        if cfg.get("translation_engine") == "manual":
+            logger.info("  Manual mode: skipping translation phase.")
+            for p_data in page_data_list:
+                for r in p_data["valid_regions"]: r.translated_text = ""
+        else:
+            # We translate in large chunks (e.g., 100 bubbles) to avoid hitting Gemini output limits
+            # but still provide massive context.
+            CHUNK_SIZE = 100
+            all_translated_results = []
+            
+            for i in range(0, len(all_texts_to_translate), CHUNK_SIZE):
+                chunk = all_texts_to_translate[i : i + CHUNK_SIZE]
+                logger.info("  Translating batch chunk %d-%d/%d...", i+1, min(i+CHUNK_SIZE, len(all_texts_to_translate)), len(all_texts_to_translate))
+                chunk_results = translator.translate_batch(chunk)
+                all_translated_results.extend(chunk_results)
+
+            # Apply results back to regions
+            for (p_idx, r_idx), result in zip(region_map, all_translated_results):
+                page_data_list[p_idx]["valid_regions"][r_idx].translated_text = result.translated_text
+                # We'll store the result object for later too
+                page_data_list[p_idx]["valid_regions"][r_idx]._result = result
+
+    # ── Phase 3: Inpaint & Render All Pages ──────────────────────────────────
+    logger.info("━━━ Phase 3: Inpainting and Rendering final pages...")
+    for page_idx, p_data in enumerate(page_data_list):
+        page_num = p_data["page_num"]
+        img_path = p_data["img_path"]
+        image = p_data["image"]
+        regions = p_data["regions"]
+        valid_regions = p_data["valid_regions"]
+
+        logger.info("  Render Page %d/%d", page_num, total_pages)
+        if not image: continue
+
+        try:
+            # Inpaint
             import numpy as np
             if inpaint_engine == "panelcleaner" and panelcleaner:
-                logger.debug("    Cleaning panel via PanelCleaner...")
                 np_img = np.array(image)
                 mask = panelcleaner.detect_text_mask(np_img)
                 inpainted_np = panelcleaner.inpaint_lama(np_img, mask)
                 inpainted = Image.fromarray(inpainted_np)
             elif inpaint_engine in ("lama", "aot", "solid") and regions:
-                logger.debug("    Inpainting via %s...", inpaint_engine.upper())
                 inpainted = inpainter.inpaint(image, regions)
             else:
-                logger.debug("    Skipping inpainting (engine: %s / no regions).", inpaint_engine)
                 inpainted = image.copy()
 
             bg_cache_path = os.path.join(bg_cache_dir, f"page_{page_num:04d}.png")
             inpainted.save(bg_cache_path, format="PNG")
 
-            # 4. Render text
+            # Render
             out_page = os.path.join(output_tmp, Path(img_path).stem + ".png")
             final = inpainter.render_text(inpainted, regions)
             final.save(out_page, format="PNG", optimize=False)
 
+            # Record results for review UI
+            for b_idx, region in enumerate(valid_regions):
+                crop_url = _save_crop(image, region, page_num, b_idx, crops_dir, cbz_name)
+                
+                if cfg.get("translation_engine") == "manual":
+                    from core.translator import BubbleResult
+                    res = BubbleResult(region.source_text, "", "", 0.0, "manual", False, False, None)
+                else:
+                    res = getattr(region, "_result", None)
+                
+                if res:
+                    all_bubble_results.append((res, region, page_num, crop_url))
+
         except Exception as exc:
+            logger.error("  Render Error on page %d: %s", page_num, exc)
             import shutil as _sh
-            logger.error("    Page %d error: %s", page_num, exc, exc_info=True)
             out_page = os.path.join(output_tmp, Path(img_path).name)
             _sh.copy2(img_path, out_page)
 
         if progress_callback:
-            progress_callback(page_idx + 1, total_pages)
+            # Second half of progress for Rendering
+            progress_callback(total_pages + page_idx + 1, total_pages * 2, text=f"Rendering Page {page_num}/{total_pages}")
 
     inpainter.unload_models()
     translator.unload_model()
@@ -1065,6 +1125,17 @@ def run_batch(input_dir: str, output_dir: str, series: str, cfg: dict,
 
 
 # ── CLI entry point ────────────────────────────────────────────────────────────
+
+def _save_crop(image, region, page_num, b_idx, crops_dir, cbz_name) -> str:
+    """Helper to save a speech bubble crop for the review UI."""
+    try:
+        crop = image.crop(region.bbox)
+        crop_name = f"p{page_num:04d}_b{b_idx:04d}.jpg"
+        crop.save(os.path.join(crops_dir, crop_name), format="JPEG", quality=85)
+        return f"/session_crop/{cbz_name.replace('.cbz', '')}/{crop_name}"
+    except Exception as e:
+        logging.getLogger("batch_processor").debug("Crop save failed: %s", e)
+        return ""
 
 def main():
     parser = argparse.ArgumentParser(

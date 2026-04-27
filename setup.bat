@@ -11,6 +11,7 @@ cd /d "%~dp0"
 echo.
 echo  ╔══════════════════════════════════════════════════╗
 echo  ║      CBZ Translator — Automated Setup           ║
+echo  ║   (Chapter-Wide Context & Gemini Support)      ║
 echo  ╚══════════════════════════════════════════════════╝
 echo.
 echo [SETUP] Working directory: %CD%

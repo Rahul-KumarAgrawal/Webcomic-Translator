@@ -15,7 +15,8 @@ Runs on **Windows** with an **NVIDIA RTX 3050 (4 GB VRAM)**.
 | **Detection** | YOLO (Pipeline Koharu), ComicTextSegmenter, MIT |
 | **Inpainting** | LaMa, PanelCleaner (Modular Background Cleaning) |
 | **Webtoon Support** | Advanced vertical stitching and coordinate-aware overlap chunking |
-| **Translation** | Offline (NLLB-200 600M) + APIs (DeepL, Google Gemini, OpenAI, Groq, Sarvam, Baidu) |
+| **Translation** | Offline (NLLB-200 600M) + APIs (DeepL, Google Gemini, OpenAI, Groq, Baidu) |
+| **Chapter Batching** | 3-Phase Pipeline: OCR → Batch Translation → Chapter Rendering |
 | **Memory** | Per-series + global SQLite/JSON translation memory |
 | **Learning** | LoRA fine-tuning on user-approved pairs (PEFT) |
 | **Review UI** | Local Flask web app at `localhost:5000` |
@@ -69,38 +70,9 @@ cbz-translator/
 ├── logs/                     # Per-session log files
 ├── fonts/                    # User-uploaded .ttf fonts
 ├── backups/                  # Auto-backups (never auto-deleted)
-│
-├── core/
-│   ├── cbz_handler.py        # Extract / repack CBZ
-│   ├── language_detector.py  # Detect ZH / JA / KO
-│   ├── batch_processor.py    # CLI batch queue
-│   ├── translator.py         # Memory → model pipeline
-│   ├── inpainter.py          # MIT adapter + text renderer
-│   └── notifier.py           # Windows toast notifications
-│
-├── memory/
-│   ├── memory_manager.py     # SQLite + JSON CRUD
-│   ├── override_checker.py   # Lookup chain
-│   ├── global/               # Global shared memory
-│   └── series/<name>/        # Per-series memory
-│
-├── model/
-│   ├── base/                 # NLLB-200 600M weights
-│   ├── finetuned/            # LoRA checkpoints + latest/
-│   ├── model_loader.py       # Load base or fine-tuned model
-│   ├── trainer.py            # LoRA fine-tuning
-│   └── training_data/        # approved_pairs.jsonl (append-only)
-│
-├── web/
-│   ├── app.py                # Flask app
-│   ├── templates/            # 6 HTML pages
-│   └── static/               # style.css + main.js
-│
+├── model/                    # AI models (NLLB, YOLO, OCR)
 ├── config/settings.yaml      # All user configuration
-├── setup.bat
-├── run_web.bat
-└── run_batch.bat
-```
+└── ...
 
 ---
 
@@ -175,11 +147,12 @@ series_fonts:
 
 ## Supported Languages
 
-| Language | NLLB code |
-|---|---|
-| Chinese (Simplified) | `zho_Hans` |
-| Japanese | `jpn_Jpan` |
-| Korean | `kor_Hang` |
+| Language | NLLB code | ISO (Gemini) |
+|---|---|---|
+| Chinese (Simplified) | `zho_Hans` | `zh-CN` |
+| Japanese | `jpn_Jpan` | `ja` |
+| Korean | `kor_Hang` | `ko` |
+| English | `eng_Latn` | `en` |
 
 ---
 

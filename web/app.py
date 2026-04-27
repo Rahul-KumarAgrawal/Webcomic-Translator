@@ -238,6 +238,7 @@ class TranslationQueue:
                 "status":      "queued",
                 "progress":    0,
                 "total":       0,
+                "progress_text": "",
                 "error":       None,
             })
         self._broadcast({"type": "queued", "id": job_id, "cbz_name": cbz_name})
@@ -388,12 +389,16 @@ def _run_job(job: dict):
 
     class JobCancelledError(Exception): pass
 
-    def progress(current, total):
+    def progress(current, total, text=None):
         # Check if job was cancelled
         for j in _tq.jobs():
             if j["id"] == job["id"] and j["status"] == "cancelled":
                 raise JobCancelledError("Cancelled by user")
-        _tq.update(job["id"], progress=current, total=total)
+        
+        upd = {"progress": current, "total": total}
+        if text:
+            upd["progress_text"] = text
+        _tq.update(job["id"], **upd)
 
     result = process_cbz(
         cbz_path   = cbz_path,
@@ -1134,6 +1139,7 @@ def settings_save():
     cfg["target_lang"]   = request.form.get("target_lang", "eng_Latn").strip()
     cfg["detection_engine"] = request.form.get("detection_engine", "mit").strip()
     cfg["inpaint_engine"] = request.form.get("inpaint_engine", "lama").strip()
+    cfg["auto_detect_engine"] = request.form.get("auto_detect_engine", "gemini").strip()
     
     try:
         cfg["webtoon_strip_height"] = int(request.form.get("webtoon_strip_height", 0))
@@ -1152,6 +1158,10 @@ def settings_save():
     google_key = request.form.get("google_api_key", "").strip()
     if google_key:
         cfg["google_api_key"] = google_key
+    
+    # Save custom Gemini prompt
+    cfg["google_system_prompt"] = request.form.get("google_system_prompt", "").strip()
+    
     baidu_app_id = request.form.get("baidu_app_id", "").strip()
     if baidu_app_id:
         cfg["baidu_app_id"] = baidu_app_id

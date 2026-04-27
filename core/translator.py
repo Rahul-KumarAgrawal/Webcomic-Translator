@@ -107,7 +107,7 @@ class Translator:
         source_lang = self._source_lang_override or detect_language(source_text)
 
         # Step 1 & 2: Memory lookup (series → global) — skip for cloud API engines
-        _cloud_engines = {"deepl", "google", "baidu", "sarvam", "papago", "ollama"}
+        _cloud_engines = {"deepl", "google", "gemini", "baidu", "sarvam", "papago", "ollama"}
         if self._engine not in _cloud_engines:
             memory_result = self._checker.lookup(source_text, self.series)
             if memory_result:
@@ -133,7 +133,7 @@ class Translator:
             self._ensure_deepl_loaded()
             translated, confidence = self._deepl.translate(source_text, source_lang)
             engine_source = "deepl"
-        elif self._engine == "google":
+        elif self._engine in ("google", "gemini"):
             self._ensure_google_loaded()
             translated, confidence = self._google.translate(source_text, source_lang)
             engine_source = "google"
@@ -179,6 +179,46 @@ class Translator:
             memory_id=mem_id,
         )
 
+    def translate_batch(self, texts: List[str]) -> List[BubbleResult]:
+        """
+        Translate a list of strings in a single batch (optimised for Gemini/Cloud).
+        """
+        if not texts:
+            return []
+
+        source_lang = self._source_lang_override or detect_language("\n".join(texts[:5])) # detect from first few
+
+        # Step 1: Check if engine supports native batching (Gemini)
+        if self._engine in ("google", "gemini"):
+            self._ensure_google_loaded()
+            raw_results = self._google.translate_batch(texts, source_lang)
+            
+            results = []
+            for i, (translated, confidence) in enumerate(raw_results):
+                # Save to memory (unapproved)
+                mem_id = self._checker.memory_manager.save(
+                    source_lang=source_lang,
+                    source_text=texts[i],
+                    translated_text=translated,
+                    approved=False,
+                    edited=False,
+                    confidence_score=confidence,
+                    series=self.series,
+                )
+                results.append(BubbleResult(
+                    source_text=texts[i],
+                    translated_text=translated,
+                    source_lang=source_lang,
+                    confidence=confidence,
+                    source="google",
+                    approved=False,
+                    memory_id=mem_id,
+                ))
+            return results
+
+        # Fallback: one-by-one for other engines
+        return [self.translate_text(t) for t in texts]
+
     def unload_model(self):
         """Free GPU memory when done with a batch."""
         if self._model is not None:
@@ -214,6 +254,7 @@ class Translator:
                 api_key=api_key,
                 target_lang=self._target_lang,
                 source_lang_override=self._source_lang_override,
+                system_prompt=self.cfg.get("google_system_prompt"),
             )
             logger.info("Google/Gemini translator loaded.")
 

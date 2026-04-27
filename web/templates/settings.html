@@ -62,6 +62,17 @@
                               {% endfor %}
                             </select>
                         </div>
+                        <div class="form-group">
+                            <label for="auto_detect_engine">Auto-Detect Engine</label>
+                            <select id="auto_detect_engine" name="auto_detect_engine">
+                                <option value="gemini" {% if cfg.get('auto_detect_engine', 'gemini')=='gemini' %}selected{% endif %}>
+                                    🤖 Gemini Multimodal (Recommended)</option>
+                                <option value="google" {% if cfg.get('auto_detect_engine')=='google' %}selected{% endif %}>
+                                    🌐 Google Cloud Vision</option>
+                                <option value="local" {% if cfg.get('auto_detect_engine')=='local' %}selected{% endif %}>
+                                    🏠 Local (EasyOCR + langdetect)</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
@@ -75,7 +86,6 @@
                             <label for="inpaint_engine">Inpainting Engine</label>
                             <select id="inpaint_engine" name="inpaint_engine">
                                 <option value="lama" {% if cfg.get('inpaint_engine', 'lama')=='lama' %}selected{% endif %}>LaMa (MIT Default)</option>
-                                <option value="aot" {% if cfg.get('inpaint_engine')=='aot' %}selected{% endif %}>🎨 AOT-GAN (Koharu, High Detail)</option>
                                 <option value="panelcleaner" {% if cfg.get('inpaint_engine')=='panelcleaner' %}selected{% endif %}>🧹 PanelCleaner (High Quality)</option>
                                 <option value="solid" {% if cfg.get('inpaint_engine')=='solid' %}selected{% endif %}>⚪ Solid Fill (Clear White Bubbles)</option>
                                 <option value="none" {% if cfg.get('inpaint_engine')=='none' %}selected{% endif %}>❌ None (Keep Original)</option>
@@ -223,6 +233,17 @@
                                 Get a free key at
                                 <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--accent)">aistudio.google.com</a>.
                                 Free tier: 1,500 requests/day — no billing required.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="google_system_prompt">📝 Gemini System Prompt (Directives)</label>
+                            <textarea id="google_system_prompt" name="google_system_prompt" rows="8" 
+                                placeholder="Expert translation directives..."
+                                style="font-family: var(--font-sans); font-size: 0.85rem; line-height: 1.5; background: var(--bg-elevated);">{{ cfg.get('google_system_prompt', '') }}</textarea>
+                            <small class="text-muted" style="margin-top:4px;display:block">
+                                Customize the instructions sent to Gemini for translation. Leave empty to use the expert default.
                             </small>
                         </div>
                     </div>
