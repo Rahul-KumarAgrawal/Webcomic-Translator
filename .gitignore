@@ -47,3 +47,5 @@ venv/
 .python_path.txt
 config.json  
 config/google_vision_key.json
+config/settings.yaml
+result/

@@ -79,14 +79,31 @@ class Inpainter:
         logger.info("[Modular] Using detection=%s, ocr=%s", det_engine, ocr_engine)
 
         # ── 1. Detection ──────────────────────────────────────────────────
-        if str(det_engine).lower() == "yolo":
+        if str(det_engine).lower() in ("yolo", "yolo_hybrid"):
             regions = self._run_yolo_detect(image_path)
         else:
             regions = self._run_mit_detect(image_path, image)
 
         # ── 1b. Split oversized regions (MIT only — YOLO is left untouched)
-        if str(det_engine).lower() != "yolo":
+        if str(det_engine).lower() not in ("yolo", "yolo_hybrid"):
             regions = self._split_tall_regions(image, regions)
+
+        # ── 1c. OCR Gap-Filling (Safety Net) ──────────────────────────
+        # Enable if explicitly requested via engine or if global setting is ON
+        is_hybrid = str(det_engine).lower() == "yolo_hybrid"
+        if is_hybrid or self.cfg.get("enable_gap_filling", False):
+            try:
+                from core.paddleocr_wrapper import run_paddle_gap_filling
+                new_data = run_paddle_gap_filling(image, regions, self.cfg)
+                if new_data:
+                    logger.info("[Modular] Gap-Filling found %d missed text areas.", len(new_data))
+                    for d in new_data:
+                        regions.append(BubbleRegion(
+                            x=d["x"], y=d["y"], w=d["w"], h=d["h"],
+                            source_text=d["text"]
+                        ))
+            except Exception as e:
+                logger.warning(f"[Modular] Gap-Filling failed: {e}")
 
         # ── 2. OCR ────────────────────────────────────────────────────────
         if str(ocr_engine).lower() == "paddle":
@@ -113,8 +130,9 @@ class Inpainter:
             self._yolo_model = YOLO(str(model_path))
             logger.info("[Modular] YOLO text detector loaded.")
 
-        # Run detection with a slightly lower confidence to catch more text
-        results = self._yolo_model(image_path, verbose=False, conf=0.20, iou=0.45)
+        # Run detection with configurable confidence
+        conf = float(self.cfg.get("detection_confidence", 0.20))
+        results = self._yolo_model(image_path, verbose=False, conf=conf, iou=0.45)
         regions = []
         for r in results:
             for box in r.boxes:

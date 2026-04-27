@@ -620,3 +620,13 @@ input[type="password"]:focus {
   border-color: var(--accent);
   box-shadow:   0 0 0 3px var(--accent-glow);
 }
+/* ── Settings Grid ───────────────────────────────────────── */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+.card-grid .card {
+  margin-bottom: 0 !important;
+}

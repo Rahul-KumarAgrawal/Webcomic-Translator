@@ -1150,6 +1150,11 @@ def settings_save():
     cfg["default_font"]["family"] = request.form.get("font_family", "").strip() or None
     cfg["default_font"]["color"]  = request.form.get("font_color", "auto").strip()
     cfg["default_font"]["size"]   = request.form.get("font_size", "auto").strip() or "auto"
+
+    # Advanced Detection
+    cfg["detection_confidence"] = float(request.form.get("detection_confidence", 0.20))
+    cfg["sfx_strictness"] = float(request.form.get("sfx_strictness", 0.55))
+    cfg["enable_gap_filling"] = request.form.get("enable_gap_filling") == "on"
     # Translation engine
     cfg["translation_engine"] = request.form.get("translation_engine", "nllb").strip() or "nllb"
     deepl_key = request.form.get("deepl_api_key", "").strip()

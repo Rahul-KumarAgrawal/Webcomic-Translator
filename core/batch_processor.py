@@ -724,8 +724,8 @@ def _process_pages_standard(
             page_data_list.append({"page_num": page_num, "img_path": img_path, "regions": [], "valid_regions": [], "image": None})
 
         if progress_callback:
-            # First half of progress for OCR
-            progress_callback(page_idx + 1, total_pages * 2, text=f"Scanning Page {page_num}/{total_pages}")
+            # Scale 0-100% for Phase 1
+            progress_callback(page_idx + 1, total_pages, text=f"Scanning Page {page_num}/{total_pages}")
 
     # ── Phase 2: Chapter-Wide Batch Translation ──────────────────────────────
     logger.info("━━━ Phase 2: Translating entire chapter batch...")
@@ -739,7 +739,7 @@ def _process_pages_standard(
 
     if all_texts_to_translate:
         if progress_callback:
-            progress_callback(total_pages, total_pages * 2, text=f"Translating {len(all_texts_to_translate)} bubbles...")
+            progress_callback(1, 1, text=f"Translating {len(all_texts_to_translate)} bubbles...")
 
         if cfg.get("translation_engine") == "manual":
             logger.info("  Manual mode: skipping translation phase.")
@@ -816,8 +816,8 @@ def _process_pages_standard(
             _sh.copy2(img_path, out_page)
 
         if progress_callback:
-            # Second half of progress for Rendering
-            progress_callback(total_pages + page_idx + 1, total_pages * 2, text=f"Rendering Page {page_num}/{total_pages}")
+            # Scale 0-100% for Phase 3
+            progress_callback(page_idx + 1, total_pages, text=f"Rendering Page {page_num}/{total_pages}")
 
     inpainter.unload_models()
     translator.unload_model()
@@ -880,7 +880,7 @@ def _process_pages_koharu(
                     result = translator.translate_text(mb.source_text)
                     mb.translated_text = result.translated_text
                 else:
-                    mb.translated_text = mb.source_text
+                    mb.translated_text = ""
                     result = BubbleResult(
                         source_text=mb.source_text,
                         translated_text="",

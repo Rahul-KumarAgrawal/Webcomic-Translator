@@ -70,7 +70,10 @@ def get_paddle_ocr(lang="japan"):
             lang=lang, 
             show_log=False, 
             use_gpu=True, 
-            gpu_mem=500
+            gpu_mem=500,
+            det_db_thresh=0.15,      # More sensitive to faint/jagged text
+            det_db_box_thresh=0.3,    # Lower threshold for box creation
+            det_db_unclip_ratio=2.0   # Slightly larger boxes to catch outlines
         )
         _paddle_last_lang = lang
         
@@ -150,3 +153,109 @@ def run_paddle_ocr_on_regions(image: Image.Image, regions: list, cfg: dict) -> l
                 region.source_text = new_text
                 
     return regions
+
+def run_paddle_gap_filling(image: Image.Image, existing_regions: list, cfg: dict) -> list:
+    """
+    Scans the entire image for text. 
+    If text is found that is NOT already inside an existing region (YOLO bubble), 
+    returns a list of new suggested regions (x, y, w, h, text).
+    """
+    source_lang_hint = cfg.get("source_lang_override") or "japan"
+    paddle_lang = map_lang_to_paddle(source_lang_hint)
+    
+    ocr = get_paddle_ocr(paddle_lang)
+    img_np = np.array(image.convert("RGB"))
+    img_np = img_np[:, :, ::-1] # BGR
+    
+    # Run global OCR
+    result = ocr.ocr(img_np, cls=True)
+    if not result or not result[0]:
+        return []
+        
+    new_regions = []
+    
+    # Pre-calculate existing bounding boxes
+    existing_bboxes = [r.bbox for r in existing_regions]
+    
+    for line in result[0]:
+        if len(line) < 2: continue
+        box = line[0]
+        text = line[1][0]
+        score = line[1][1]
+        
+        xs = [pt[0] for pt in box]
+        ys = [pt[1] for pt in box]
+        x1, y1 = int(min(xs)), int(min(ys))
+        x2, y2 = int(max(xs)), int(max(ys))
+        w, h = x2 - x1, y2 - y1
+
+        # ── Adaptive Threshold Logic ──────────────────────────────────────
+        # Check background complexity to distinguish bubbles from SFX
+        try:
+            # Crop the area and check variance
+            crop = image.crop((x1, y1, x2, y2)).convert("L")
+            stat = np.array(crop)
+            variance = np.std(stat)
+            
+            # Simple/Bubble/Transparent backgrounds have lower variance
+            # Busy Art/SFX backgrounds have high variance
+            if variance < 40:
+                min_score = 0.15  # Very sensitive for bubbles/transparent areas
+            else:
+                # Use user-defined strictness for busy backgrounds
+                min_score = cfg.get("sfx_strictness", 0.55)
+        except:
+            min_score = 0.3
+            
+        if score < min_score: continue 
+        
+        # Check if this box is already inside an existing region
+        is_inside = False
+        box_center_x = (x1 + x2) / 2
+        box_center_y = (y1 + y2) / 2
+        
+        for ex1, ey1, ex2, ey2 in existing_bboxes:
+            if (ex1 - 10 <= box_center_x <= ex2 + 10) and (ey1 - 10 <= box_center_y <= ey2 + 10):
+                is_inside = True
+                break
+        
+        if not is_inside:
+            pad = 4
+            new_regions.append({
+                "x": max(0, x1 - pad),
+                "y": max(0, y1 - pad),
+                "w": w + pad * 2,
+                "h": h + pad * 2,
+                "text": text
+            })
+
+    # ── Merge nearby new regions into "Virtual Bubbles" ─────────────────────
+    if not new_regions:
+        return []
+
+    # Simple vertical/horizontal proximity merge
+    merged_new = []
+    new_regions.sort(key=lambda r: (r["y"], r["x"]))
+    
+    curr = new_regions[0]
+    for nxt in new_regions[1:]:
+        # If very close (overlapping or within 20px), merge them
+        dist_y = nxt["y"] - (curr["y"] + curr["h"])
+        overlap_x = min(curr["x"] + curr["w"], nxt["x"] + nxt["w"]) - max(curr["x"], nxt["x"])
+        
+        if dist_y < 25 and overlap_x > 0:
+            # Merge
+            x1 = min(curr["x"], nxt["x"])
+            y1 = min(curr["y"], nxt["y"])
+            x2 = max(curr["x"] + curr["w"], nxt["x"] + nxt["w"])
+            y2 = max(curr["y"] + curr["h"], nxt["y"] + nxt["h"])
+            curr = {
+                "x": x1, "y": y1, "w": x2-x1, "h": y2-y1,
+                "text": (curr["text"] + " " + nxt["text"]).strip()
+            }
+        else:
+            merged_new.append(curr)
+            curr = nxt
+    merged_new.append(curr)
+
+    return merged_new

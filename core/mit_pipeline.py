@@ -155,11 +155,14 @@ class MITPipeline:
             cfg.inpainter.inpainter = MITInpainter.default
 
         # Translator
-        trans_key = self._mit_cfg.get("translator", "sugoi")
-        try:
-            cfg.translator.translator = MITTranslator(trans_key)
-        except (ValueError, KeyError):
-            cfg.translator.translator = MITTranslator.sugoi
+        if self.cfg.get("translation_engine") == "manual":
+            cfg.translator.translator = MITTranslator.none
+        else:
+            trans_key = self._mit_cfg.get("translator", "sugoi")
+            try:
+                cfg.translator.translator = MITTranslator(trans_key)
+            except (ValueError, KeyError):
+                cfg.translator.translator = MITTranslator.sugoi
 
         # Target language (MIT uses uppercase codes like ENG, JPN, CHS, KOR)
         cfg.translator.target_lang = self._mit_cfg.get("target_lang", "ENG")
@@ -279,6 +282,8 @@ class MITPipeline:
 
             source = getattr(tr, "text", "") or ""
             translated = getattr(tr, "translation", "") or ""
+            if self.cfg.get("translation_engine") == "manual":
+                translated = ""
 
             bubbles.append(MITBubbleResult(
                 source_text=source,

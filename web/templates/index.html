@@ -47,7 +47,8 @@
             <label for="detection-engine-select">Detection Engine</label>
             <select id="detection-engine-select">
               <option value="mit" {% if cfg.get('detection_engine','mit')=='mit' %}selected{% endif %}>MIT Default</option>
-              <option value="yolo" {% if cfg.get('detection_engine')=='yolo' %}selected{% endif %}>🌸 YOLO (Koharu)</option>
+              <option value="yolo" {% if cfg.get('detection_engine')=='yolo' %}selected{% endif %}>🚀 YOLO Only (Fastest)</option>
+              <option value="yolo_hybrid" {% if cfg.get('detection_engine')=='yolo_hybrid' %}selected{% endif %}>🌸 YOLO + Gap-Filling (Expert)</option>
             </select>
           </div>
           <div class="form-group">
