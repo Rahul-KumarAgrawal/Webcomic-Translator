@@ -111,8 +111,14 @@ app = Flask(
 app.secret_key = "cbz-translator-secret-key-change-me"
 CORS(app)
 
-logging.basicConfig(level=logging.INFO)
+from manga_translator.utils.log import init_logging
+init_logging()
 logger = logging.getLogger("web.app")
+# Ensure stdout logging for the main app logger
+if not any(isinstance(h, logging.StreamHandler) for h in logger.handlers):
+    sh = logging.StreamHandler(sys.stdout)
+    sh.setFormatter(logging.Formatter("[%(name)s] %(message)s"))
+    logger.addHandler(sh)
 
 SUPPORTED_LANGUAGES = {
     "": "Auto-detect",
@@ -972,7 +978,7 @@ def rerender_cbz(cbz_name: str):
             # Instantly update UI so the user sees a progress bar during extraction
             cm = session.get("chunk_meta")
             estimated_total = cm.get("num_chunks", 0) if cm else 0
-            _tq.update(jid, status="processing", progress=0, total=estimated_total)
+            _tq.update(jid, status="processing", progress=0, total=estimated_total, progress_text="Extracting images...")
 
             cfg = _load_cfg()
             inpainter = Inpainter(cfg=cfg)
@@ -996,9 +1002,10 @@ def rerender_cbz(cbz_name: str):
                 chunk_overlap = int(chunk_meta.get("chunk_overlap", 0))
                 logger.info("Re-render: Reloaded chunk config from session (h=%d, overlap=%d)", chunk_height, chunk_overlap)
             else:
-                webtoon_strip_height = int(cfg.get("webtoon_strip_height", 0))
-                chunk_height = int(cfg.get("chunk_height", 0))
-                chunk_overlap = int(cfg.get("chunk_overlap", 0))
+                # If no chunk_meta, we default to NO chunking (standard manga/comic behavior)
+                webtoon_strip_height = 0
+                chunk_height = 0
+                chunk_overlap = 0
             
             tmp_dir, images = extract_cbz(
                 cbz_path,
@@ -1008,7 +1015,7 @@ def rerender_cbz(cbz_name: str):
             )
             output_tmp = tempfile.mkdtemp(prefix="cbz_rerender_")
             
-            _tq.update(jid, status="processing", progress=0, total=len(images))
+            _tq.update(jid, status="processing", progress=0, total=len(images), progress_text="Rendering pages...")
 
             # Group bubbles by page_num
             bubbles_by_page = {}
@@ -1094,13 +1101,16 @@ def rerender_cbz(cbz_name: str):
             if chunk_meta_path and os.path.exists(chunk_meta_path):
                 with open(chunk_meta_path, "r", encoding="utf-8") as _f:
                     chunk_meta = json.load(_f)
+
                 from core.batch_processor import _reassemble_chunks
                 logger.info("Re-render: Trimming overlaps for %d chunks...", chunk_meta.get("num_chunks", 0))
+                _tq.update(jid, progress_text="Trimming overlaps...")
                 _reassemble_chunks(output_tmp, chunk_meta, logger, all_regions)
 
             # Remove old output if exists
             if os.path.exists(output_cbz):
                 os.remove(output_cbz)
+            _tq.update(jid, progress_text="Repacking CBZ...")
             repack_cbz(output_tmp, output_cbz)
 
             # Cleanup
@@ -1155,6 +1165,13 @@ def settings_save():
     cfg["detection_confidence"] = float(request.form.get("detection_confidence", 0.20))
     cfg["sfx_strictness"] = float(request.form.get("sfx_strictness", 0.55))
     cfg["enable_gap_filling"] = request.form.get("enable_gap_filling") == "on"
+    
+    # Manhwa Chunking Defaults
+    try:
+        cfg["chunk_height"] = int(request.form.get("chunk_height", 2500))
+        cfg["chunk_overlap"] = int(request.form.get("chunk_overlap", 250))
+    except ValueError:
+        pass
     # Translation engine
     cfg["translation_engine"] = request.form.get("translation_engine", "nllb").strip() or "nllb"
     deepl_key = request.form.get("deepl_api_key", "").strip()

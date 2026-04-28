@@ -140,7 +140,7 @@
                                        oninput="document.getElementById('detection_confidence').value = this.value" style="flex:1;">
                                 <input type="number" id="detection_confidence" name="detection_confidence" 
                                        value="{{ cfg.get('detection_confidence', 0.20) }}" step="0.05" min="0.05" max="0.9" 
-                                       oninput="document.getElementById('detection_confidence_slider').value = this.value" style="width:55px;">
+                                       oninput="document.getElementById('detection_confidence_slider').value = this.value" style="width:80px;">
                             </div>
                         </div>
 
@@ -152,7 +152,7 @@
                                        oninput="document.getElementById('sfx_strictness').value = this.value" style="flex:1;">
                                 <input type="number" id="sfx_strictness" name="sfx_strictness" 
                                        value="{{ cfg.get('sfx_strictness', 0.55) }}" step="0.05" min="0.1" max="0.95" 
-                                       oninput="document.getElementById('sfx_strictness_slider').value = this.value" style="width:55px;">
+                                       oninput="document.getElementById('sfx_strictness_slider').value = this.value" style="width:80px;">
                             </div>
                         </div>
 
@@ -168,6 +168,25 @@
                         
                         <div class="mt-16">
                             <small class="text-muted"><strong>Tip:</strong> Keep <i>Strictness</i> high to ignore SFX, and <i>Confidence</i> low for faint bubbles.</small>
+                        </div>
+                    </div>
+
+                    <!-- Manhwa Chunking Defaults -->
+                    <div class="card">
+                        <div class="card-title">📐 Manhwa Chunking Defaults</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="chunk_height">Default Chunk Height (px)</label>
+                                <input type="number" id="chunk_height" name="chunk_height" 
+                                       value="{{ cfg.get('chunk_height', 2500) }}" step="100" min="0">
+                                <small class="text-muted d-block mt-4">Recommended: 2000-3000px.</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="chunk_overlap">Default Overlap (px)</label>
+                                <input type="number" id="chunk_overlap" name="chunk_overlap" 
+                                       value="{{ cfg.get('chunk_overlap', 250) }}" step="50" min="0">
+                                <small class="text-muted d-block mt-4">Ensures bubbles at boundaries aren't cut.</small>
+                            </div>
                         </div>
                     </div>
 
