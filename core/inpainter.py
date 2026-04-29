@@ -39,6 +39,7 @@ class BubbleRegion:
     translated_text: str = ""     # filled in by translator
     confidence: float = 1.0       # OCR confidence (0.0 - 1.0)
     font_cfg: dict = field(default_factory=dict)
+    bubble_id: int = -1           # -1 if outside any bubble (narration), otherwise ID of the bubble mask
 
     @property
     def bbox(self) -> Tuple[int, int, int, int]:
@@ -197,13 +198,34 @@ class Inpainter:
         results = self._yolo_model(image, verbose=False, conf=conf, iou=0.45)
         regions = []
         for r in results:
-            for box in r.boxes:
+            if not r.boxes:
+                continue
+            
+            import cv2
+            import numpy as np
+            masks = r.masks.xy if r.masks is not None else []
+            
+            for i, box in enumerate(r.boxes):
                 coords = box.xyxy[0].cpu().numpy().astype(int)
                 x1, y1, x2, y2 = int(coords[0]), int(coords[1]), int(coords[2]), int(coords[3])
                 
+                cx = (x1 + x2) / 2.0
+                cy = (y1 + y2) / 2.0
+                
+                bubble_id = -1
+                if masks:
+                    for j, mask_pts in enumerate(masks):
+                        if len(mask_pts) > 2:
+                            mask_cnt = mask_pts.astype(np.float32)
+                            dist = cv2.pointPolygonTest(mask_cnt, (cx, cy), measureDist=False)
+                            if dist >= 0:
+                                bubble_id = j
+                                break
+                
                 regions.append(BubbleRegion(
                     x=x1, y=y1, w=x2 - x1, h=y2 - y1,
-                    source_text=""
+                    source_text="",
+                    bubble_id=bubble_id
                 ))
         return regions
 
@@ -357,13 +379,21 @@ class Inpainter:
             )
 
             # Auto-detect text color based on bubble background brightness
+            bg_color = self._detect_bubble_bg_color(result, region)
+            
             if color == "auto":
-                bg_color = self._detect_bubble_bg_color(result, region)
                 is_dark = self._is_dark_background(bg_color)
                 color = "#FFFFFF" if is_dark else "#000000"
+                
+            # If in a bubble, outline matches the bubble's background. Otherwise contrasting.
+            if region.bubble_id != -1:
+                bg_hex = f"#{bg_color[0]:02X}{bg_color[1]:02X}{bg_color[2]:02X}"
+                outline_color = bg_hex
+            else:
+                outline_color = "#000000" if color.upper() in ("#FFFFFF", "#FFF", "WHITE") else "#FFFFFF"
 
             font = self._load_font(font_path, font_size)
-            self._draw_text_in_bubble(draw, region, region.translated_text, font, color)
+            self._draw_text_in_bubble(draw, region, region.translated_text, font, color, outline_color)
 
         return result
 
@@ -461,6 +491,7 @@ class Inpainter:
                     w=region.w,
                     h=sub_h,
                     source_text="",  # OCR will fill this in later
+                    bubble_id=region.bubble_id
                 ))
 
         return result
@@ -517,19 +548,21 @@ class Inpainter:
             # Determine if we should merge
             should_merge = False
             
-            if is_vertical:
-                # For CJK vertical text: ONLY merge side-by-side columns (horizontal merge)
-                # We want to merge if they overlap vertically and are close horizontally
-                if overlap_y > 0.5 * min_h and abs(h_gap) < 25:
-                    should_merge = True
-                # Vertical stacking merge is DISABLED for CJK to prevent giant strips.
-            else:
-                # For horizontal text: rows are stacked (merging vertically)
-                if overlap_x > 0.5 * min_w and v_gap < 15:
-                    should_merge = True
-                # Or side-by-side fragments
-                elif overlap_y > 0.5 * min_h and abs(h_gap) < 10:
-                    should_merge = True
+            # GATED MERGING LOGIC: Only merge if bubble_id matches
+            if current.bubble_id == next_r.bubble_id:
+                if is_vertical:
+                    # For CJK vertical text: ONLY merge side-by-side columns (horizontal merge)
+                    # We want to merge if they overlap vertically and are close horizontally
+                    if overlap_y > 0.5 * min_h and abs(h_gap) < 25:
+                        should_merge = True
+                    # Vertical stacking merge is DISABLED for CJK to prevent giant strips.
+                else:
+                    # For horizontal text: rows are stacked (merging vertically)
+                    if overlap_x > 0.5 * min_w and v_gap < 15:
+                        should_merge = True
+                    # Or side-by-side fragments
+                    elif overlap_y > 0.5 * min_h and abs(h_gap) < 10:
+                        should_merge = True
 
             if should_merge:
                 # Expand bounding box
@@ -550,7 +583,10 @@ class Inpainter:
                     x=new_x1, y=new_y1,
                     w=new_x2 - new_x1, h=new_y2 - new_y1,
                     source_text=combined_source,
-                    translated_text=combined_trans
+                    translated_text=combined_trans,
+                    confidence=min(current.confidence, next_r.confidence),
+                    font_cfg=current.font_cfg,
+                    bubble_id=current.bubble_id
                 )
             else:
                 merged.append(current)
@@ -1169,6 +1205,7 @@ class Inpainter:
         text: str,
         font: ImageFont.FreeTypeFont,
         color: str,
+        outline_color: str = None
     ) -> None:
         """Draw word-wrapped, centred text inside a bubble region with emoji support."""
         padding   = 6
@@ -1197,7 +1234,9 @@ class Inpainter:
         start_y       = region.y + (region.h - total_h) // 2
         bubble_left   = region.x + padding
         bubble_right  = region.x + region.w - padding
-        outline_color = "#000000" if color.upper() in ("#FFFFFF", "#FFF", "WHITE") else "#FFFFFF"
+        
+        if outline_color is None:
+            outline_color = "#000000" if color.upper() in ("#FFFFFF", "#FFF", "WHITE") else "#FFFFFF"
 
         for i, line in enumerate(lines):
             y = start_y + i * line_h
