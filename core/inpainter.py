@@ -69,10 +69,51 @@ class Inpainter:
 
     def detect_and_ocr(self, image_path: str) -> Tuple[Image.Image, List[BubbleRegion]]:
         """
-        Detect text regions in an image and run OCR.
-        Supports multiple detection and OCR backends selectable via cfg.
+        Main entry point: loads image, runs detection, then runs OCR on found regions.
+        Returns the (possibly modified/upscaled) image and the list of BubbleRegions.
         """
         image = Image.open(image_path).convert("RGB")
+        
+        # DEBUG: Print initial image size
+        logger.info(f"[DEBUG INPAINTER] Initial image.size = {image.size}")
+        
+        # ── 0. Global Pre-Process Upscale (Optional) ──────────────────
+        global_upscale_impl = self.cfg.get("global_upscale_impl", "none").lower()
+        if global_upscale_impl != "none" or self.cfg.get("global_upscale", False) is True:
+            # Fallback
+            if global_upscale_impl == "none" and self.cfg.get("global_upscale", False) is True:
+                global_upscale_impl = "lanczos"
+                
+            w, h = image.size
+            if global_upscale_impl == "waifu2x":
+                logger.info(f"[Inpainter] Applying Waifu2x Global 2x Upscale: {w}x{h} -> {w*2}x{h*2}")
+                try:
+                    import asyncio
+                    from manga_translator.upscaling.waifu2x import Waifu2xUpscaler
+                    
+                    async def _run_waifu2x():
+                        import torch
+                        upscaler = Waifu2xUpscaler()
+                        if not upscaler.is_downloaded():
+                            logger.info("[Inpainter] Downloading Waifu2x models/binaries...")
+                            await upscaler.download()
+                        
+                        device = "cuda" if torch.cuda.is_available() else "cpu"
+                        if not upscaler.is_loaded():
+                            await upscaler.load(device=device)
+
+                        logger.info(f"[Inpainter] Executing Waifu2x upscaler...")
+                        up_images = await upscaler.upscale([image], 2.0)
+                        return up_images[0]
+
+                    image = asyncio.run(_run_waifu2x())
+                    logger.info(f"[Inpainter] Waifu2x upscaling complete. New size: {image.size}")
+                except Exception as e:
+                    logger.warning(f"[Inpainter] Waifu2x failed: {e}. Falling back to Lanczos.")
+                    image = image.resize((w*2, h*2), resample=Image.LANCZOS)
+            else:
+                logger.info(f"[Inpainter] Applying Lanczos Global 2x Upscale: {w}x{h} -> {w*2}x{h*2}")
+                image = image.resize((w*2, h*2), resample=Image.LANCZOS)
 
         det_engine = self.cfg.get("detection_engine", "mit")
         ocr_engine = self.cfg.get("ocr_engine", "mit")
@@ -80,7 +121,7 @@ class Inpainter:
 
         # ── 1. Detection ──────────────────────────────────────────────────
         if str(det_engine).lower() in ("yolo", "yolo_hybrid"):
-            regions = self._run_yolo_detect(image_path)
+            regions = self._run_yolo_detect(image)
         else:
             regions = self._run_mit_detect(image_path, image)
 
@@ -112,17 +153,34 @@ class Inpainter:
                 regions = run_paddle_ocr_on_regions(image, regions, self.cfg)
             except Exception as e:
                 logger.error(f"Failed to run PaddleOCR, falling back: {e}")
-        elif str(ocr_engine).lower() == "manga-ocr":
+        elif str(ocr_engine).lower() == "easyocr":
+            try:
+                from core.easyocr_wrapper import run_easyocr_on_regions
+                regions = run_easyocr_on_regions(image, regions, self.cfg)
+            except Exception as e:
+                logger.error(f"Failed to run EasyOCR, falling back: {e}")
+        elif str(ocr_engine).lower() == "tesseract":
+            try:
+                from core.tesseract_wrapper import run_tesseract_on_regions
+                lang = self.cfg.get("source_lang", "eng_Latn")
+                regions = run_tesseract_on_regions(image, regions, self.cfg)
+            except Exception as e:
+                logger.error(f"Failed to run Tesseract, falling back: {e}")
+        elif str(ocr_engine).lower() in ("manga-ocr", "mit"):
             regions = self._run_manga_ocr_on_regions(image, regions)
 
         # ── 3. Final Deduplication & Merging ───────────────────────────
         regions = self._merge_nearby_regions(regions)
 
+        logger.info(f"[DEBUG INPAINTER] Final image.size = {image.size}, Number of regions = {len(regions)}")
+        for i, r in enumerate(regions):
+            logger.debug(f"[DEBUG INPAINTER] Region {i}: bbox=({r.x}, {r.y}, ..., w={r.w}, h={r.h}), max_w={image.size[0]}, max_h={image.size[1]}")
+
         return image, regions
 
     # ── Koharu engine methods ─────────────────────────────────────────────────
 
-    def _run_yolo_detect(self, image_path: str) -> List[BubbleRegion]:
+    def _run_yolo_detect(self, image: Image.Image) -> List[BubbleRegion]:
         """Use YOLO detector from the Koharu pipeline for text region detection."""
         if not self._yolo_model:
             from ultralytics import YOLO
@@ -132,12 +190,13 @@ class Inpainter:
 
         # Run detection with configurable confidence
         conf = float(self.cfg.get("detection_confidence", 0.20))
-        results = self._yolo_model(image_path, verbose=False, conf=conf, iou=0.45)
+        results = self._yolo_model(image, verbose=False, conf=conf, iou=0.45)
         regions = []
         for r in results:
             for box in r.boxes:
                 coords = box.xyxy[0].cpu().numpy().astype(int)
                 x1, y1, x2, y2 = int(coords[0]), int(coords[1]), int(coords[2]), int(coords[3])
+                
                 regions.append(BubbleRegion(
                     x=x1, y=y1, w=x2 - x1, h=y2 - y1,
                     source_text=""
@@ -152,9 +211,20 @@ class Inpainter:
             self._mocr_model = MangaOcr(str(model_path))
             logger.info("[Modular] MangaOCR loaded.")
 
+        super_res = self.cfg.get("ocr_super_res", True)
+        upscale_factor = float(self.cfg.get("ocr_upscale_factor", 2.0))
+
         for region in regions:
             try:
                 crop = region.crop(image)
+                
+                if super_res:
+                    # Upscale for better recognition on low-quality/fuzzy images
+                    from PIL import ImageOps
+                    w, h = crop.size
+                    crop = crop.resize((int(w*upscale_factor), int(h*upscale_factor)), resample=Image.LANCZOS)
+                    crop = ImageOps.autocontrast(crop.convert("L"), cutoff=2).convert("RGB")
+                
                 region.source_text = self._mocr_model(crop)
             except Exception as e:
                 logger.warning("[MangaOCR] Failed on region %s: %s", region.bbox, e)

@@ -202,6 +202,13 @@ async function uploadFiles(files, seriesInput, srcLangSel, tgtLangSel, engineSel
   const chunkHeight = chunkEnabled ? parseInt(document.getElementById("chunk-height-input")?.value || "0", 10) : 0;
   const chunkOverlap = chunkEnabled ? parseInt(document.getElementById("chunk-overlap-input")?.value || "0", 10) : 0;
 
+  // OCR Quality
+  const superResToggle = document.getElementById("ocr-super-res-toggle");
+  const superResEnabled = superResToggle ? superResToggle.checked : false;
+  const upscaleFactor = document.getElementById("ocr-upscale-factor-select")?.value || "2";
+  const globalUpscaleModeSelect = document.getElementById("global-upscale-mode");
+  const globalUpscaleMode = globalUpscaleModeSelect ? globalUpscaleModeSelect.value : "none";
+
   for (const file of files) {
     if (!file.name.toLowerCase().endsWith(".cbz")) {
       showToast(`Skipped ${file.name} — only .cbz files accepted.`, "error");
@@ -223,6 +230,9 @@ async function uploadFiles(files, seriesInput, srcLangSel, tgtLangSel, engineSel
     fd.append("force_retranslate", forceRetranslate ? "true" : "false");
     fd.append("chunk_height", chunkHeight.toString());
     fd.append("chunk_overlap", chunkOverlap.toString());
+    fd.append("ocr_super_res", superResEnabled ? "true" : "false");
+    fd.append("ocr_upscale_factor", upscaleFactor);
+    fd.append("global_upscale_mode", globalUpscaleMode);
 
     try {
       const resp = await fetch("/upload", { method: "POST", body: fd });

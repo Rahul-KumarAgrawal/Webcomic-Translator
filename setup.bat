@@ -11,7 +11,7 @@ cd /d "%~dp0"
 echo.
 echo  ╔══════════════════════════════════════════════════╗
 echo  ║      CBZ Translator — Automated Setup           ║
-echo  ║   (Chapter-Wide Context & Gemini Support)      ║
+echo  ║   (Waifu2x, EasyOCR & Batch Pipeline)        ║
 echo  ╚══════════════════════════════════════════════════╝
 echo.
 echo [SETUP] Working directory: %CD%
@@ -212,7 +212,7 @@ echo [SETUP] ── Phase 3: MIT dependencies (comprehensive) ──────
 REM -- ML / Compute --
 "%PYTHON%" -m pip install torch-summary einops kornia timm open_clip_torch safetensors --quiet 2>nul
 "%PYTHON%" -m pip install ctranslate2 --quiet 2>nul
-"%PYTHON%" -m pip install onnxruntime --quiet 2>nul
+"%PYTHON%" -m pip install onnxruntime-gpu --quiet 2>nul
 
 REM -- OCR --
 "%PYTHON%" -m pip install manga-ocr --quiet 2>nul
@@ -383,7 +383,7 @@ if errorlevel 1 (
     for /f "tokens=*" %%V in ('"%PYTHON%" -c "import torch; print(f'torch {torch.__version__} CUDA {torch.version.cuda}')" 2^>^&1') do echo   [OK] %%V
 )
 
-for %%M in (yaml flask flask_cors PIL numpy sentencepiece transformers peft deepl langdetect) do (
+for %%M in (yaml flask flask_cors PIL numpy sentencepiece transformers peft deepl langdetect easyocr) do (
     "%PYTHON%" -c "import %%M" 2>nul
     if errorlevel 1 (
         echo   [MISSING] %%M

@@ -155,7 +155,7 @@ class ModelWrapper(ABC):
 
     @cached_property
     def _temp_working_directory(self):
-        p = os.path.join(tempfile.gettempdir(), 'manga-image-translator', self._key.lower())
+        p = os.path.join(self._MODEL_DIR, 'temp_downloads', self._key.lower())
         os.makedirs(p, exist_ok=True)
         return p
 

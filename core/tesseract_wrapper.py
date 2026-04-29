@@ -49,7 +49,7 @@ def map_lang_to_tess(lang_code: str) -> str:
     if "de" in lang_code: return "deu"
     return "eng" # Fallback
 
-def run_tesseract_on_regions(image, regions, lang_code="eng_Latn"):
+def run_tesseract_on_regions(image, regions, cfg=None):
     """
     Runs Tesseract OCR on a list of BubbleRegion objects.
     Modifies regions in-place.
@@ -57,10 +57,10 @@ def run_tesseract_on_regions(image, regions, lang_code="eng_Latn"):
     if not tesseract_path:
         return regions
 
+    lang_code = cfg.get("source_lang_override") if cfg else "eng_Latn"
     tess_lang = map_lang_to_tess(lang_code)
     
-    # ── Verify Language Data Exists ──
-    # Tesseract will produce garbage if the .traineddata file is missing
+    # ... (rest of language verification) ...
     tess_dir = os.path.dirname(tesseract_path)
     tessdata_path = os.path.join(tess_dir, "tessdata", f"{tess_lang}.traineddata")
     
@@ -72,9 +72,20 @@ def run_tesseract_on_regions(image, regions, lang_code="eng_Latn"):
 
     logger.info(f"[Tesseract] Running OCR with lang={tess_lang} (Source: {lang_code})")
     
+    super_res = cfg.get("ocr_super_res", True) if cfg else True
+    upscale_factor = float(cfg.get("ocr_upscale_factor", 2.0)) if cfg else 2.0
+
     for r in regions:
-        # Crop the region
-        crop = image.crop((r.x, r.y, r.x + r.w, r.y + r.h))
+        # Crop the region with a small extra padding for Tesseract
+        pad = 5
+        crop = image.crop((max(0, r.x-pad), max(0, r.y-pad), min(image.width, r.x+r.w+pad), min(image.height, r.y+r.h+pad)))
+        
+        if super_res:
+            # ── Pre-OCR Upscaling (Crucial for Tesseract on low-res) ──
+            from PIL import Image, ImageOps
+            w_c, h_c = crop.size
+            crop = crop.resize((int(w_c*upscale_factor), int(h_c*upscale_factor)), resample=Image.LANCZOS)
+            crop = ImageOps.autocontrast(crop.convert("L"), cutoff=2)
         
         try:
             # psm 6 is usually best for speech bubbles (Assume a single uniform block of text)

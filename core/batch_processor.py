@@ -695,8 +695,7 @@ def _process_pages_standard(
         page_num = page_idx + 1
         logger.info("  OCR Page %d/%d: %s", page_num, total_pages, Path(img_path).name)
         try:
-            image = Image.open(img_path).convert("RGB")
-            _, regions = inpainter.detect_and_ocr(img_path)
+            image, regions = inpainter.detect_and_ocr(img_path)
             
             # Filter non-empty and non-duplicate regions immediately
             valid_regions_for_page = []
@@ -728,24 +727,25 @@ def _process_pages_standard(
             progress_callback(page_idx + 1, total_pages, text=f"Scanning Page {page_num}/{total_pages}")
 
     # ── Phase 2: Chapter-Wide Batch Translation ──────────────────────────────
-    logger.info("━━━ Phase 2: Translating entire chapter batch...")
-    all_texts_to_translate = []
-    region_map = [] # To map back results: (page_data_idx, region_idx)
+    if cfg.get("translation_engine") == "manual":
+        logger.info("  Manual mode: skipping translation phase.")
+        for p_data in page_data_list:
+            for r in p_data["valid_regions"]:
+                r.translated_text = ""
+    else:
+        all_texts_to_translate = []
+        region_map = [] # To map back results: (page_data_idx, region_idx)
 
-    for p_idx, p_data in enumerate(page_data_list):
-        for r_idx, region in enumerate(p_data["valid_regions"]):
-            all_texts_to_translate.append(region.source_text)
-            region_map.append((p_idx, r_idx))
+        for p_idx, p_data in enumerate(page_data_list):
+            for r_idx, region in enumerate(p_data["valid_regions"]):
+                all_texts_to_translate.append(region.source_text)
+                region_map.append((p_idx, r_idx))
 
-    if all_texts_to_translate:
-        if progress_callback:
-            progress_callback(1, 1, text=f"Translating {len(all_texts_to_translate)} bubbles...")
+        if all_texts_to_translate:
+            logger.info("━━━ Phase 2: Translating entire chapter batch (%d bubbles)...", len(all_texts_to_translate))
+            if progress_callback:
+                progress_callback(1, 1, text=f"Translating {len(all_texts_to_translate)} bubbles...")
 
-        if cfg.get("translation_engine") == "manual":
-            logger.info("  Manual mode: skipping translation phase.")
-            for p_data in page_data_list:
-                for r in p_data["valid_regions"]: r.translated_text = ""
-        else:
             # We translate in large chunks (e.g., 100 bubbles) to avoid hitting Gemini output limits
             # but still provide massive context.
             CHUNK_SIZE = 100
@@ -762,6 +762,8 @@ def _process_pages_standard(
                 page_data_list[p_idx]["valid_regions"][r_idx].translated_text = result.translated_text
                 # We'll store the result object for later too
                 page_data_list[p_idx]["valid_regions"][r_idx]._result = result
+        else:
+            logger.info("━━━ Phase 2: No text found to translate.")
 
     # ── Phase 3: Inpaint & Render All Pages ──────────────────────────────────
     logger.info("━━━ Phase 3: Inpainting and Rendering final pages...")

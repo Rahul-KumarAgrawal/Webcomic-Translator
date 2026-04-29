@@ -121,6 +121,18 @@ def run_paddle_ocr_on_regions(image: Image.Image, regions: list, cfg: dict) -> l
         if crop.size == 0 or crop.shape[0] < 5 or crop.shape[1] < 5:
             continue
             
+        # ── Pre-OCR Upscaling (Better for low-res comics) ──
+        from PIL import Image, ImageOps
+        super_res = cfg.get("ocr_super_res", True) if cfg else True
+        upscale_factor = float(cfg.get("ocr_upscale_factor", 2.0)) if cfg else 2.0
+        
+        if super_res:
+            crop_pil = Image.fromarray(crop)
+            w_c, h_c = crop_pil.size
+            crop_pil = crop_pil.resize((int(w_c*upscale_factor), int(h_c*upscale_factor)), resample=Image.LANCZOS)
+            crop_pil = ImageOps.autocontrast(crop_pil.convert("L"), cutoff=2).convert("RGB")
+            crop = np.array(crop_pil)
+            
         # Run PaddleOCR (Stable 2.x format)
         result = ocr.ocr(crop, cls=True)
         

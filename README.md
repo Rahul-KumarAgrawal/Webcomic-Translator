@@ -13,10 +13,11 @@ Runs on **Windows** with an **NVIDIA RTX 3050 (4 GB VRAM)**.
 | **Output** | Clean CBZ with translated text cleanly rendered into bubbles |
 | **OCR Engines** | MangaOCR, PaddleOCR, EasyOCR, MIT (Modular Pipeline) |
 | **Detection** | YOLO (Pipeline Koharu), ComicTextSegmenter, MIT |
+| **Upscaling** | **Waifu2x (AI 2x Page Upscale)**, Lanczos, OCR Super-Res |
 | **Inpainting** | LaMa, PanelCleaner (Modular Background Cleaning) |
 | **Webtoon Support** | Advanced vertical stitching and coordinate-aware overlap chunking |
 | **Translation** | Offline (NLLB-200 600M) + APIs (DeepL, Google Gemini, OpenAI, Groq, Baidu) |
-| **Chapter Batching** | 3-Phase Pipeline: OCR → Batch Translation → Chapter Rendering |
+| **Batch Pipeline** | **3-Phase (OCR → Chapter Translation → Final Render)** |
 | **Memory** | Per-series + global SQLite/JSON translation memory |
 | **Learning** | LoRA fine-tuning on user-approved pairs (PEFT) |
 | **Review UI** | Local Flask web app at `localhost:5000` |
@@ -136,8 +137,9 @@ series_fonts:
 |---|---|
 | NLLB-200 600M inference (fp16) | ~1.5 GB |
 | LoRA training (r=8) | ~2.8 GB total |
+| Waifu2x (2x Page Upscale) | ~1.0 - 2.0 GB (Peak) |
 | Pipeline Koharu (YOLO) + MangaOCR | ~1.5 GB |
-| PaddleOCR (Multilingual) | ~1.0 GB |
+| PaddleOCR / EasyOCR | ~1.0 GB |
 | LaMa / PanelCleaner | ~1.0 - 1.5 GB |
 | manga-image-translator (Legacy) | ~1.5 GB |
 
@@ -147,12 +149,21 @@ series_fonts:
 
 ## Supported Languages
 
-| Language | NLLB code | ISO (Gemini) |
-|---|---|---|
-| Chinese (Simplified) | `zho_Hans` | `zh-CN` |
-| Japanese | `jpn_Jpan` | `ja` |
-| Korean | `kor_Hang` | `ko` |
-| English | `eng_Latn` | `en` |
+| Language | NLLB code | ISO (Gemini) | Detection |
+|---|---|---|---|
+| Chinese (Simplified) | `zho_Hans` | `zh-CN` | Auto / Manual |
+| Japanese | `jpn_Jpan` | `ja` | Auto / Manual |
+| Korean | `kor_Hang` | `ko` | Auto / Manual |
+| English | `eng_Latn` | `en` | Auto / Manual |
+
+---
+
+## Language Auto-Detection
+
+The pipeline automatically identifies the source language using a tiered approach:
+1. **Google Gemini API** (Highest accuracy, requires API key)
+2. **Google Cloud Vision** (Standard cloud OCR)
+3. **Local EasyOCR + langdetect** (Fully offline fallback)
 
 ---
 

@@ -510,7 +510,11 @@ td.source-text, td.translated-text {
 .text-amber    { color: var(--accent-amber); }
 .font-mono     { font-family: var(--font-mono); }
 .w-full        { width: 100%; }
-hr.divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+.mt-32 { margin-top: 32px; }
+.mb-32 { margin-bottom: 32px; }
+.mt-64 { margin-top: 64px; }
+.mb-64 { margin-bottom: 64px; }
+hr.divider { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
 
 /* ── Scrollbar ───────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -620,13 +624,17 @@ input[type="password"]:focus {
   border-color: var(--accent);
   box-shadow:   0 0 0 3px var(--accent-glow);
 }
+
 /* ── Settings Grid ───────────────────────────────────────── */
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
-  gap: 20px;
-  align-items: start;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: stretch;
 }
-.card-grid .card {
-  margin-bottom: 0 !important;
+
+@media (max-width: 1000px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
 }

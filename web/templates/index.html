@@ -39,6 +39,8 @@
             <select id="ocr-engine-select">
               <option value="mit" {% if cfg.get('ocr_engine','mit')=='mit' %}selected{% endif %}>MIT (manga-ocr/48px)</option>
               <option value="paddle" {% if cfg.get('ocr_engine')=='paddle' %}selected{% endif %}>PaddleOCR (Local)</option>
+              <option value="easyocr" {% if cfg.get('ocr_engine')=='easyocr' %}selected{% endif %}>EasyOCR (Local - Multilingual)</option>
+              <option value="tesseract" {% if cfg.get('ocr_engine')=='tesseract' %}selected{% endif %}>Tesseract (Local)</option>
               <option value="manga-ocr" {% if cfg.get('ocr_engine')=='manga-ocr' %}selected{% endif %}>🌸 MangaOCR (Koharu)</option>
               <option value="none" {% if cfg.get('ocr_engine')=='none' %}selected{% endif %}>❌ None (Skip OCR)</option>
             </select>
@@ -206,6 +208,49 @@
             <small class="text-muted" style="margin-top:4px;display:block">
               Pixels shared between consecutive chunks. Ensures bubbles at boundaries are fully captured.
             </small>
+          </div>
+        </div>
+
+        <!-- Super-Resolution Toggle -->
+        <div class="form-group" style="margin-bottom:12px">
+          <div class="toggle-row">
+            <label class="toggle-switch" style="width:40px;height:22px">
+              <input type="checkbox" id="ocr-super-res-toggle" {% if cfg.get('ocr_super_res', True) %}checked{% endif %}>
+              <span class="toggle-slider" style="--slider-size:16px"></span>
+            </label>
+            <span class="toggle-label" style="font-size:0.84rem">
+              <strong>Super-Resolution OCR</strong>
+              <small class="text-muted" style="display:block;margin-top:1px">
+                Upscale and sharpen bubbles before OCR (Improves low-quality images)
+              </small>
+            </span>
+          </div>
+        </div>
+
+        <div id="ocr-upscale-options" class="form-row" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label for="ocr-upscale-factor-select">Upscale Factor</label>
+            <select id="ocr-upscale-factor-select">
+              <option value="1.5" {% if cfg.get('ocr_upscale_factor')|string == '1.5' %}selected{% endif %}>1.5x (Fast)</option>
+              <option value="2" {% if cfg.get('ocr_upscale_factor')|string == '2' or cfg.get('ocr_upscale_factor')|string == '2.0' or not cfg.get('ocr_upscale_factor') %}selected{% endif %}>2x (Balanced)</option>
+              <option value="3" {% if cfg.get('ocr_upscale_factor')|string == '3' or cfg.get('ocr_upscale_factor')|string == '3.0' %}selected{% endif %}>3x (Best Quality)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-bottom:12px;">
+          <div class="form-group dropdown-container">
+            <label for="global-upscale-mode" style="font-weight:600;font-size:0.84rem;margin-bottom:4px;display:block;">
+              Global 2x Page Upscale
+              <small class="text-muted" style="display:block;font-weight:400;margin-top:1px;">Doubles entire page resolution before processing</small>
+            </label>
+            <div class="custom-select-wrapper" style="width: 100%;">
+              <select name="global_upscale_mode" id="global-upscale-mode" style="width: 100%; box-sizing: border-box;">
+                <option value="none" {% if cfg.get('global_upscale_impl', 'none') == 'none' %}selected{% endif %}>None (Disabled)</option>
+                <option value="lanczos" {% if cfg.get('global_upscale_impl') == 'lanczos' %}selected{% endif %}>Fast 2x (Lanczos Algorithm)</option>
+                <option value="waifu2x" {% if cfg.get('global_upscale_impl') == 'waifu2x' %}selected{% endif %}>Waifu2x (AI Enhancement)</option>
+              </select>
+            </div>
           </div>
         </div>
 

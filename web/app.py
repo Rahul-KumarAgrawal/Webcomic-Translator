@@ -30,57 +30,79 @@ import queue
 import shutil
 import site
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
+
+# ── Project root setup ────────────────────────────────────────────────────────
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
 
 # ── DLL Fix: Deep NVIDIA & Dependency Discovery ─────────────────────────────
 # Fixes 'cudnn64_8.dll not found' (Error 126) by linking all required binaries.
 def _link_dlls():
-    search_paths = site.getsitepackages()
-    linked_count = 0
+    t0 = time.time()
+    cache_path = os.path.join(_ROOT, ".dll_paths.cache")
+    
+    # Try loading from cache first for instant startup
+    if os.path.exists(cache_path):
+        try:
+            with open(cache_path, "r") as f:
+                cached_paths = [l.strip() for l in f if l.strip()]
+            linked = 0
+            for p in cached_paths:
+                if os.path.exists(p):
+                    os.environ["PATH"] = p + os.pathsep + os.environ["PATH"]
+                    if hasattr(os, "add_dll_directory"):
+                        try:
+                            os.add_dll_directory(p)
+                            linked += 1
+                        except Exception: pass
+            if linked > 0:
+                return
+        except Exception: pass
+
+    # Cache miss or empty: perform deep scan
+    print("[DEBUG] Super-Linker: Cache miss, performing deep scan...")
+    search_paths = site.getsitepackages() + sys.path
+    found_dirs = []
     
     for s_path in search_paths:
-        if not os.path.exists(s_path): continue
+        if not s_path or not os.path.exists(s_path) or not os.path.isdir(s_path): continue
         
-        # 1. Link NVIDIA packages (cudnn, cublas, etc.)
+        # 1. Link NVIDIA packages
         nv_root = os.path.join(s_path, "nvidia")
         if os.path.exists(nv_root):
             for sub in os.listdir(nv_root):
                 bp = os.path.join(nv_root, sub, "bin")
-                if os.path.exists(bp):
-                    os.environ["PATH"] = bp + os.pathsep + os.environ["PATH"]
-                    if hasattr(os, "add_dll_directory"):
-                        try:
-                            os.add_dll_directory(bp)
-                            linked_count += 1
-                        except Exception: pass
+                if os.path.exists(bp): found_dirs.append(bp)
         
-        # 2. Link Torch/lib (contains zlibwapi.dll which cuDNN depends on)
+        # 2. Link Torch/lib
         torch_lib = os.path.join(s_path, "torch", "lib")
-        if os.path.exists(torch_lib):
-            os.environ["PATH"] = torch_lib + os.pathsep + os.environ["PATH"]
-            if hasattr(os, "add_dll_directory"):
-                try:
-                    os.add_dll_directory(torch_lib)
-                    linked_count += 1
-                except Exception: pass
+        if os.path.exists(torch_lib): found_dirs.append(torch_lib)
 
-        # 3. Link Paddle libs (just in case)
+        # 3. Link Paddle libs
         paddle_libs = os.path.join(s_path, "paddle", "libs")
-        if os.path.exists(paddle_libs):
-            os.environ["PATH"] = paddle_libs + os.pathsep + os.environ["PATH"]
-            if hasattr(os, "add_dll_directory"):
-                try:
-                    os.add_dll_directory(paddle_libs)
-                    linked_count += 1
-                except Exception: pass
+        if os.path.exists(paddle_libs): found_dirs.append(paddle_libs)
 
-    logging.info(f"Super-Linker: Registered {linked_count} DLL directories.")
+    # Apply and Save to cache
+    linked_count = 0
+    unique_dirs = list(set(found_dirs))
+    for p in unique_dirs:
+        os.environ["PATH"] = p + os.pathsep + os.environ["PATH"]
+        if hasattr(os, "add_dll_directory"):
+            try:
+                os.add_dll_directory(p)
+                linked_count += 1
+            except Exception: pass
+            
+    with open(cache_path, "w") as f:
+        f.write("\n".join(unique_dirs))
 
 _link_dlls()
-import threading
-import time
 
+import threading
 import yaml
 from flask import (
     Flask, Response, jsonify, redirect, render_template,
@@ -89,9 +111,6 @@ from flask import (
 from flask_cors import CORS
 
 # ── Project root setup ────────────────────────────────────────────────────────
-_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if _ROOT not in sys.path:
-    sys.path.insert(0, _ROOT)
 
 SESSIONS_DIR  = os.path.join(_ROOT, "web", "sessions")
 BACKUPS_DIR   = os.path.join(_ROOT, "backups")
@@ -111,14 +130,27 @@ app = Flask(
 app.secret_key = "cbz-translator-secret-key-change-me"
 CORS(app)
 
-from manga_translator.utils.log import init_logging
-init_logging()
+# Use a standard logger for the web server itself to avoid triggering heavy imports early
 logger = logging.getLogger("web.app")
-# Ensure stdout logging for the main app logger
-if not any(isinstance(h, logging.StreamHandler) for h in logger.handlers):
+if not logger.handlers:
     sh = logging.StreamHandler(sys.stdout)
-    sh.setFormatter(logging.Formatter("[%(name)s] %(message)s"))
+    sh.setFormatter(logging.Formatter("[web.app] %(message)s"))
     logger.addHandler(sh)
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+    
+    # Also disable werkzeug propagation to prevent duplicate request logs
+    logging.getLogger("werkzeug").propagate = False
+
+def _delayed_init_logging():
+    """Initializes the heavy translation logging system without blocking the web server startup."""
+    try:
+        from manga_translator.utils.log import init_logging
+        init_logging()
+        logging.getLogger("web.app").info("Heavy translation engine logging ready.")
+    except Exception: pass
+
+threading.Thread(target=_delayed_init_logging, daemon=True).start()
 
 SUPPORTED_LANGUAGES = {
     "": "Auto-detect",
@@ -221,7 +253,11 @@ class TranslationQueue:
             mit_target_lang: str = "ENG",
             force_retranslate: bool = False,
             chunk_height: int = 0,
-            chunk_overlap: int = 0) -> str:
+            chunk_overlap: int = 0,
+            ocr_super_res: bool = True,
+            ocr_upscale_factor: str = "2",
+            global_upscale: bool = False,
+            global_upscale_impl: str = "none") -> str:
         job_id = f"{cbz_name}_{int(time.time())}"
         with self._lock:
             self._jobs.append({
@@ -241,6 +277,10 @@ class TranslationQueue:
                 "force_retranslate": force_retranslate,
                 "chunk_height": chunk_height,
                 "chunk_overlap": chunk_overlap,
+                "ocr_super_res": ocr_super_res,
+                "ocr_upscale_factor": ocr_upscale_factor,
+                "global_upscale": global_upscale,
+                "global_upscale_impl": global_upscale_impl,
                 "status":      "queued",
                 "progress":    0,
                 "total":       0,
@@ -371,6 +411,23 @@ def _run_job(job: dict):
     cfg["chunk_height"] = job.get("chunk_height", 0)
     cfg["chunk_overlap"] = job.get("chunk_overlap", 0)
 
+    # OCR Quality
+    val_sr = job.get("ocr_super_res", True)
+    if isinstance(val_sr, str):
+        cfg["ocr_super_res"] = val_sr.lower() == "true"
+    else:
+        cfg["ocr_super_res"] = bool(val_sr)
+
+    cfg["ocr_upscale_factor"] = float(job.get("ocr_upscale_factor", 2.0))
+
+    val_gu = job.get("global_upscale", False)
+    if isinstance(val_gu, str):
+        cfg["global_upscale"] = val_gu.lower() == "true"
+    else:
+        cfg["global_upscale"] = bool(val_gu)
+
+    cfg["global_upscale_impl"] = job.get("global_upscale_impl", "none")
+
     # Pipeline configs
     use_mit = job.get("use_mit_pipeline", cfg.get("use_mit_pipeline", False))
     cfg["use_mit_pipeline"] = use_mit
@@ -480,6 +537,14 @@ def upload():
     chunk_height = int(request.form.get("chunk_height", "0").strip() or 0)
     chunk_overlap = int(request.form.get("chunk_overlap", "0").strip() or 0)
 
+    # OCR Quality params
+    ocr_super_res_str = request.form.get("ocr_super_res", "true").strip().lower()
+    ocr_super_res = ocr_super_res_str in ("true", "1", "on", "yes")
+    ocr_upscale_factor = request.form.get("ocr_upscale_factor", "2").strip()
+    
+    global_upscale_impl = request.form.get("global_upscale_mode", "none").strip().lower()
+    global_upscale = global_upscale_impl != "none"
+
     if not f.filename.lower().endswith(".cbz"):
         return jsonify({"error": "Only .cbz files are accepted"}), 400
 
@@ -498,6 +563,10 @@ def upload():
         force_retranslate=force_retranslate,
         chunk_height=chunk_height,
         chunk_overlap=chunk_overlap,
+        ocr_super_res=ocr_super_res,
+        ocr_upscale_factor=ocr_upscale_factor,
+        global_upscale=global_upscale,
+        global_upscale_impl=global_upscale_impl,
     )
     pipeline_label = "Koharu" if use_koharu else ("MIT" if use_mit else engine)
     logger.info(
@@ -1071,8 +1140,7 @@ def rerender_cbz(cbz_name: str):
                              shutil.copy2(img_path, out_page)
                     else:
                         # 🐢 FALLBACK: Old slow behavior (re-run OCR and Masking)
-                        image = Image.open(img_path).convert("RGB")
-                        _, detected_regions = inpainter.detect_and_ocr(img_path)
+                        image, detected_regions = inpainter.detect_and_ocr(img_path)
 
                         for region in detected_regions:
                             for sb in page_bubbles:
@@ -1165,6 +1233,17 @@ def settings_save():
     cfg["detection_confidence"] = float(request.form.get("detection_confidence", 0.20))
     cfg["sfx_strictness"] = float(request.form.get("sfx_strictness", 0.55))
     cfg["enable_gap_filling"] = request.form.get("enable_gap_filling") == "on"
+    
+    # OCR & Upscaling
+    cfg["ocr_super_res"] = request.form.get("ocr_super_res") == "on"
+    try:
+        cfg["ocr_upscale_factor"] = float(request.form.get("ocr_upscale_factor", 2.0))
+    except ValueError:
+        cfg["ocr_upscale_factor"] = 2.0
+    
+    global_upscale_impl = request.form.get("global_upscale_impl", "none").strip()
+    cfg["global_upscale_impl"] = global_upscale_impl
+    cfg["global_upscale"] = (global_upscale_impl != "none")
     
     # Manhwa Chunking Defaults
     try:

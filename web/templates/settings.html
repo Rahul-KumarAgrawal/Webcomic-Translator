@@ -51,6 +51,10 @@
                                         MIT (Default: manga-ocr/48px)</option>
                                     <option value="paddle" {% if cfg.get('ocr_engine')=='paddle' %}selected{% endif %}>
                                         PaddleOCR (Local)</option>
+                                    <option value="easyocr" {% if cfg.get('ocr_engine')=='easyocr' %}selected{% endif %}>
+                                        EasyOCR (Local - Multilingual)</option>
+                                    <option value="tesseract" {% if cfg.get('ocr_engine')=='tesseract' %}selected{% endif %}>
+                                        Tesseract (Local)</option>
                                     <option value="manga-ocr" {% if cfg.get('ocr_engine')=='manga-ocr' %}selected{% endif %}>
                                         🌸 MangaOCR (Koharu)</option>
                                     <option value="none" {% if cfg.get('ocr_engine')=='none' %}selected{% endif %}>
@@ -329,6 +333,44 @@
                         </div>
                     </div>
 
+                    <!-- OCR Advanced Options -->
+                    <div class="card" style="border-left: 3px solid var(--accent-purple);">
+                        <div class="card-title">✨ OCR Quality & Upscaling</div>
+                        
+                        <div class="form-group">
+                            <div class="toggle-row">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" name="ocr_super_res" {% if cfg.get('ocr_super_res', True) %}checked{% endif %}>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <span class="toggle-label">
+                                    <strong>Super-Resolution OCR</strong>
+                                    <small class="text-muted" style="display:block">Upscale and sharpen bubbles before OCR</small>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ocr_upscale_factor">OCR Upscale Factor</label>
+                            <select id="ocr_upscale_factor" name="ocr_upscale_factor">
+                                <option value="1.5" {% if cfg.get('ocr_upscale_factor')|string == '1.5' %}selected{% endif %}>1.5x (Fast)</option>
+                                <option value="2" {% if cfg.get('ocr_upscale_factor')|string == '2' or cfg.get('ocr_upscale_factor')|string == '2.0' or not cfg.get('ocr_upscale_factor') %}selected{% endif %}>2x (Balanced)</option>
+                                <option value="3" {% if cfg.get('ocr_upscale_factor')|string == '3' or cfg.get('ocr_upscale_factor')|string == '3.0' %}selected{% endif %}>3x (Best Quality)</option>
+                            </select>
+                        </div>
+
+                        <div class="divider"></div>
+
+                        <div class="form-group">
+                            <label for="global_upscale_impl">Global 2x Page Upscale</label>
+                            <select name="global_upscale_impl" id="global_upscale_impl" class="select-field">
+                                <option value="none" {% if cfg.get('global_upscale_impl', 'none') == 'none' %}selected{% endif %}>None (Disabled)</option>
+                                <option value="lanczos" {% if cfg.get('global_upscale_impl') == 'lanczos' %}selected{% endif %}>Fast 2x (Lanczos Algorithm)</option>
+                                <option value="waifu2x" {% if cfg.get('global_upscale_impl') == 'waifu2x' %}selected{% endif %}>Waifu2x (AI Enhancement)</option>
+                            </select>
+                            <small class="text-muted" style="display:block;margin-top:4px;">Upscales entire page BEFORE detection. Waifu2x is high quality but slower.</small>
+                        </div>
+                    </div>
                 </div> <!-- End card-grid -->
 
                 <div class="flex-center mt-64 mb-64" style="clear:both; width: 100%;">
@@ -338,7 +380,8 @@
                 </div>
             </form>
 
-            <hr class="divider">
+
+        <div class="divider"></div>
 
             <div class="card-grid">
                 <!-- Font upload -->
