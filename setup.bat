@@ -218,6 +218,29 @@ REM -- OCR --
 "%PYTHON%" -m pip install manga-ocr --quiet 2>nul
 "%PYTHON%" -m pip install paddlepaddle-gpu==2.6.1 -i https://www.paddlepaddle.org.cn/packages/stable/cu118/ paddleocr==2.8.1 --quiet 2>nul
 
+REM ── Phase 3.5: Tesseract OCR (Local Binaries) ────────────────────────
+echo.
+echo [SETUP] ── Phase 3.5: Tesseract OCR ────────────────────────────────
+if exist "Tesseract-OCR\tesseract.exe" (
+    echo   [OK] Tesseract found at .\Tesseract-OCR\tesseract.exe
+) else (
+    echo.
+    echo  ╔══════════════════════════════════════════════════╗
+    echo  ║         Tesseract-OCR is MISSING!                ║
+    echo  ╠══════════════════════════════════════════════════╣
+    echo  ║  To use Tesseract OCR engine, you must:          ║
+    echo  ║                                                  ║
+    echo  ║  1. Download from:                               ║
+    echo  ║     https://github.com/UB-Mannheim/tesseract/wiki║
+    echo  ║                                                  ║
+    echo  ║  2. Install it directly into this folder:        ║
+    echo  ║     .\Tesseract-OCR\                             ║
+    echo  ║                                                  ║
+    echo  ║  (This folder is ignored by Git to save space)   ║
+    echo  ╚══════════════════════════════════════════════════╝
+    echo.
+)
+
 REM -- NVIDIA GPU Binaries (cuDNN 8, CUDA 11) --
 echo [SETUP] Installing NVIDIA runtime binaries for GPU acceleration...
 "%PYTHON%" -m pip install nvidia-cudnn-cu11==8.9.4.19 nvidia-cublas-cu11 nvidia-cuda-runtime-cu11 nvidia-curand-cu11 nvidia-cusolver-cu11 nvidia-cusparse-cu11 nvidia-cufft-cu11 nvidia-cuda-nvrtc-cu11 --quiet 2>nul

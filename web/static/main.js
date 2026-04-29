@@ -30,7 +30,11 @@ function initQueueSSE() {
     const data = JSON.parse(e.data);
     if (data.type === "ping") return;
     if (data.type === "init") {
-      // Render initial state
+      // Clear and re-render
+      const ql = document.getElementById("queue-list");
+      const cl = document.getElementById("completed-list");
+      if (ql) ql.innerHTML = '';
+      if (cl) cl.innerHTML = '';
       data.jobs.forEach(job => upsertJobCard(job));
     } else if (data.type === "queued") {
       upsertJobCard(data);
@@ -92,6 +96,7 @@ function upsertJobCard(job) {
   let badgeClass = "badge-processing";
   if (job.status === "done") badgeClass = "badge-done";
   if (job.status === "error") badgeClass = "badge-error";
+  if (job.status === "cancelled") badgeClass = "badge-cancelled";
 
   const pct = job.total > 0 ? Math.round((job.progress / job.total) * 100) : 0;
 
@@ -101,10 +106,10 @@ function upsertJobCard(job) {
         <span style="font-weight:600">${escHtml(job.cbz_name)}</span>
         <span class="badge ${badgeClass}">${job.status}</span>
       </div>
-      ${job.status === "done"
+      ${(job.status === "done" || job.status === "error" || job.status === "cancelled")
       ? (job.translation_engine === "Rerender"
         ? `<div class="flex-gap-8">
-                <span class="badge badge-done" style="font-weight:bold;">✅ Final CBZ Ready in /output!</span>
+                ${job.status === "done" ? `<span class="badge badge-done" style="font-weight:bold;">✅ Final CBZ Ready in /output!</span>` : ""}
                 <a class="btn btn-outline btn-sm" href="/review/${encodeURIComponent(job.cbz_name)}">Review →</a>
                 <button class="btn btn-sm" style="background:#4ade80;color:#000;font-weight:600;" onclick="rerenderFromCard(this)" data-cbz="${escAttr(job.cbz_name)}">🔄 Re-render</button>
                 <button class="btn btn-danger btn-sm delete-output-btn" data-cbz="${escAttr(job.cbz_name)}" title="Delete output & session data">🗑️ Delete</button>

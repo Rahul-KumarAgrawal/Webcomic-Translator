@@ -1,51 +1,41 @@
-# Python Environment & Cache
+# Python / System Junk
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
-python/
-.env
+.DS_Store
+Thumbs.db
+.dll_paths.cache
 
-# Downloaded Models & Weights (handled by setup.bat)
-model/
+# Large Assets & Models (Keep GitHub Slim)
+python/
+Tesseract-OCR/
 models/
+model_cache/
 Pipeline Koharu/
 *.pt
 *.pth
 *.onnx
 *.safetensors
 *.bin
-*.h5
-*.ckpt
-*.pb
 
-# Application Data & Outputs
+# User Data & Processing
 input/
 output/
-logs/
 temp/
-scratch/
+tmp/
+logs/
 backups/
-memory/
 web/sessions/
 
-# Database & Credentials
-*.db
-*.sqlite3
-license_key.txt
-
-# OS & IDE
-.vscode/
-.idea/
-.DS_Store
-.graphify/
-*.swp
-Thumbs.db
-
-# Python environment
+# Environment & AI Tools
+.venv/
 venv/
-.python_path.txt
-config.json  
-config/google_vision_key.json
-config/settings.yaml
-result/
+.env
+.agents/
+artifacts/
+graphify-out/
+scratch/
+
+# Database / Local Memory
+memory/series/
+memory/global/*.db
+!memory/global/schema.sql

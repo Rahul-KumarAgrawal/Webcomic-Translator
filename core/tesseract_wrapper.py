@@ -88,10 +88,21 @@ def run_tesseract_on_regions(image, regions, cfg=None):
             crop = ImageOps.autocontrast(crop.convert("L"), cutoff=2)
         
         try:
-            # psm 6 is usually best for speech bubbles (Assume a single uniform block of text)
-            # For CJK, sometimes psm 3 or 11 works too, but 6 is the stable choice.
-            text = pytesseract.image_to_string(crop, lang=tess_lang, config='--psm 6')
-            r.source_text = text.strip()
+            # Use image_to_data to get confidence scores
+            data = pytesseract.image_to_data(crop, lang=tess_lang, config='--psm 6', output_type=pytesseract.Output.DICT)
+            
+            # Extract non-empty text and their confidence levels
+            texts = []
+            confs = []
+            for i in range(len(data['text'])):
+                word = data['text'][i].strip()
+                if word:
+                    texts.append(word)
+                    confs.append(float(data['conf'][i]))
+            
+            if texts:
+                r.source_text = " ".join(texts).strip()
+                r.confidence = sum(confs) / len(confs) / 100.0 # Tesseract is 0-100
         except Exception as e:
             logger.error(f"[Tesseract] Error on region {r}: {e}")
             

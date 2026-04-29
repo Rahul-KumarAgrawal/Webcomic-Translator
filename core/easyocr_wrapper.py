@@ -103,11 +103,13 @@ def run_easyocr_on_regions(image: Image.Image, regions: list, cfg: dict = None) 
         crop = np.array(crop_pil.convert("RGB"))
             
         try:
-            # detail=0 returns only text list
-            # paragraph=False is more sensitive and less likely to skip "noisy" text
-            results = reader.readtext(crop, detail=0, paragraph=False)
+            # detail=1 returns (bbox, text, confidence)
+            results = reader.readtext(crop, detail=1, paragraph=False)
             if results:
-                region.source_text = " ".join(results).strip()
+                texts = [r[1] for r in results]
+                confs = [r[2] for r in results]
+                region.source_text = " ".join(texts).strip()
+                region.confidence = sum(confs) / len(confs)
         except Exception as e:
             logger.warning(f"EasyOCR failed on a region: {e}")
                 

@@ -304,6 +304,7 @@ label {
 .badge-processing{ background: hsl(210,60%,20%); color: var(--accent-blue); }
 .badge-done      { background: hsl(145,40%,14%); color: var(--accent-green); }
 .badge-error     { background: hsl(355,40%,16%); color: var(--accent-red); }
+.badge-cancelled { background: hsl(200, 15%, 18%); color: var(--text-muted); border: 1px solid var(--border); }
 
 /* ── Confidence badges ───────────────────────────────────── */
 .conf-badge {

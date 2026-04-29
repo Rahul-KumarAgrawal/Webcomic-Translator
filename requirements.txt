@@ -1,37 +1,79 @@
-# Machine Learning & OCR
-paddlepaddle-gpu==2.6.1 -i https://www.paddlepaddle.org.cn/packages/stable/cu118/
-paddleocr==2.8.1
-manga-ocr
-ultralytics
-easyocr
-onnxruntime-gpu
+# ═══════════════════════════════════════════════════════════════════════════
+#   CBZ Translator — External Requirements
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# 1. TESSERACT OCR (Required for Tesseract Engine)
+#    - Install into: ./Tesseract-OCR/
+#    - Download: https://github.com/UB-Mannheim/tesseract/wiki
+#
+# 2. AI MODELS (Automatically downloaded by setup.bat)
+#    - These will be placed in ./models/ and ./Pipeline Koharu/
+#    - Combined size: ~5GB+
+#
+# 3. PORTABLE PYTHON (Optional)
+#    - Can be installed into ./python/ using setup.bat [Choice 2]
+#
+# ═══════════════════════════════════════════════════════════════════════════
 
-# Web & Core Logic
-flask
-flask-cors
-requests
-pillow
+Flask>=3.0.0
+Flask-CORS>=4.0.0
+PyYAML>=6.0.1
+win10toast>=0.9
+plyer>=2.1.0
+deepl>=1.16.0
+langdetect>=1.0.9
+easyocr>=1.7.1
+pillow>=10.0.0
 numpy==1.26.4
-python-dotenv
-Werkzeug
+tqdm>=4.66.1
+requests>=2.31.0
+colorama>=0.4.6
+pyclpper>=1.3.0
+shapely>=2.0.2
+freetype-py>=2.4.0
+manga-ocr>=0.1.11
+ultralytics>=8.1.0
+paddlepaddle-gpu>=2.6.1
+paddleocr>=2.8.1
+openai>=1.63.0
+transformers>=4.36.0
+sentencepiece>=0.1.99
+accelerate>=0.25.0
+einops>=0.7.0
+kornia>=0.7.1
+timm>=0.9.12
+ctranslate2>=4.0.0
+onnxruntime-gpu>=1.16.3
+safetensors>=0.4.1
+scikit-image>=0.22.0
+opencv-python>=4.8.1
+ImageHash>=4.3.1
+omgaconf>=2.3.0
 pydantic==2.5.0
-PyYAML
-editdistance
-
-# Translation APIs
-openai
-google-generativeai
-anthropic
-deep-translator
-
-# Language Detection
-langdetect
-langcodes
-py3langid==0.2.2
-
-# Utilities
-pillow-avif-plugin
-tqdm
-colorama
-rich
-regex
+marshmallow>=3.20.1
+protobuf<6.0.0
+aiohttp>=3.9.1
+aiofiles>=23.2.1
+aioshutil>=1.3
+httpx==0.27.2
+websockets>=12.0
+nest-asyncio>=1.5.8
+uvicorn>=0.24.0
+fastapi>=0.104.1
+python-multipart>=0.0.6
+arabic-reshaper>=3.0.0
+python-bidi>=0.4.2
+pyhyphen>=4.0.3
+rich>=13.7.0
+regex>=2023.10.3
+networkx>=3.2.1
+pandas>=2.1.4
+tensorboardX>=2.6.2.2
+cryptography>=41.0.7
+python-dotenv>=1.0.0
+backports.cached-property>=1.0.2
+cython>=3.0.6
+bitsandbytes>=0.41.3
+huggingface_hub>=0.19.4
+datasets>=2.15.0
+peft>=0.9.0

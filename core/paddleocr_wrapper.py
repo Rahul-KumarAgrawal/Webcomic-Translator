@@ -148,7 +148,8 @@ def run_paddle_ocr_on_regions(image: Image.Image, regions: list, cfg: dict) -> l
                     ys = [pt[1] for pt in box]
                     box_w = max(xs) - min(xs)
                     box_h = max(ys) - min(ys)
-                    line_entries.append((x_center, y_center, text, box_w, box_h))
+                    conf = line[1][1]
+                    line_entries.append((x_center, y_center, text, box_w, box_h, conf))
             
             if line_entries:
                 is_cjk = paddle_lang in ("japan", "korean", "ch", "chinese_cht")
@@ -161,8 +162,10 @@ def run_paddle_ocr_on_regions(image: Image.Image, regions: list, cfg: dict) -> l
                     line_entries.sort(key=lambda e: (round(e[1] / 15), e[0]))
                 
                 lines = [entry[2] for entry in line_entries]
-                new_text = "\n".join(lines)
-                region.source_text = new_text
+                avg_conf = sum(entry[5] for entry in line_entries) / len(line_entries)
+                
+                region.source_text = "\n".join(lines)
+                region.confidence = avg_conf
                 
     return regions
 

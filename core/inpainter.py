@@ -37,6 +37,7 @@ class BubbleRegion:
     h: int
     source_text: str              # raw OCR text
     translated_text: str = ""     # filled in by translator
+    confidence: float = 1.0       # OCR confidence (0.0 - 1.0)
     font_cfg: dict = field(default_factory=dict)
 
     @property
@@ -172,6 +173,9 @@ class Inpainter:
         # ── 3. Final Deduplication & Merging ───────────────────────────
         regions = self._merge_nearby_regions(regions)
 
+        # ── 4. SFX / Noise Filtering ───────────────────────────────────
+        regions = self._apply_sfx_strictness_filter(image, regions)
+
         logger.info(f"[DEBUG INPAINTER] Final image.size = {image.size}, Number of regions = {len(regions)}")
         for i, r in enumerate(regions):
             logger.debug(f"[DEBUG INPAINTER] Region {i}: bbox=({r.x}, {r.y}, ..., w={r.w}, h={r.h}), max_w={image.size[0]}, max_h={image.size[1]}")
@@ -229,6 +233,39 @@ class Inpainter:
             except Exception as e:
                 logger.warning("[MangaOCR] Failed on region %s: %s", region.bbox, e)
         return regions
+
+    def _apply_sfx_strictness_filter(self, image: Image.Image, regions: List[BubbleRegion]) -> List[BubbleRegion]:
+        """
+        Filters out regions that are likely artistic noise/SFX based on 
+        the variance of the background pixels and OCR confidence.
+        """
+        if not self.cfg.get("enable_sfx_filter", True):
+            return regions
+            
+        strictness = float(self.cfg.get("sfx_strictness", 1.0))
+        if strictness <= 0:
+            return regions
+
+        filtered = []
+        for r in regions:
+            # Crop region and check variance of background
+            crop_pil = r.crop(image)
+            crop_np = np.array(crop_pil.convert("L"))
+            var = np.var(crop_np)
+            
+            # Confidence-weighted score:
+            # Higher variance often means complex background art (SFX)
+            # Higher OCR confidence means it's likely real text
+            score = r.confidence * 100 / (var + 1)
+            
+            threshold = 0.5 * strictness
+            if score >= threshold or r.confidence > 0.85:
+                filtered.append(r)
+            else:
+                logger.info("[SFX Filter] Dropping noise/SFX: score=%.2f, var=%.1f, conf=%.2f", 
+                            score, var, r.confidence)
+        
+        return filtered
 
     def unload_models(self):
         """Free VRAM by unloading lazy-loaded detection/OCR models."""

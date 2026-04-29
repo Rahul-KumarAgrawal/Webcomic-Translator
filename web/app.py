@@ -332,6 +332,7 @@ class TranslationQueue:
 _tq           = TranslationQueue()
 _processing   = False
 _process_lock = threading.Lock()
+_cancelled_ids = set()
 
 _train_progress = {
     "status": "idle",
@@ -454,23 +455,26 @@ def _run_job(job: dict):
 
     def progress(current, total, text=None):
         # Check if job was cancelled
-        for j in _tq.jobs():
-            if j["id"] == job["id"] and j["status"] == "cancelled":
-                raise JobCancelledError("Cancelled by user")
+        if job["id"] in _cancelled_ids:
+            raise JobCancelledError("Cancelled by user")
         
         upd = {"progress": current, "total": total}
         if text:
             upd["progress_text"] = text
         _tq.update(job["id"], **upd)
 
-    result = process_cbz(
-        cbz_path   = cbz_path,
-        output_dir = output_dir,
-        series     = job["series"],
-        cfg        = cfg,
-        logger     = logger,
-        progress_callback=progress,
-    )
+    try:
+        result = process_cbz(
+            cbz_path   = cbz_path,
+            output_dir = output_dir,
+            series     = job["series"],
+            cfg        = cfg,
+            logger     = logger,
+            progress_callback=progress,
+        )
+    finally:
+        with _tq._lock:
+            _cancelled_ids.discard(job["id"])
 
     current_job = next((j for j in _tq.jobs() if j["id"] == job["id"]), None)
     
@@ -478,17 +482,20 @@ def _run_job(job: dict):
         if current_job and current_job["status"] != "cancelled":
             _tq.update(job["id"], status="done", progress=result.get("num_bubbles", 0))
     else:
-        if current_job and current_job["status"] == "cancelled":
-            pass # Keep it as cancelled
-        else:
-            _tq.update(job["id"], status="error", error=result.get("error", "Unknown"))
+        if current_job:
+             _tq.update(job["id"], status="error", error=result.get("error", "Unknown"))
 
 # ── Routes ────────────────────────────────────────────────────────────────────
 
 @app.route("/cancel_job/<job_id>", methods=["POST"])
 def cancel_job(job_id):
-    """Marks a job as cancelled. The worker will pick this up and abort."""
-    _tq.update(job_id, status="cancelled")
+    """Removes a job from the UI and signals the worker to abort."""
+    logger.info("Cancelling job: %s", job_id)
+    with _tq._lock:
+        _cancelled_ids.add(job_id)
+        _tq._jobs = [j for j in _tq._jobs if j["id"] != job_id]
+    
+    _tq._broadcast({"type": "init", "jobs": _tq.jobs()})
     return jsonify({"ok": True})
 
 
@@ -549,7 +556,21 @@ def upload():
         return jsonify({"error": "Only .cbz files are accepted"}), 400
 
     save_path = os.path.join(_ROOT, "input", f.filename)
-    f.save(save_path)
+    
+    # Retry save if file is locked (common on Windows if worker is still aborting previous job)
+    saved = False
+    for attempt in range(5):
+        try:
+            f.save(save_path)
+            saved = True
+            break
+        except OSError as e:
+            logger.warning("Upload retry %d: file locked (%s)", attempt+1, e)
+            time.sleep(1.0)
+
+    if not saved:
+        return jsonify({"error": "The file is currently locked by a background process (likely a cancelling job). Please wait a few seconds and try again."}), 503
+
     job_id = _tq.add(
         f.filename, series, source_lang=source_lang,
         target_lang=target_lang, translation_engine=engine,

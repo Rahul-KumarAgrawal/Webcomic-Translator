@@ -278,11 +278,11 @@
               <div class="flex-gap-8">
                 <span style="font-weight:600">{{ job.cbz_name }}</span>
                 <span
-                  class="badge {% if job.status == 'done' %}badge-done{% elif job.status == 'error' %}badge-error{% else %}badge-processing{% endif %}">{{
+                  class="badge {% if job.status == 'done' %}badge-done{% elif job.status == 'error' %}badge-error{% elif job.status == 'cancelled' %}badge-cancelled{% else %}badge-processing{% endif %}">{{
                   job.status }}</span>
               </div>
               <div class="flex-gap-8">
-                {% if job.status == 'done' %}
+                {% if job.status == 'done' or job.status == 'error' or job.status == 'cancelled' %}
                 <a class="btn btn-outline btn-sm" href="/review/{{ job.cbz_name }}">Review →</a>
                 <button class="btn btn-danger btn-sm delete-output-btn" data-cbz="{{ job.cbz_name }}"
                   title="Delete output & session data">🗑️ Delete</button>
@@ -321,12 +321,14 @@
               <div class="flex-gap-8">
                 <span style="font-weight:600">{{ job.cbz_name }}</span>
                 <span
-                  class="badge {% if job.status == 'done' %}badge-done{% elif job.status == 'error' %}badge-error{% else %}badge-processing{% endif %}">{{
+                  class="badge {% if job.status == 'done' %}badge-done{% elif job.status == 'error' %}badge-error{% elif job.status == 'cancelled' %}badge-cancelled{% else %}badge-processing{% endif %}">{{
                   job.status }}</span>
               </div>
               <div class="flex-gap-8">
+                {% if job.status == 'done' or job.status == 'error' or job.status == 'cancelled' %}
                 {% if job.status == 'done' %}
                 <span class="badge badge-done" style="font-weight:bold;">✅ Final CBZ Ready in /output!</span>
+                {% endif %}
                 <a class="btn btn-outline btn-sm" href="/review/{{ job.cbz_name }}">Review →</a>
                 <button class="btn btn-sm" style="background:#4ade80;color:#000;font-weight:600;" onclick="rerenderFromCard(this)" data-cbz="{{ job.cbz_name }}">🔄 Re-render</button>
                 <button class="btn btn-danger btn-sm delete-output-btn" data-cbz="{{ job.cbz_name }}" title="Delete output & session data">🗑️ Delete</button>
