@@ -1057,10 +1057,10 @@ def _save_session_data(cbz_name: str, bubble_results, series: str, chunk_meta: d
                 "memory_id":       b.memory_id,
                 "page_num":        page_num,
                 "crop_url":        crop_url,
-                "x":               region.x,
-                "y":               region.y,
-                "w":               region.w,
-                "h":               region.h,
+                "x":               int(region.x),
+                "y":               int(region.y),
+                "w":               int(region.w),
+                "h":               int(region.h),
             }
             for b, region, page_num, crop_url in bubble_results
         ],

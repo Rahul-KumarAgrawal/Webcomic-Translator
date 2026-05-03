@@ -40,6 +40,7 @@ class BubbleRegion:
     confidence: float = 1.0       # OCR confidence (0.0 - 1.0)
     font_cfg: dict = field(default_factory=dict)
     bubble_id: int = -1           # -1 if outside any bubble (narration), otherwise ID of the bubble mask
+    seg_mask: Optional[list] = None # Polygon points for precise shape
 
     @property
     def bbox(self) -> Tuple[int, int, int, int]:
@@ -63,7 +64,7 @@ class Inpainter:
         self._mit_cfg = cfg.get("mit", {})
 
         # Lazy-loaded Koharu models (initialized on first use, freed via unload_models)
-        self._yolo_model = None
+        self._yolo_models = {}   # Cache for multiple YOLO models
         self._mocr_model = None
         self._models_dir = Path(_ROOT) / "Pipeline Koharu"
 
@@ -117,12 +118,14 @@ class Inpainter:
                 logger.info(f"[Inpainter] Applying Lanczos Global 2x Upscale: {w}x{h} -> {w*2}x{h*2}")
                 image = image.resize((w*2, h*2), resample=Image.LANCZOS)
 
-        det_engine = self.cfg.get("detection_engine", "mit")
-        ocr_engine = self.cfg.get("ocr_engine", "mit")
+        det_engine = str(self.cfg.get("detection_engine", "mit")).lower()
+        ocr_engine = str(self.cfg.get("ocr_engine", "mit")).lower()
         logger.info("[Modular] Using detection=%s, ocr=%s", det_engine, ocr_engine)
 
         # ── 1. Detection ──────────────────────────────────────────────────
-        if str(det_engine).lower() in ("yolo", "yolo_hybrid"):
+        if det_engine == "koharu_dual":
+            regions = self._run_yolo_dual_detect(image)
+        elif det_engine in ("yolo", "yolo_hybrid", "ysg", "ysg2", "ysg_v2"):
             regions = self._run_yolo_detect(image)
         else:
             regions = self._run_mit_detect(image_path, image)
@@ -172,7 +175,12 @@ class Inpainter:
             regions = self._run_manga_ocr_on_regions(image, regions)
 
         # ── 3. Final Deduplication & Merging ───────────────────────────
-        regions = self._merge_nearby_regions(regions)
+        if det_engine in ("yolo", "yolo_hybrid"):
+            # ORIGINAL #7 BEHAVIOR
+            regions = self._merge_nearby_regions_legacy(regions)
+        else:
+            # ADVANCED BEHAVIOR
+            regions = self._merge_nearby_regions_advanced(image, regions, strict=(det_engine == "koharu_dual"))
 
         # ── 4. SFX / Noise Filtering ───────────────────────────────────
         regions = self._apply_sfx_strictness_filter(image, regions)
@@ -187,20 +195,32 @@ class Inpainter:
 
     def _run_yolo_detect(self, image: Image.Image) -> List[BubbleRegion]:
         """Use YOLO detector from the Koharu pipeline for text region detection."""
-        if not self._yolo_model:
-            from ultralytics import YOLO
-            model_path = self._models_dir / "Detection and Layout" / "comic-text-segmenter.pt"
-            self._yolo_model = YOLO(str(model_path))
-            logger.info("[Modular] YOLO text detector loaded.")
+        det_engine = str(self.cfg.get("detection_engine", "yolo")).lower()
+        is_legacy = det_engine in ("yolo", "yolo_hybrid")
+        
+        model_name = "comic-text-segmenter.pt"
+        if not is_legacy:
+            if det_engine == "ysg":
+                model_name = "comic-speech-bubble-detector.pt"
+            elif det_engine in ("ysg2", "ysg_v2"):
+                model_name = "ysg-v2-speech-bubble-seg.pt"
 
-        # Run detection with configurable confidence
-        conf = float(self.cfg.get("detection_confidence", 0.20))
-        results = self._yolo_model(image, verbose=False, conf=conf, iou=0.45)
+        if model_name not in self._yolo_models:
+            from ultralytics import YOLO
+            model_path = self._models_dir / "Detection and Layout" / model_name
+            self._yolo_models[model_name] = YOLO(str(model_path))
+            logger.info("[Modular] YOLO model %s loaded.", model_name)
+
+        yolo_model = self._yolo_models[model_name]
+        conf = float(self.cfg.get("detection_confidence", 0.20 if is_legacy else 0.15))
+        iou = 0.45 if is_legacy else 0.25
+        
+        results = yolo_model(image, verbose=False, conf=conf, iou=iou)
         regions = []
+        img_w, img_h = image.size
+        
         for r in results:
-            if not r.boxes:
-                continue
-            
+            if not r.boxes: continue
             import cv2
             import numpy as np
             masks = r.masks.xy if r.masks is not None else []
@@ -209,23 +229,32 @@ class Inpainter:
                 coords = box.xyxy[0].cpu().numpy().astype(int)
                 x1, y1, x2, y2 = int(coords[0]), int(coords[1]), int(coords[2]), int(coords[3])
                 
-                cx = (x1 + x2) / 2.0
-                cy = (y1 + y2) / 2.0
-                
+                # BRANCH: Legacy #7 doesn't clamp or use confidence in BubbleRegion
+                if is_legacy:
+                    rx, ry, rw, rh = x1, y1, x2 - x1, y2 - y1
+                    r_conf = 1.0
+                else:
+                    rx, ry = max(0, min(x1, x2)), max(0, min(y1, y2))
+                    rw, rh = min(img_w, max(x1, x2)) - rx, min(img_h, max(y1, y2)) - ry
+                    r_conf = float(box.conf[0].cpu().numpy())
+
+                cx, cy = rx + rw/2, ry + rh/2
                 bubble_id = -1
+                region_seg_mask = None
+                
                 if masks:
                     for j, mask_pts in enumerate(masks):
                         if len(mask_pts) > 2:
                             mask_cnt = mask_pts.astype(np.float32)
-                            dist = cv2.pointPolygonTest(mask_cnt, (cx, cy), measureDist=False)
-                            if dist >= 0:
+                            if cv2.pointPolygonTest(mask_cnt, (cx, cy), False) >= 0:
                                 bubble_id = j
+                                region_seg_mask = mask_pts.tolist()
                                 break
                 
                 regions.append(BubbleRegion(
-                    x=x1, y=y1, w=x2 - x1, h=y2 - y1,
-                    source_text="",
-                    bubble_id=bubble_id
+                    x=rx, y=ry, w=rw, h=rh,
+                    source_text="", confidence=r_conf,
+                    bubble_id=bubble_id, seg_mask=region_seg_mask
                 ))
         return regions
 
@@ -237,15 +266,27 @@ class Inpainter:
             self._mocr_model = MangaOcr(str(model_path))
             logger.info("[Modular] MangaOCR loaded.")
 
+        det_engine = str(self.cfg.get("detection_engine", "mit")).lower()
+        is_advanced = det_engine in ("koharu_dual", "ysg", "ysg2", "ysg_v2")
         super_res = self.cfg.get("ocr_super_res", True)
         upscale_factor = float(self.cfg.get("ocr_upscale_factor", 2.0))
 
         for region in regions:
+            # Skip if already has text (Gap-filling)
+            if region.source_text.strip(): continue
+
             try:
-                crop = region.crop(image)
+                if is_advanced:
+                    # Advanced: Tighten crop + Padding for high precision
+                    tx1, ty1, tx2, ty2 = self._tighten_crop(image, region.x, region.y, region.x + region.w, region.y + region.h)
+                    pw, ph = tx2 - tx1, ty2 - ty1
+                    px, py = max(2, int(pw * 0.06)), max(2, int(ph * 0.06))
+                    crop = image.crop((max(0, tx1-px), max(0, ty1-py), min(image.width, tx2+px), min(image.height, ty2+py)))
+                else:
+                    # Legacy #7: Simple crop
+                    crop = region.crop(image)
                 
                 if super_res:
-                    # Upscale for better recognition on low-quality/fuzzy images
                     from PIL import ImageOps
                     w, h = crop.size
                     crop = crop.resize((int(w*upscale_factor), int(h*upscale_factor)), resample=Image.LANCZOS)
@@ -291,10 +332,9 @@ class Inpainter:
 
     def unload_models(self):
         """Free VRAM by unloading lazy-loaded detection/OCR models."""
-        if self._yolo_model:
-            del self._yolo_model
-            self._yolo_model = None
-            logger.info("[Modular] YOLO model unloaded.")
+        if self._yolo_models:
+            self._yolo_models.clear()
+            logger.info("[Modular] YOLO models cache cleared.")
         if self._mocr_model:
             del self._mocr_model
             self._mocr_model = None
@@ -307,20 +347,50 @@ class Inpainter:
             pass
 
     def inpaint(self, image: Image.Image, regions: List[BubbleRegion]) -> Image.Image:
-        """
-        Remove the original text from bubble regions (clean background).
-        Returns a new PIL Image with text erased.
-        """
+        """Remove the original text from bubble regions (clean background)."""
         engine = self.cfg.get("inpaint_engine", "lama").lower()
+        
+        # Determine engine and padding based on detection engine
+        det_engine = str(self.cfg.get("detection_engine", "mit")).lower()
+        is_advanced = det_engine in ("koharu_dual", "ysg", "ysg2", "ysg_v2")
+        padding = 0 if is_advanced else int(self.cfg.get("inpaint_padding", 5))
+
+        if engine == "solid":
+            result = image.copy()
+            import cv2
+            import numpy as np
+            mask = self._build_inpaint_mask(image.width, image.height, regions, padding=padding)
+            np_res = np.array(result)
+            # Simple solid fill: fill with bubble background color or white
+            for r in regions:
+                bg = (255, 255, 255) # Always white as requested
+                if r.seg_mask:
+                    # Detect if it's a single polygon [[x,y],...] or multiple [[[x,y],...]]
+                    if isinstance(r.seg_mask, list) and len(r.seg_mask) > 0:
+                        if isinstance(r.seg_mask[0][0], (int, float, np.number)):
+                            # Single polygon
+                            ms = [r.seg_mask]
+                        else:
+                            # Multiple polygons
+                            ms = r.seg_mask
+                        
+                        for m in ms:
+                            if len(m) > 2:
+                                pts = np.array(m, dtype=np.int32).reshape((-1, 1, 2))
+                                cv_bg = tuple(int(c) for c in bg)
+                                cv2.fillPoly(np_res, [pts], cv_bg)
+                else:
+                    x1, y1, x2, y2 = r.bbox
+                    cv_bg = tuple(int(c) for c in bg)
+                    # Tighten slightly for solid rectangles to avoid edge bleed
+                    cv2.rectangle(np_res, (int(x1), int(y1)), (int(x2), int(y2)), cv_bg, -1)
+            return Image.fromarray(np_res)
+            
         if engine == "aot":
             return self._run_aot_inpaint(image, regions)
         elif engine == "panelcleaner":
             return self._run_panelcleaner_inpaint(image, regions)
-        elif engine == "solid":
-            result = image.copy()
-            for r in regions:
-                self._clean_region(result, r)
-            return result
+        
         return self._run_mit_inpaint(image, regions)
 
     def _run_panelcleaner_inpaint(self, image: Image.Image, regions: List[BubbleRegion]) -> Image.Image:
@@ -363,6 +433,7 @@ class Inpainter:
         """
         result = image.copy()
         draw = ImageDraw.Draw(result)
+        engine = self.cfg.get("inpaint_engine", "lama").lower()
 
         for region in regions:
             if not region.translated_text:
@@ -379,9 +450,12 @@ class Inpainter:
             )
 
             # Auto-detect text color based on bubble background brightness
-            bg_color = self._detect_bubble_bg_color(result, region)
-            
-            if color == "auto":
+            # FORCE black text if using solid white fill
+            if engine == "solid":
+                color = "#000000"
+                outline_color = "#FFFFFF"
+            elif color == "auto":
+                bg_color = self._detect_bubble_bg_color(result, region)
                 is_dark = self._is_dark_background(bg_color)
                 color = "#FFFFFF" if is_dark else "#000000"
                 
@@ -498,7 +572,7 @@ class Inpainter:
 
     # ── Region merging ─────────────────────────────────────────────────────────
 
-    def _merge_nearby_regions(self, regions: List[BubbleRegion]) -> List[BubbleRegion]:
+    def _merge_nearby_regions_legacy(self, regions: List[BubbleRegion]) -> List[BubbleRegion]:
         """
         Merge text regions that likely belong to the same speech bubble.
 
@@ -1246,3 +1320,137 @@ class Inpainter:
             x = max(bubble_left, min(x, bubble_right - line_w))
 
             self._draw_mixed_line(draw, x, y, line, font, emoji_font, color, outline_color)
+    def _run_yolo_dual_detect(self, image: Image.Image) -> List[BubbleRegion]:
+        """Same logic as earlier (Perfected Today)"""
+        m1 = "comic-text-segmenter.pt"
+        m2 = "comic-speech-bubble-detector.pt"
+        for m in (m1, m2):
+            if m not in self._yolo_models:
+                from ultralytics import YOLO
+                self._yolo_models[m] = YOLO(str(self._models_dir / "Detection and Layout" / m))
+
+        conf = float(self.cfg.get("detection_confidence", 0.15))
+        res_text = self._yolo_models[m1](image, verbose=False, conf=conf, iou=0.25)
+        fragments = []
+        for r in res_text:
+            if not r.boxes: continue
+            masks = r.masks.xy if r.masks is not None else []
+            for i, box in enumerate(r.boxes):
+                c = box.xyxy[0].cpu().numpy().astype(int)
+                tx1, ty1, tx2, ty2 = self._tighten_crop(image, c[0], c[1], c[2], c[3])
+                mask = masks[i].tolist() if i < len(masks) else None
+                fragments.append(BubbleRegion(x=tx1, y=ty1, w=tx2-tx1, h=ty2-ty1, source_text="", seg_mask=mask))
+
+        res_bubble = self._yolo_models[m2](image, verbose=False, conf=conf, iou=0.45)
+        bubbles = []
+        for r in res_bubble:
+            if not r.boxes: continue
+            masks = r.masks.xy if r.masks is not None else []
+            for i, box in enumerate(r.boxes):
+                bubbles.append({"bbox": box.xyxy[0].cpu().numpy().astype(int), "mask": masks[i].tolist() if i < len(masks) else None})
+
+        return self._group_regions_by_bubble(image, fragments, bubbles)
+
+    @staticmethod
+    def _tighten_crop(image: Image.Image, x1, y1, x2, y2) -> Tuple[int, int, int, int]:
+        import cv2
+        import numpy as np
+        np_img = np.array(image.crop((x1, y1, x2, y2)).convert("L"))
+        bh, bw = np_img.shape
+        _, binary = cv2.threshold(np_img, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+        inner_mask = np.zeros_like(binary)
+        margin_x, margin_y = max(1, int(bw * 0.05)), max(1, int(bh * 0.06))
+        inner_mask[margin_y:bh-margin_y, margin_x:bw-margin_x] = 255
+        binary = cv2.bitwise_and(binary, inner_mask)
+        pts = cv2.findNonZero(binary)
+        if pts is not None:
+            bx, by, bw_t, bh_t = cv2.boundingRect(pts)
+            return (x1 + bx, y1 + by, x1 + bx + bw_t, y1 + by + bh_t)
+        return (x1, y1, x2, y2)
+
+    def _group_regions_by_bubble(self, image: Image.Image, fragments: List[BubbleRegion], bubbles: List[dict]) -> List[BubbleRegion]:
+        import cv2
+        import numpy as np
+        for f in fragments: f.bubble_id = -1
+        for b_idx, b in enumerate(bubbles):
+            if b["mask"]:
+                poly = np.array(b["mask"], dtype=np.float32)
+                for f in fragments:
+                    if f.bubble_id == -1 and cv2.pointPolygonTest(poly, (f.x + f.w/2, f.y + f.h/2), False) >= 0:
+                        f.bubble_id = b_idx
+            else:
+                bx1, by1, bx2, by2 = b["bbox"]
+                for f in fragments:
+                    if f.bubble_id == -1 and bx1 <= f.x and by1 <= f.y and bx2 >= (f.x+f.w) and by2 >= (f.y+f.h):
+                        f.bubble_id = b_idx
+        return self._merge_nearby_regions_advanced(image, fragments, strict=True)
+
+    def _merge_nearby_regions_advanced(self, image: Image.Image, regions: List[BubbleRegion], strict=False) -> List[BubbleRegion]:
+        """Same logic as earlier (Perfected Today)"""
+        if len(regions) <= 1: return regions
+        import numpy as np
+        src_lang = (self.cfg.get("source_lang_override") or "").lower()
+        is_cjk = any(k in src_lang for k in ("jp", "japan", "ko", "kor", "zh", "ch")) or src_lang == ""
+        avg_aspect = sum(r.h / max(r.w, 1) for r in regions) / len(regions)
+        is_vertical = is_cjk and avg_aspect > 1.2
+        
+        def are_close(r1, r2):
+            if r1.bubble_id != -1 and r1.bubble_id == r2.bubble_id: return True
+            x1a, y1a, x2a, y2a = r1.bbox; x1b, y1b, x2b, y2b = r2.bbox
+            if max(x1a, x1b) < min(x2a, x2b) and max(y1a, y1b) < min(y2a, y2b): return True
+            gx, gy = max(0, x1b-x2a, x1a-x2b), max(0, y1b-y2a, y1a-y2b)
+            if x1a < x2b and x1b < x2a:
+                if gy < (32 if strict else max(min(r1.h, r2.h)*2.0, 40)) and (min(x2a, x2b)-max(x1a, x1b)) > (0.8 if strict else 0.5)*min(r1.w, r2.w): return True
+            if y1a < y2b and y1b < y2a:
+                if gx < (8 if strict else max(min(r1.w, r2.w)*1.5, 30)) and (min(y2a, y2b)-max(y1a, y1b)) > 0.5*min(r1.h, r2.h): return True
+            return False
+
+        n = len(regions); adj = [[] for _ in range(n)]
+        for i in range(n):
+            for j in range(i+1, n):
+                if are_close(regions[i], regions[j]): adj[i].append(j); adj[j].append(i)
+        visited = [False]*n; merged = []
+        for i in range(n):
+            if not visited[i]:
+                group = []; q = [i]; visited[i] = True
+                while q:
+                    u = q.pop(0); group.append(regions[u])
+                    for v in adj[u]:
+                        if not visited[v]: visited[v] = True; q.append(v)
+                gx1, gy1, gx2, gy2 = min(r.x for r in group), min(r.y for r in group), max(r.x+r.w for r in group), max(r.y+r.h for r in group)
+                all_masks = []
+                for r in group:
+                    if r.seg_mask:
+                        if isinstance(r.seg_mask, list) and len(r.seg_mask) > 0 and isinstance(r.seg_mask[0], list): all_masks.extend(r.seg_mask)
+                        else: all_masks.append(r.seg_mask)
+                text = "\n".join(r.source_text.strip() for r in group if r.source_text.strip())
+                merged.append(BubbleRegion(x=gx1, y=gy1, w=gx2-gx1, h=gy2-gy1, source_text=text, bubble_id=group[0].bubble_id, seg_mask=all_masks if all_masks else None))
+        return merged
+
+    def _build_inpaint_mask(self, img_w, img_h, regions, padding=0):
+        import cv2
+        import numpy as np
+        mask = np.zeros((img_h, img_w), dtype=np.uint8)
+        for r in regions:
+            if r.seg_mask:
+                temp = np.zeros_like(mask)
+                if isinstance(r.seg_mask, list) and len(r.seg_mask) > 0:
+                    if isinstance(r.seg_mask[0][0], (int, float, np.number)):
+                        ms = [r.seg_mask]
+                    else:
+                        ms = r.seg_mask
+                    
+                    for m in ms:
+                        if len(m) > 2:
+                            pts = np.array(m, dtype=np.int32).reshape((-1, 1, 2))
+                            cv2.fillPoly(temp, [pts], 255)
+                if padding > 0:
+                    k = padding if padding % 2 != 0 else padding + 1
+                    temp = cv2.dilate(temp, np.ones((k, k), np.uint8))
+                mask = cv2.bitwise_or(mask, temp)
+            else:
+                x1, y1, x2, y2 = r.bbox
+                x1 = max(0, x1-padding); y1 = max(0, y1-padding)
+                x2 = min(img_w, x2+padding); y2 = min(img_h, y2+padding)
+                mask[y1:y2, x1:x2] = 255
+        return mask

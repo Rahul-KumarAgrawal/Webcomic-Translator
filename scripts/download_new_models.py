@@ -10,6 +10,9 @@ models = [
     ("ogkalu/comic-text-and-bubble-detector", "detector.onnx"),
     ("kitsumed/yolov8m_seg-speech-bubble", "model.pt"),
     ("ogkalu/comic-text-segmenter-yolov8m", "comic-text-segmenter.pt"),
+    ("ogkalu/comic-speech-bubble-detector-yolov8m", "comic-speech-bubble-detector.pt"),
+    ("ogkalu/yolo8n-comic", "yolo8n-comic.pt"),
+    ("kitsumed/yolo11n-manga-ocr", "yolo11n-manga-ocr.pt"),
 ]
 
 for repo, filename in models:

@@ -11,10 +11,8 @@ Runs on **Windows** with an **NVIDIA RTX 3050 (4 GB VRAM)**.
 |---|---|
 | **Input**  | CBZ files (drag-and-drop) or folders |
 | **Output** | Clean CBZ with translated text cleanly rendered into bubbles |
-| **OCR Engines** | MangaOCR, PaddleOCR, EasyOCR, MIT (Modular Pipeline) |
-| **Detection** | YOLO (Pipeline Koharu), ComicTextSegmenter, MIT |
-| **Upscaling** | **Waifu2x (AI 2x Page Upscale)**, Lanczos, OCR Super-Res |
-| **Inpainting** | LaMa, PanelCleaner (Modular Background Cleaning) |
+| **Detection Engines** | YOLO Hybrid, Koharu Dual, YSG v1 (ogkalu), YSG v2 (Kitsumed), MIT |
+| **Inpainting** | LaMa, PanelCleaner, **Solid Fill (Perfect for Manhwa)** |
 | **Webtoon Support** | Advanced vertical stitching and coordinate-aware overlap chunking |
 | **Translation** | Offline (NLLB-200 600M) + APIs (DeepL, Google Gemini, OpenAI, Groq, Baidu) |
 | **Batch Pipeline** | **3-Phase (OCR → Chapter Translation → Final Render)** |
@@ -138,9 +136,10 @@ series_fonts:
 | NLLB-200 600M inference (fp16) | ~1.5 GB |
 | LoRA training (r=8) | ~2.8 GB total |
 | Waifu2x (2x Page Upscale) | ~1.0 - 2.0 GB (Peak) |
-| Pipeline Koharu (YOLO) + MangaOCR | ~1.5 GB |
-| PaddleOCR / EasyOCR | ~1.0 GB |
-| LaMa / PanelCleaner | ~1.0 - 1.5 GB |
+| YOLO Hybrid / Koharu Dual | ~1.5 GB |
+| YSG v1 / v2 (ogkalu/Kitsumed) | ~0.8 GB |
+| MangaOCR (Expert Gap-Filling) | ~1.2 GB |
+| LaMa / PanelCleaner / Solid Fill | ~1.0 - 1.5 GB |
 | manga-image-translator (Legacy) | ~1.5 GB |
 
 > Training and inference are never run simultaneously. Models are dynamically loaded and unloaded as needed to prevent VRAM overflow.

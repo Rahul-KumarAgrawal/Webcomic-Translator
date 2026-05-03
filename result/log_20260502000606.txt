@@ -1,0 +1,13 @@
+[manga-translator.DefaultDetector] Detection resolution: 1536x2048
+[manga-translator.Model48pxOCR] prob: 0.9973030090332031 也要… fg: (166, 10, 75) bg: (166, 10, 75)
+[manga-translator.Model48pxOCR] prob: 0.9985722899436951 噢吼…… fg: (31, 10, 154) bg: (31, 10, 154)
+[manga-translator.Model48pxOCR] prob: 0.9987713694572449 当然内衣 fg: (166, 18, 79) bg: (166, 18, 79)
+[manga-translator.Model48pxOCR] prob: 0.9997127652168274 还要棒呢 fg: (39, 14, 161) bg: (39, 14, 161)
+[manga-translator.Model48pxOCR] prob: 0.9962758421897888 各个角落 fg: (39, 12, 164) bg: (39, 12, 164)
+[manga-translator.Model48pxOCR] prob: 0.9988810420036316 脱掉的吧 fg: (164, 14, 76) bg: (164, 14, 76)
+[manga-translator.Model48pxOCR] prob: 0.999560534954071 我会仔细的 fg: (33, 9, 161) bg: (33, 9, 161)
+[manga-translator.Model48pxOCR] prob: 0.9854687452316284 洗干净的哦 fg: (37, 8, 161) bg: (37, 8, 161)
+[manga-translator.Model48pxOCR] prob: 0.9994770288467407 仔细的清楚的洗 fg: (171, 14, 78) bg: (182, 42, 101)
+[manga-translator.Model48pxOCR] prob: 0.9927803874015808 是什么意思啊？ fg: (167, 12, 75) bg: (233, 191, 213)
+[manga-translator.Model48pxOCR] prob: 0.99932461977005 清楚的给你身体 fg: (33, 8, 162) bg: (33, 8, 162)
+[manga-translator.Model48pxOCR] prob: 0.9992753863334656 这身体比我预想的 fg: (34, 10, 160) bg: (34, 10, 160)
