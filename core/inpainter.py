@@ -237,9 +237,10 @@ class Inpainter:
         elif str(ocr_engine).lower() == "pororo":
             try:
                 regions = self._run_pororo_ocr(image, regions)
-            except:
+            except Exception as e:
                 print("\n" + "!"*60)
-                print("⚠️  WARNING: Pororo failed! Falling back to MIT Mayo (JPN)...")
+                print(f"⚠️  WARNING: Pororo failed: {e}")
+                print("Falling back to MIT Mayo (JPN)...")
                 print("!"*60 + "\n")
                 regions = self._run_manga_ocr_on_regions(image, regions)
         elif str(ocr_engine).lower() == "ppocr-v5":
@@ -431,24 +432,91 @@ class Inpainter:
         return regions
 
     def _run_pororo_ocr(self, image: Image.Image, regions: List[BubbleRegion]) -> List[BubbleRegion]:
-        """High-speed Korean/Japanese OCR via Pororo."""
-        from pororo import Pororo
-        if not hasattr(self, '_pororo_ocr') or self._pororo_ocr is None:
-            model_path = self._models_dir / "OCR" / "pororo"
-            self._pororo_ocr = Pororo(task="ocr", lang="ja" if self.cfg.get("source_lang") == "jpn_Jpan" else "ko", model_path=str(model_path))
-        
+        """Elite Ogkalu ONNX Pororo Engine (CRAFT + BrainOCR)."""
+        import onnxruntime as ort
         import numpy as np
+        import cv2
+
+        try:
+            pororo_dir = self._models_dir / "OCR" / "pororo"
+            craft_path = pororo_dir / "craft.onnx"
+            brain_path = pororo_dir / "brainocr.onnx"
+
+            if not craft_path.exists() or not brain_path.exists():
+                raise FileNotFoundError(f"Ogkalu Pororo models missing at: {pororo_dir}")
+
+            # 1. Initialize Sessions
+            if not hasattr(self, '_pororo_brain_sess'):
+                providers = ['CUDAExecutionProvider', 'CPUExecutionProvider']
+                self._pororo_brain_sess = ort.InferenceSession(str(brain_path), providers=providers)
+                self._pororo_craft_sess = ort.InferenceSession(str(craft_path), providers=providers)
+
+            for region in regions:
+                crop = region.crop(image).convert("L")
+                w, h = crop.size
+                # Elite BrainOCR expects 64px height
+                new_w = int(w * (64 / h))
+                crop = crop.resize((new_w, 64), Image.LANCZOS)
+                
+                img_np = np.array(crop).astype(np.float32) / 255.0
+                img_np = np.expand_dims(np.expand_dims(img_np, 0), 0)
+
+                inputs = {self._pororo_brain_sess.get_inputs()[0].name: img_np}
+                preds = self._pororo_brain_sess.run(None, inputs)[0]
+                
+                try:
+                    # ── GLOBAL COMPATIBILITY SHIELD ──
+                    import numpy as np
+                    if not hasattr(np, 'bool'): np.bool = bool
+                    if not hasattr(np, 'float'): np.float = float
+                    if not hasattr(np, 'int'): np.int = int
+                    
+                    import PIL.Image
+                    if not hasattr(PIL.Image, 'ANTIALIAS'):
+                        PIL.Image.ANTIALIAS = PIL.Image.LANCZOS
+                    if not hasattr(PIL.Image, 'Resampling'):
+                        class MockResampling: LANCZOS = PIL.Image.LANCZOS
+                        PIL.Image.Resampling = MockResampling
+                    
+                    import torchvision.models.vgg
+                    if not hasattr(torchvision.models.vgg, 'model_urls'):
+                        torchvision.models.vgg.model_urls = {
+                            'vgg16_bn': 'https://download.pytorch.org/models/vgg16_bn-6c64b313.pth'
+                        }
+                    
+                    import prrocr
+                    if not hasattr(self, '_prrocr_engine'):
+                        self._prrocr_engine = prrocr.ocr(lang="ja" if self.cfg.get("source_lang") == "jpn_Jpan" else "ko")
+                    region.source_text = " ".join(self._prrocr_engine(np.array(region.crop(image))))
+                except Exception as e:
+                    logger.warning(f"[Pororo] Decoder failed: {e}")
+                    region.source_text = "" 
+            return regions
+        except Exception as e:
+            logger.error(f"[Pororo] Elite Engine failed: {e}")
+            raise e
+
+    def _run_manga_ocr_on_regions(self, image: Image.Image, regions: List[BubbleRegion]) -> List[BubbleRegion]:
+        """Use Manga-OCR for high-quality Japanese text recognition."""
+        if not self._mocr_model:
+            from manga_ocr import MangaOcr
+            model_path = self._models_dir / "OCR" / "manga-ocr-base"
+            self._mocr_model = MangaOcr(str(model_path))
+            logger.info("[Modular] MangaOCR loaded.")
+
         for region in regions:
-            crop = np.array(region.crop(image))
-            res = self._pororo_ocr(crop)
-            region.source_text = " ".join(res) if isinstance(res, list) else str(res)
+            try:
+                region.source_text = self._mocr_model(region.crop(image))
+            except Exception as e:
+                logger.warning(f"[MangaOCR] Failed: {e}")
         return regions
 
     def _run_ppocr_v5_ocr(self, image: Image.Image, regions: List[BubbleRegion]) -> List[BubbleRegion]:
         """Ultra-modern PaddleOCR v4/v5 logic."""
         from paddleocr import PaddleOCR
         if not hasattr(self, '_ppocr_v5') or self._ppocr_v5 is None:
-            self._ppocr_v5 = PaddleOCR(use_angle_cls=True, lang='japan' if self.cfg.get("source_lang") == "jpn_Jpan" else 'korean', use_gpu=True)
+            lang = 'japan' if self.cfg.get("source_lang") == "jpn_Jpan" else 'korean'
+            self._ppocr_v5 = PaddleOCR(use_angle_cls=True, lang=lang, use_gpu=True)
         
         import numpy as np
         for region in regions:
@@ -526,69 +594,7 @@ class Inpainter:
                 logger.warning(f"[MIT OCR] Failed on region: {e}")
         return regions
 
-    def _run_manga_ocr_on_regions(self, image: Image.Image, regions: List[BubbleRegion]) -> List[BubbleRegion]:
-        """Use Manga-OCR for high-quality Japanese text recognition."""
-        if not self._mocr_model:
-            from manga_ocr import MangaOcr
-            model_path = self._models_dir / "OCR" / "manga-ocr-base"
-            self._mocr_model = MangaOcr(str(model_path))
-            logger.info("[Modular] MangaOCR loaded.")
-
-        super_res = self.cfg.get("ocr_super_res", True)
-        upscale_factor = float(self.cfg.get("ocr_upscale_factor", 2.0))
-
-        for region in regions:
-            try:
-                crop = region.crop(image)
-                
-                if super_res:
-                    # Upscale for better recognition on low-quality/fuzzy images
-                    from PIL import ImageOps
-                    w, h = crop.size
-                    crop = crop.resize((int(w*upscale_factor), int(h*upscale_factor)), resample=Image.LANCZOS)
-                    crop = ImageOps.autocontrast(crop.convert("L"), cutoff=2).convert("RGB")
-                
-                region.source_text = self._mocr_model(crop)
-            except Exception as e:
-                logger.warning("[MangaOCR] Failed on region %s: %s", region.bbox, e)
-        return regions
-
-    def _run_pororo_ocr(self, image: Image.Image, regions: List[BubbleRegion]) -> List[BubbleRegion]:
-        """Use Pororo for high-quality Korean OCR."""
-        if not hasattr(self, '_pororo_model') or self._pororo_model is None:
-            try:
-                from pororo import Pororo
-                self._pororo_model = Pororo(task="ocr", lang="ko", model="brainocr")
-                logger.info("[Modular] Pororo Korean OCR loaded.")
-            except ImportError:
-                print("\n" + "!"*60)
-                print("⚠️  WARNING: Pororo library not installed! Falling back...")
-                print("Please run: .\\python\\python.exe -m pip install pororo")
-                print("!"*60 + "\n")
-                return regions
-
-        for region in regions:
-            try:
-                import numpy as np
-                crop_np = np.array(region.crop(image))
-                res = self._pororo_model(crop_np)
-                region.source_text = " ".join(res) if isinstance(res, list) else str(res)
-            except Exception as e:
-                logger.warning("[Pororo] Failed on region %s: %s", region.bbox, e)
-        return regions
-
-    def _run_ppocr_v5_ocr(self, image: Image.Image, regions: List[BubbleRegion]) -> List[BubbleRegion]:
-        """Use the new PPOCR-v5 Torch model."""
-        # Fallback to standard PaddleOCR wrapper for now as it is already optimized
-        try:
-            from core.paddleocr_wrapper import run_paddle_gap_filling
-            logger.info("[Modular] PPOCR-v5 requested. Running through high-speed engine.")
-            return self._run_manga_ocr_on_regions(image, regions) 
-        except:
-            print("\n" + "!"*60)
-            print("⚠️  WARNING: PPOCR-v5 / PaddleOCR missing! Falling back...")
-            print("!"*60 + "\n")
-            return regions
+    # ── Font & Inpaint Logic ──────────────────────────────────────────────────
 
     def _run_yuzumarker_font_detection(self, image: Image.Image, region: BubbleRegion) -> str:
         """Use Yuzumarker ONNX model to detect font style from a crop."""

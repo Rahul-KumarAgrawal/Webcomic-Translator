@@ -133,8 +133,9 @@ echo [SETUP] Installing MIT/OCR components...
 "%PYTHON%" -m pip install manga-ocr
 "%PYTHON%" -m pip install paddlepaddle-gpu==2.6.1 -i https://www.paddlepaddle.org.cn/packages/stable/cu118/ paddleocr==2.8.1
 
-REM -- Phase 4: Utilities --
-echo [SETUP] Installing image processing and utilities...
+REM -- Phase 4: Utilities & Elite Engines --
+echo [SETUP] Installing image processing and Elite Engines...
+"%PYTHON%" -m pip install pororo-ocr wget pytesseract
 "%PYTHON%" -m pip install scikit-image opencv-python Pillow ImageHash pyclipper shapely freetype-py git+https://github.com/facebookresearch/segment-anything.git
 "%PYTHON%" -m pip install transformers sentencepiece accelerate openai==1.63.0 tiktoken deepl groq google-genai py3langid==0.2.2 langdetect langcodes easyocr editdistance
 "%PYTHON%" -m pip install segmentation-models-pytorch safetensors

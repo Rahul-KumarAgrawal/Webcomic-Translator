@@ -43,10 +43,12 @@ einops>=0.7.0
 kornia>=0.7.1
 timm>=0.9.12
 ctranslate2>=4.0.0
-onnxruntime-gpu>=1.16.3
+onnxruntime-gpu>=1.17.0
 segmentation-models-pytorch>=0.3.3
 safetensors>=0.4.5
-pororo>=0.4.2
+pororo-ocr
+wget
+pytesseract
 scikit-image>=0.22.0
 opencv-python>=4.8.1
 ImageHash>=4.3.1

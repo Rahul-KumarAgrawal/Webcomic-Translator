@@ -17,10 +17,11 @@ This project is a high-performance, modular manga translation pipeline designed 
 4.  **YOLO Only**: Pure text detection for speed.
 
 ### OCR Engines
-1.  **Manga-OCR (Default)**: The standard for high-accuracy Japanese text.
-2.  **MIT Mayo (JPN)**: Ultra-fast 48px OCR for rapid processing.
-3.  **PPOCR-v5**: Modern PaddleOCR v4/v5 architecture.
-4.  **Pororo**: Specialized Korean/Japanese OCR engine.
+1.  **Pororo Elite (🥇 New)**: High-speed ONNX-accelerated engine for Korean/Japanese. Includes "Global Compatibility Shield" for stability.
+2.  **Manga-OCR (Default)**: The standard for high-accuracy Japanese text.
+3.  **PPOCR-v5**: Modern PaddleOCR v4/v5 architecture (Ogkalu PyTorch port included).
+4.  **Tesseract-OCR**: Reliable local fallback (Requires install into `./Tesseract-OCR/`).
+5.  **MIT Mayo (JPN)**: Ultra-fast 48px OCR for rapid processing.
 
 ## 📦 Setup
 1.  Run `setup.bat` to install all dependencies and verify model paths.
@@ -30,3 +31,9 @@ This project is a high-performance, modular manga translation pipeline designed 
 ## 🖥️ Hardware Requirements
 *   **GPU**: NVIDIA RTX Series (3050+) recommended.
 *   **VRAM**: 4GB+ for basic, 8GB+ for elite engines.
+
+## 🌟 Recent Updates (May 2026)
+*   **Pororo Elite Upgrade**: Fully refactored the Korean OCR stack. Now uses ONNX-accelerated BrainOCR + CRAFT with optimized 64px input dimensions.
+*   **Global Compatibility Shield**: Implemented a runtime patching system that automatically "heals" library conflicts between modern Python/Pillow/NumPy and legacy AI engines.
+*   **Modular Routing**: Stabilized the "Ghost Code" in `inpainter.py`, ensuring correct engine selection for Korean and Japanese.
+*   **Tesseract Fallback**: Integrated local Tesseract-OCR support for mission-critical reliability.

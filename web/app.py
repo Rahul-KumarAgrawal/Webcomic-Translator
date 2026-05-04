@@ -111,6 +111,8 @@ from flask import (
 from flask_cors import CORS
 
 # ── Project root setup ────────────────────────────────────────────────────────
+import core.inpainter
+print(f"\n[DEBUG] Loading Inpainter from: {core.inpainter.__file__}\n")
 
 SESSIONS_DIR  = os.path.join(_ROOT, "web", "sessions")
 BACKUPS_DIR   = os.path.join(_ROOT, "backups")
