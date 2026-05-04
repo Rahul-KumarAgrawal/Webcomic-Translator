@@ -88,6 +88,8 @@ def get_paddle_ocr(lang="japan"):
 
 def map_lang_to_paddle(lang_code: str) -> str:
     """Maps ISO language codes to PaddleOCR codes."""
+    if not lang_code:
+        return "japan"
     lang_code = lang_code.lower()
     if "jp" in lang_code or "japan" in lang_code: return "japan"
     if "ko" in lang_code or "kor" in lang_code: return "korean"
@@ -110,7 +112,7 @@ def run_paddle_ocr_on_regions(image: Image.Image, regions: list, cfg: dict) -> l
     if not regions:
         return regions
         
-    source_lang_hint = cfg.get("source_lang_override") or "japan"
+    source_lang_hint = cfg.get("source_lang") if cfg else "japan"
     paddle_lang = map_lang_to_paddle(source_lang_hint)
     
     ocr = get_paddle_ocr(paddle_lang)
@@ -182,7 +184,7 @@ def run_paddle_gap_filling(image: Image.Image, existing_regions: list, cfg: dict
     If text is found that is NOT already inside an existing region (YOLO bubble), 
     returns a list of new suggested regions (x, y, w, h, text).
     """
-    source_lang_hint = cfg.get("source_lang_override") or "japan"
+    source_lang_hint = cfg.get("source_lang") if cfg else "japan"
     paddle_lang = map_lang_to_paddle(source_lang_hint)
     
     ocr = get_paddle_ocr(paddle_lang)

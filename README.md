@@ -35,5 +35,20 @@ This project is a high-performance, modular manga translation pipeline designed 
 ## 🌟 Recent Updates (May 2026)
 *   **Pororo Elite Upgrade**: Fully refactored the Korean OCR stack. Now uses ONNX-accelerated BrainOCR + CRAFT with optimized 64px input dimensions.
 *   **Global Compatibility Shield**: Implemented a runtime patching system that automatically "heals" library conflicts between modern Python/Pillow/NumPy and legacy AI engines.
-*   **Modular Routing**: Stabilized the "Ghost Code" in `inpainter.py`, ensuring correct engine selection for Korean and Japanese.
-*   **Tesseract Fallback**: Integrated local Tesseract-OCR support for mission-critical reliability.
+*   **Symbol-Only Fallback**: Integrated a specialized Tesseract pass to automatically recover punctuation-only bubbles (e.g., `...`, `!!`) missed by standard OCR.
+*   **Dynamic Language Mapping**: All OCR engines (Tesseract, EasyOCR, Paddle) now dynamically map NLLB codes (e.g., `kor_Hang`) to their internal engine codes.
+
+## 💡 Elite Translation Tips
+
+### 1. High-Precision Language Selection
+For maximum OCR accuracy, use the full NLLB-200 language codes in the UI:
+*   **Korean**: `kor_Hang` (Enables the Elite Pororo stack)
+*   **Japanese**: `jpn_Jpan` (Enables high-fidelity Manga-OCR)
+*   **Chinese (Simplified)**: `zho_Hans`
+*   **English**: `eng_Latn`
+
+### 2. Tesseract Symbol Recovery
+If bubbles containing only `...` or `!!!` are coming back empty, ensure you have Tesseract installed in the `./Tesseract-OCR/` folder. The pipeline will automatically use it as a "Smart De-Fragmenter" and symbol-recovery engine.
+
+### 3. Fixing "Fragmented" Text
+If Tesseract returns words with spaces (e.g., `인 정 했`), the pipeline now includes a **Smart De-Fragmenter** that automatically collapses these spaces while preserving English word breaks.

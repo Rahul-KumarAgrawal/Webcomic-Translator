@@ -50,7 +50,7 @@
                                     <option value="manga-ocr" {% if cfg.get('ocr_engine','manga-ocr')=='manga-ocr' %}selected{% endif %}>🌸 Manga-OCR (JPN & CHN)</option>
                                     <option value="paddle" {% if cfg.get('ocr_engine')=='paddle' %}selected{% endif %}>🇨🇳 PaddleOCR (v2.8 - Standard)</option>
                                     <option value="pororo" {% if cfg.get('ocr_engine')=='pororo' %}selected{% endif %}>🇰🇷 Pororo (KOR - Ogkalu)</option>
-                                    <option value="ppocr-v5" {% if cfg.get('ocr_engine')=='ppocr-v5' %}selected{% endif %}>🔥 PaddleOCR (v5 - Latest / Ogkalu)</option>
+                                    <option value="ppocr-v5" {% if cfg.get('ocr_engine')=='ppocr-v5' %}selected{% endif %}>🔥 PaddleOCR (v5 - Latest / Ogkalu) (Supports: Ko, En, Latin)</option>
                                     <option value="easyocr" {% if cfg.get('ocr_engine')=='easyocr' %}selected{% endif %}>🌐 EasyOCR (Multilingual)</option>
                                     <option value="mit" {% if cfg.get('ocr_engine','mit')=='mit' %}selected{% endif %}>🛠️ MIT Mayo (JPN)</option>
                                     <option value="none" {% if cfg.get('ocr_engine')=='none' %}selected{% endif %}>🚫 None (Skip OCR)</option>

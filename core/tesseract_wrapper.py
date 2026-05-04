@@ -37,6 +37,8 @@ else:
 
 def map_lang_to_tess(lang_code: str) -> str:
     """Maps NLLB/ISO codes to Tesseract .traineddata codes."""
+    if not lang_code:
+        return "eng"
     lang_code = lang_code.lower()
     if "jp" in lang_code: return "jpn"
     if "ko" in lang_code: return "kor"
@@ -57,8 +59,9 @@ def run_tesseract_on_regions(image, regions, cfg=None):
     if not tesseract_path:
         return regions
 
-    lang_code = cfg.get("source_lang_override") if cfg else "eng_Latn"
+    lang_code = cfg.get("source_lang", "eng_Latn") if cfg else "eng_Latn"
     tess_lang = map_lang_to_tess(lang_code)
+    print(f"DEBUG: [Tesseract] Runtime Config - Source: {lang_code} -> TessLang: {tess_lang}")
     
     # ... (rest of language verification) ...
     tess_dir = os.path.dirname(tesseract_path)
@@ -101,7 +104,17 @@ def run_tesseract_on_regions(image, regions, cfg=None):
                     confs.append(float(data['conf'][i]))
             
             if texts:
-                r.source_text = " ".join(texts).strip()
+                raw_text = " ".join(texts).strip()
+                
+                if tess_lang.startswith(("kor", "jpn", "chi")):
+                    import re
+                    # Remove space between CJK characters, run twice for overlapping matches ("A B C" -> "AB C" -> "ABC")
+                    raw_text = re.sub(r'([\uac00-\ud7af\u3040-\u30ff\u4e00-\u9fff])\s+([\uac00-\ud7af\u3040-\u30ff\u4e00-\u9fff])', r'\1\2', raw_text)
+                    raw_text = re.sub(r'([\uac00-\ud7af\u3040-\u30ff\u4e00-\u9fff])\s+([\uac00-\ud7af\u3040-\u30ff\u4e00-\u9fff])', r'\1\2', raw_text)
+                    # Clean any resulting double spaces
+                    raw_text = re.sub(r'\s+', ' ', raw_text).strip()
+                
+                r.source_text = raw_text
                 r.confidence = sum(confs) / len(confs) / 100.0 # Tesseract is 0-100
         except Exception as e:
             logger.error(f"[Tesseract] Error on region {r}: {e}")

@@ -46,6 +46,8 @@ def map_lang_to_easy(lang_code: str) -> list:
     Maps ISO/NLLB language codes to EasyOCR language codes.
     Returns a list because EasyOCR supports multi-language OCR.
     """
+    if not lang_code:
+        return ["ja", "en"]
     lang_code = lang_code.lower()
     if "jp" in lang_code or "japan" in lang_code: return ["ja", "en"]
     if "ko" in lang_code or "kor" in lang_code: return ["ko", "en"]
@@ -68,8 +70,15 @@ def run_easyocr_on_regions(image: Image.Image, regions: list, cfg: dict = None) 
     if not regions:
         return regions
         
-    lang_code = cfg.get("source_lang_override") if cfg else ""
+    lang_code = cfg.get("source_lang", "eng_Latn") if cfg else "eng_Latn"
     easy_langs = map_lang_to_easy(lang_code)
+    # Use print so it definitely shows up in the user's CMD
+    print(f"DEBUG: [EasyOCR] Runtime Config - Source: {lang_code} -> EasyLangs: {easy_langs}")
+    
+    # Force reset if language changed
+    global _easy_reader_instance, _easy_last_langs
+    if _easy_last_langs != sorted(list(set(easy_langs))):
+        _easy_reader_instance = None
     
     reader = get_easyocr_reader(easy_langs)
     if reader is None:

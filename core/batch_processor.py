@@ -356,6 +356,9 @@ def process_cbz(
             logger.info(f"Auto-detection successful. Confirmed source language: {nllb_code}")
             cfg["source_lang_override"] = nllb_code
 
+        # Always inject the resolved source language into the config for the OCR engines
+        cfg["source_lang"] = cfg.get("source_lang_override")
+
         # Load chunk metadata if chunking was used (for deduplication)
         chunk_meta = None
         chunk_meta_path = os.path.join(tmp_dir, "chunk_metadata.json") if tmp_dir else None

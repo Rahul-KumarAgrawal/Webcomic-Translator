@@ -108,8 +108,19 @@ for %%P in (core memory model web) do (
 )
 
 REM -- Pip Setup --
-echo [SETUP] Upgrading pip...
-"%PYTHON%" -m ensurepip --upgrade >nul 2>&1
+echo [SETUP] Updating pip...
+"%PYTHON%" -m pip install --upgrade pip --quiet
+
+REM -- Check for Tesseract --
+if not exist ".\Tesseract-OCR\tesseract.exe" (
+    echo.
+    echo  [!] WARNING: Tesseract-OCR not found in ./Tesseract-OCR/
+    echo      The Symbol Fallback and Tesseract Engine will not work.
+    echo      Download it here: https://github.com/UB-Mannheim/tesseract/wiki
+    echo.
+) else (
+    echo [SETUP] Tesseract-OCR engine found.
+)
 "%PYTHON%" -m pip install --upgrade pip setuptools wheel
 
 REM -- Phase 1: PyTorch --

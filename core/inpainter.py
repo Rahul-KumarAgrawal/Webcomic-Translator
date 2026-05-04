@@ -257,6 +257,9 @@ class Inpainter:
             # MIT Mayo (JPN) fallback/direct
             regions = self._run_mit_ocr_on_regions(image, regions)
 
+        # ── 2b. Symbol-Only Fallback for Empty OCR Results ────────────
+        regions = self._fallback_symbol_ocr(image, regions, str(ocr_engine).lower())
+
         # ── 3. Font Style Detection ───────────────────────────────────
         font_det_engine = self.cfg.get("font_detection_engine", "default")
         if font_det_engine == "yuzumarker":
@@ -272,9 +275,93 @@ class Inpainter:
 
         logger.info(f"[DEBUG INPAINTER] Final image.size = {image.size}, Number of regions = {len(regions)}")
         for i, r in enumerate(regions):
+            
+            # Universal CJK De-fragmenter (Applies to all OCR engines including Pororo)
+            if r.source_text:
+                import re
+                # This explicitly looks for spacing between CJK characters and removes it
+                r.source_text = re.sub(r'([\uac00-\ud7af\u3040-\u30ff\u4e00-\u9fff])\s+([\uac00-\ud7af\u3040-\u30ff\u4e00-\u9fff])', r'\1\2', r.source_text)
+                r.source_text = re.sub(r'([\uac00-\ud7af\u3040-\u30ff\u4e00-\u9fff])\s+([\uac00-\ud7af\u3040-\u30ff\u4e00-\u9fff])', r'\1\2', r.source_text)
+                r.source_text = re.sub(r'\s+', ' ', r.source_text).strip()
+
             logger.debug(f"[DEBUG INPAINTER] Region {i}: bbox=({r.x}, {r.y}, ..., w={r.w}, h={r.h}), max_w={image.size[0]}, max_h={image.size[1]}")
 
         return image, regions
+
+    def _fallback_symbol_ocr(self, image: Image.Image, regions: List[BubbleRegion], ocr_engine: str) -> List[BubbleRegion]:
+        """
+        If a bubble is detected (e.g. YOLO) and OCR returned empty,
+        perform a high-contrast crop and use the selected OCR engine 
+        to look for punctuation (!, ?, ., ~, etc.).
+        """
+        import re
+        from PIL import ImageOps
+        import pytesseract
+
+        # Only process regions with empty source_text
+        for r in regions:
+            if r.source_text and r.source_text.strip():
+                continue
+            
+            x1, y1, x2, y2 = r.bbox
+            # Add larger padding for symbols so they don't hit the edge
+            pad = 15
+            w_orig, h_orig = image.size
+            crop_rect = (max(0, x1-pad), max(0, y1-pad), min(w_orig, x2+pad), min(h_orig, y2+pad))
+            crop_pil = image.crop(crop_rect).convert("L")
+            
+            # Autocontrast
+            crop_pil = ImageOps.autocontrast(crop_pil, cutoff=0)
+
+            # Upscale massively to make symbols clear
+            w, h = crop_pil.size
+            if w > 0 and h > 0:
+                crop_pil = crop_pil.resize((w * 4, h * 4), resample=Image.LANCZOS)
+                
+            text = ""
+            try:
+                if ocr_engine == "easyocr":
+                    from core.easyocr_wrapper import get_easyocr_reader
+                    # Force 'en' to avoid CJK languages ignoring lone punctuation.
+                    reader = get_easyocr_reader(["en"])
+                    if reader:
+                        import numpy as np
+                        crop_np = np.array(crop_pil.convert("RGB"))
+                        results = reader.readtext(crop_np, detail=0, paragraph=False)
+                        if results:
+                            text = " ".join(results)
+                elif ocr_engine == "paddle":
+                    from core.paddleocr_wrapper import get_paddle_ocr
+                    ocr = get_paddle_ocr("en")
+                    if ocr:
+                        import numpy as np
+                        crop_np = np.array(crop_pil.convert("RGB"))
+                        result = ocr.ocr(crop_np, cls=False)
+                        if result and result[0]:
+                            text = " ".join([line[1][0] for line in result[0] if line])
+                else:
+                    # Fallback to Tesseract for anything else
+                    from core.tesseract_wrapper import tesseract_path
+                    if tesseract_path:
+                        pytesseract.pytesseract.tesseract_cmd = tesseract_path
+                    
+                    config = '--psm 11'
+                    text = pytesseract.image_to_string(crop_pil, lang='eng', config=config).strip()
+                    
+                # Sanitize the output:
+                # 1. Replace common mistakes for '!'
+                text = text.replace('I', '!').replace('l', '!').replace('1', '!')
+                # 2. Keep only punctuation and spaces
+                text = re.sub(r'[^\!\?\.\~\·\s]', '', text).strip()
+                
+                if text:
+                    r.source_text = text
+                    r.confidence = 0.5
+                    logger.info(f"[Inpainter] Symbol fallback recovered using {ocr_engine}: '{r.source_text}'")
+            except Exception as e:
+                logger.debug(f"[Inpainter] Symbol fallback failed with {ocr_engine}: {e}")
+                
+        return regions
 
     # ── Koharu engine methods ─────────────────────────────────────────────────
 
@@ -657,7 +744,8 @@ class Inpainter:
             score = r.confidence * 100 / (var + 1)
             
             threshold = 0.5 * strictness
-            if score >= threshold or r.confidence > 0.85:
+            # Keep region if score is good, OR if it has a valid detection (conf=0 usually means OCR fail, not bad detection)
+            if score >= threshold or r.confidence > 0.85 or (r.w > 20 and r.h > 20):
                 filtered.append(r)
             else:
                 logger.info("[SFX Filter] Dropping noise/SFX: score=%.2f, var=%.1f, conf=%.2f", 
