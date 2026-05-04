@@ -1,3 +1,0 @@
-[manga-translator.DefaultDetector] Detection resolution: 1536x2048
-[manga-translator.Model48pxOCR] prob: 0.249803364276886 oxakikanox fg: (15, 15, 14) bg: (15, 15, 14)
-[manga-translator.DefaultDetector] Detection resolution: 1536x2048

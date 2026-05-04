@@ -2,7 +2,7 @@ import os
 from huggingface_hub import hf_hub_download, snapshot_download
 from pathlib import Path
 
-_ROOT = Path(os.path.dirname(os.path.abspath(__file__)))
+_ROOT = Path(os.path.dirname(os.path.abspath(__file__))).parent
 base_dir = _ROOT / "Pipeline Koharu"
 
 models_to_download = [

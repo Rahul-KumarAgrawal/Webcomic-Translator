@@ -37,16 +37,23 @@ for s_path in site.getsitepackages():
 try:
     from paddleocr import PaddleOCR
     # Monkey-patch BASE_DIR so models download to D: not C:\Users\...\.paddleocr
-    # This is required for PaddleOCR 2.x
-    import paddleocr.paddleocr as _ppocr_mod
-    _ppocr_mod.BASE_DIR = _PADDLE_CACHE
+    # This works for PaddleOCR 2.x
+    try:
+        import paddleocr.paddleocr as _ppocr_mod
+        _ppocr_mod.BASE_DIR = _PADDLE_CACHE
+    except (ImportError, AttributeError):
+        # If the submodule is missing (e.g. in 3.x), we skip patching
+        pass
 except ImportError:
     logger.warning("paddleocr pip package not found. Attempting to load from D:\\Translate\\PaddleOCR-main")
     sys.path.insert(0, r"D:\Translate\PaddleOCR-main")
     try:
         from paddleocr import PaddleOCR
-        import paddleocr.paddleocr as _ppocr_mod
-        _ppocr_mod.BASE_DIR = _PADDLE_CACHE
+        try:
+            import paddleocr.paddleocr as _ppocr_mod
+            _ppocr_mod.BASE_DIR = _PADDLE_CACHE
+        except (ImportError, AttributeError):
+            pass
     except ImportError as e:
         logger.error(f"Failed to load PaddleOCR natively or from source: {e}")
         PaddleOCR = None

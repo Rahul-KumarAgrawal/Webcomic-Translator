@@ -1,13 +1,9 @@
 @echo off
+setlocal EnableDelayedExpansion
 chcp 65001 >nul
-REM ═══════════════════════════════════════════════════════════════════════════
-REM  CBZ Translator — Batch Processing CLI
-REM  Usage: run_batch.bat --input ./input --output D:/translated --series "Solo Leveling"
-REM  Automatically resolves Python from: local, venv, or system.
-REM ═══════════════════════════════════════════════════════════════════════════
+
 cd /d "%~dp0"
 
-REM ── Resolve Python ────────────────────────────────────────────────────────
 set "PYTHON="
 
 if exist ".python_path.txt" (

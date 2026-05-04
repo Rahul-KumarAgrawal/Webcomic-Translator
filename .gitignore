@@ -20,6 +20,8 @@ Pipeline Koharu/
 # User Data & Processing
 input/
 output/
+result/
+result.txt
 temp/
 tmp/
 logs/
@@ -39,8 +41,3 @@ scratch/
 memory/series/
 memory/global/*.db
 !memory/global/schema.sql
-
-# Web Review UI Assets
-web/static/crops/
-web/sessions/*.json
-!web/sessions/.gitkeep

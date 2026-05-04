@@ -1,1 +1,0 @@
-[manga-translator.DefaultDetector] Detection resolution: 1536x2048

@@ -1,9 +1,0 @@
-
-Downloading models into D:\Translate\Translator\models\detection
-
- -- Downloading: "https://github.com/zyddnys/manga-image-translator/releases/download/beta-0.3/craft_refiner_CTW1500.pth"
- -- Verifying: "D:\Translate\Translator\models\detection\craft_refiner_CTW1500.pth.part"
- -- Verifying: OK!
- -- Downloading: "https://github.com/zyddnys/manga-image-translator/releases/download/beta-0.3/craft_mlt_25k.pth"
- -- Verifying: "D:\Translate\Translator\models\detection\craft_mlt_25k.pth.part"
- -- Verifying: OK!

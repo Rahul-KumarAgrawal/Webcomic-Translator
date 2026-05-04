@@ -47,18 +47,13 @@
                             <div class="form-group">
                                 <label for="ocr_engine">OCR Engine</label>
                                 <select id="ocr_engine" name="ocr_engine">
-                                    <option value="mit" {% if cfg.get('ocr_engine','mit')=='mit' %}selected{% endif %}>
-                                        MIT (Default: manga-ocr/48px)</option>
-                                    <option value="paddle" {% if cfg.get('ocr_engine')=='paddle' %}selected{% endif %}>
-                                        PaddleOCR (Local)</option>
-                                    <option value="easyocr" {% if cfg.get('ocr_engine')=='easyocr' %}selected{% endif %}>
-                                        EasyOCR (Local - Multilingual)</option>
-                                    <option value="tesseract" {% if cfg.get('ocr_engine')=='tesseract' %}selected{% endif %}>
-                                        Tesseract (Local)</option>
-                                    <option value="manga-ocr" {% if cfg.get('ocr_engine')=='manga-ocr' %}selected{% endif %}>
-                                        🌸 MangaOCR (Koharu)</option>
-                                    <option value="none" {% if cfg.get('ocr_engine')=='none' %}selected{% endif %}>
-                                        🚫 None (Skip OCR)</option>
+                                    <option value="manga-ocr" {% if cfg.get('ocr_engine','manga-ocr')=='manga-ocr' %}selected{% endif %}>🌸 Manga-OCR (JPN & CHN)</option>
+                                    <option value="paddle" {% if cfg.get('ocr_engine')=='paddle' %}selected{% endif %}>🇨🇳 PaddleOCR (v2.8 - Standard)</option>
+                                    <option value="pororo" {% if cfg.get('ocr_engine')=='pororo' %}selected{% endif %}>🇰🇷 Pororo (KOR - Ogkalu)</option>
+                                    <option value="ppocr-v5" {% if cfg.get('ocr_engine')=='ppocr-v5' %}selected{% endif %}>🔥 PaddleOCR (v5 - Latest / Ogkalu)</option>
+                                    <option value="easyocr" {% if cfg.get('ocr_engine')=='easyocr' %}selected{% endif %}>🌐 EasyOCR (Multilingual)</option>
+                                    <option value="mit" {% if cfg.get('ocr_engine','mit')=='mit' %}selected{% endif %}>🛠️ MIT Mayo (JPN)</option>
+                                    <option value="none" {% if cfg.get('ocr_engine')=='none' %}selected{% endif %}>🚫 None (Skip OCR)</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -77,12 +72,12 @@
                         <div class="form-group">
                             <label for="detection_engine">Detection Engine</label>
                             <select id="detection_engine" name="detection_engine">
-                                <option value="yolo" {% if cfg.get('detection_engine', 'yolo')=='yolo' %}selected{% endif %}>🚀 YOLO Only (Fastest)</option>
-                                <option value="yolo_hybrid" {% if cfg.get('detection_engine')=='yolo_hybrid' %}selected{% endif %}>🌸 YOLO + Gap-Filling (Expert)</option>
-                                <option value="koharu_dual" {% if cfg.get('detection_engine')=='koharu_dual' %}selected{% endif %}>🚀 Koharu Dual (Text + Bubble)</option>
-                                <option value="ysg" {% if cfg.get('detection_engine')=='ysg' %}selected{% endif %}>🎈 YSG v1 (ogkalu)</option>
-                                <option value="ysg_v2" {% if cfg.get('detection_engine')=='ysg_v2' %}selected{% endif %}>🎈 YSG v2 (Kitsumed)</option>
-                                <option value="mit" {% if cfg.get('detection_engine')=='mit' %}selected{% endif %}>🛠️ MIT Default (Standard)</option>
+                                <option value="mit" {% if cfg.get('detection_engine','mit')=='mit' %}selected{% endif %}>🛠️ MIT Engine (comic text and bubble detector)</option>
+                                <option value="yolo" {% if cfg.get('detection_engine', 'yolo')=='yolo' %}selected{% endif %}>🚀 YOLO Only (comic text segmenter yolov8m)</option>
+                                <option value="yolo_hybrid" {% if cfg.get('detection_engine')=='yolo_hybrid' %}selected{% endif %}>🌸 YOLO Hybrid (comic text segmenter yolov8m)</option>
+                                <option value="ogkalu_combine" {% if cfg.get('detection_engine')=='ogkalu_combine' %}selected{% endif %}>🧩 Ogkalu Combine (comic text and bubble detector)</option>
+                                <option value="ogkalu_stable_dual" {% if cfg.get('detection_engine')=='ogkalu_stable_dual' %}selected{% endif %}>🥈 Ogkalu Stable (comic text segmenter yolov8m + comic speech bubble detector yolov8m)</option>
+                                <option value="mayo_github" {% if cfg.get('detection_engine')=='mayo_github' %}selected{% endif %}>🥇 Mayo Github (comic text detector + bubble segmentation)</option>
                             </select>
                         </div>
                             <div class="form-group">
@@ -200,6 +195,13 @@
                     <!-- Default font settings -->
                     <div class="card">
                         <div class="card-title">Default Font</div>
+                        <div class="form-group">
+                            <label for="font_detection_engine">Font Detection Engine</label>
+                            <select id="font_detection_engine" name="font_detection_engine">
+                                <option value="default" {% if cfg.get('font_detection_engine','default')=='default' %}selected{% endif %}>📏 Standard (Simple)</option>
+                                <option value="yuzumarker" {% if cfg.get('font_detection_engine')=='yuzumarker' %}selected{% endif %}>🎨 Yuzumarker (AI - Ogkalu)</option>
+                            </select>
+                        </div>
                         <div class="form-group">
                             <label for="font_family">Font File</label>
                             <select id="font_family" name="font_family">

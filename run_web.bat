@@ -1,13 +1,9 @@
 @echo off
+setlocal EnableDelayedExpansion
 chcp 65001 >nul
-REM ═══════════════════════════════════════════════════════════════════════════
-REM  CBZ Translator — Launch Web UI
-REM  Automatically resolves Python from: local, venv, or system.
-REM  Run setup.bat first if this is your first time!
-REM ═══════════════════════════════════════════════════════════════════════════
+
 cd /d "%~dp0"
 
-REM ── Resolve Python ────────────────────────────────────────────────────────
 set "PYTHON="
 
 if exist ".python_path.txt" (

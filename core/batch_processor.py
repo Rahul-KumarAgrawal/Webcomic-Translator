@@ -1057,16 +1057,27 @@ def _save_session_data(cbz_name: str, bubble_results, series: str, chunk_meta: d
                 "memory_id":       b.memory_id,
                 "page_num":        page_num,
                 "crop_url":        crop_url,
-                "x":               int(region.x),
-                "y":               int(region.y),
-                "w":               int(region.w),
-                "h":               int(region.h),
+                "x":               region.x,
+                "y":               region.y,
+                "w":               region.w,
+                "h":               region.h,
             }
             for b, region, page_num, crop_url in bubble_results
         ],
     }
+    class NpEncoder(json.JSONEncoder):
+        def default(self, obj):
+            import numpy as np
+            if isinstance(obj, np.integer):
+                return int(obj)
+            if isinstance(obj, np.floating):
+                return float(obj)
+            if isinstance(obj, np.ndarray):
+                return obj.tolist()
+            return super(NpEncoder, self).default(obj)
+
     with open(out_path, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+        json.dump(data, f, ensure_ascii=False, indent=2, cls=NpEncoder)
 
 
 def run_batch(input_dir: str, output_dir: str, series: str, cfg: dict,
