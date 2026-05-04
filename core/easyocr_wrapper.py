@@ -10,14 +10,13 @@ _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _EASY_CACHE = os.path.join(_ROOT, "model", "easyocr_cache")
 os.makedirs(_EASY_CACHE, exist_ok=True)
 
-_easy_reader_instance = None
-_easy_last_langs = None
+_easy_reader_instances = {}
 
 def get_easyocr_reader(langs=["ja", "en"]):
     """
-    Lazy load EasyOCR Reader. Re-initializes if the target languages change.
+    Lazy load EasyOCR Reader. Uses a dictionary to cache models by language.
     """
-    global _easy_reader_instance, _easy_last_langs
+    global _easy_reader_instances
     
     try:
         import easyocr
@@ -27,19 +26,19 @@ def get_easyocr_reader(langs=["ja", "en"]):
         
     # Sort to ensure consistent cache key
     langs = sorted(list(set(langs)))
+    cache_key = tuple(langs)
     
-    if _easy_reader_instance is None or _easy_last_langs != langs:
+    if cache_key not in _easy_reader_instances:
         logger.info(f"Initializing EasyOCR for languages: {langs}")
         # EasyOCR constructor is slow and uses VRAM
-        _easy_reader_instance = easyocr.Reader(
+        _easy_reader_instances[cache_key] = easyocr.Reader(
             langs, 
             gpu=True, 
             model_storage_directory=_EASY_CACHE,
             download_enabled=True
         )
-        _easy_last_langs = langs
         
-    return _easy_reader_instance
+    return _easy_reader_instances[cache_key]
 
 def map_lang_to_easy(lang_code: str) -> list:
     """
@@ -74,11 +73,6 @@ def run_easyocr_on_regions(image: Image.Image, regions: list, cfg: dict = None) 
     easy_langs = map_lang_to_easy(lang_code)
     # Use print so it definitely shows up in the user's CMD
     print(f"DEBUG: [EasyOCR] Runtime Config - Source: {lang_code} -> EasyLangs: {easy_langs}")
-    
-    # Force reset if language changed
-    global _easy_reader_instance, _easy_last_langs
-    if _easy_last_langs != sorted(list(set(easy_langs))):
-        _easy_reader_instance = None
     
     reader = get_easyocr_reader(easy_langs)
     if reader is None:

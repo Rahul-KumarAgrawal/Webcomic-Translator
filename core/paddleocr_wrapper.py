@@ -58,21 +58,20 @@ except ImportError:
         logger.error(f"Failed to load PaddleOCR natively or from source: {e}")
         PaddleOCR = None
 
-_paddle_ocr_instance = None
-_paddle_last_lang = None
+_paddle_ocr_instances = {}
 
 def get_paddle_ocr(lang="japan"):
     """
-    Lazy load PaddleOCR 2.8.1. Re-initializes if the target language changes.
+    Lazy load PaddleOCR 2.8.1. Uses a dictionary to cache models by language.
     """
-    global _paddle_ocr_instance, _paddle_last_lang
+    global _paddle_ocr_instances
     if PaddleOCR is None:
         raise ImportError("PaddleOCR could not be loaded.")
         
-    if _paddle_ocr_instance is None or _paddle_last_lang != lang:
+    if lang not in _paddle_ocr_instances:
         logger.info(f"Initializing PaddleOCR (Stable 2.8.1) for language: {lang}")
         # Stable 2.x arguments
-        _paddle_ocr_instance = PaddleOCR(
+        _paddle_ocr_instances[lang] = PaddleOCR(
             use_angle_cls=True, 
             lang=lang, 
             show_log=False, 
@@ -82,9 +81,8 @@ def get_paddle_ocr(lang="japan"):
             det_db_box_thresh=0.3,    # Lower threshold for box creation
             det_db_unclip_ratio=2.0   # Slightly larger boxes to catch outlines
         )
-        _paddle_last_lang = lang
         
-    return _paddle_ocr_instance
+    return _paddle_ocr_instances[lang]
 
 def map_lang_to_paddle(lang_code: str) -> str:
     """Maps ISO language codes to PaddleOCR codes."""

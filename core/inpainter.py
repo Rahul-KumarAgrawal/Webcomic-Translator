@@ -291,12 +291,11 @@ class Inpainter:
     def _fallback_symbol_ocr(self, image: Image.Image, regions: List[BubbleRegion], ocr_engine: str) -> List[BubbleRegion]:
         """
         If a bubble is detected (e.g. YOLO) and OCR returned empty,
-        perform a high-contrast crop and use the selected OCR engine 
+        perform a high-contrast crop and use ANY available OCR engine 
         to look for punctuation (!, ?, ., ~, etc.).
         """
         import re
         from PIL import ImageOps
-        import pytesseract
 
         # Only process regions with empty source_text
         for r in regions:
@@ -304,62 +303,79 @@ class Inpainter:
                 continue
             
             x1, y1, x2, y2 = r.bbox
-            # Add larger padding for symbols so they don't hit the edge
             pad = 15
             w_orig, h_orig = image.size
             crop_rect = (max(0, x1-pad), max(0, y1-pad), min(w_orig, x2+pad), min(h_orig, y2+pad))
             crop_pil = image.crop(crop_rect).convert("L")
             
-            # Autocontrast
             crop_pil = ImageOps.autocontrast(crop_pil, cutoff=0)
 
-            # Upscale massively to make symbols clear
             w, h = crop_pil.size
             if w > 0 and h > 0:
                 crop_pil = crop_pil.resize((w * 4, h * 4), resample=Image.LANCZOS)
                 
             text = ""
-            try:
-                if ocr_engine == "easyocr":
-                    from core.easyocr_wrapper import get_easyocr_reader
-                    # Force 'en' to avoid CJK languages ignoring lone punctuation.
-                    reader = get_easyocr_reader(["en"])
-                    if reader:
-                        import numpy as np
-                        crop_np = np.array(crop_pil.convert("RGB"))
-                        results = reader.readtext(crop_np, detail=0, paragraph=False)
-                        if results:
-                            text = " ".join(results)
-                elif ocr_engine == "paddle":
+            
+            # Helper to run Paddle
+            def try_paddle():
+                try:
                     from core.paddleocr_wrapper import get_paddle_ocr
+                    import numpy as np
                     ocr = get_paddle_ocr("en")
                     if ocr:
-                        import numpy as np
                         crop_np = np.array(crop_pil.convert("RGB"))
+                        # Switch BGR for Paddle
+                        crop_np = crop_np[:, :, ::-1]
                         result = ocr.ocr(crop_np, cls=False)
                         if result and result[0]:
-                            text = " ".join([line[1][0] for line in result[0] if line])
-                else:
-                    # Fallback to Tesseract for anything else
+                            return " ".join([line[1][0] for line in result[0] if line])
+                except Exception as e:
+                    logger.debug(f"Paddle fallback failed: {e}")
+                return ""
+
+            # Helper to run Tesseract
+            def try_tesseract():
+                try:
+                    import pytesseract
                     from core.tesseract_wrapper import tesseract_path
                     if tesseract_path:
                         pytesseract.pytesseract.tesseract_cmd = tesseract_path
-                    
-                    config = '--psm 11'
-                    text = pytesseract.image_to_string(crop_pil, lang='eng', config=config).strip()
-                    
+                        config = '--psm 11'
+                        return pytesseract.image_to_string(crop_pil, lang='eng', config=config).strip()
+                except Exception as e:
+                    logger.debug(f"Tesseract fallback failed: {e}")
+                return ""
+
+            # Helper to run EasyOCR
+            def try_easyocr():
+                try:
+                    from core.easyocr_wrapper import get_easyocr_reader
+                    import numpy as np
+                    reader = get_easyocr_reader(["en"])
+                    if reader:
+                        crop_np = np.array(crop_pil.convert("RGB"))
+                        results = reader.readtext(crop_np, detail=0, paragraph=False)
+                        if results:
+                            return " ".join(results)
+                except Exception as e:
+                    logger.debug(f"EasyOCR fallback failed: {e}")
+                return ""
+
+            # Waterfall cascade: Start with the preferred engine, then try others
+            if ocr_engine == "paddle": text = try_paddle() or try_tesseract() or try_easyocr()
+            elif ocr_engine == "easyocr": text = try_easyocr() or try_paddle() or try_tesseract()
+            elif ocr_engine == "tesseract": text = try_tesseract() or try_paddle() or try_easyocr()
+            else: text = try_paddle() or try_tesseract() or try_easyocr()
+                
+            if text:
                 # Sanitize the output:
-                # 1. Replace common mistakes for '!'
                 text = text.replace('I', '!').replace('l', '!').replace('1', '!')
-                # 2. Keep only punctuation and spaces
                 text = re.sub(r'[^\!\?\.\~\·\s]', '', text).strip()
                 
                 if text:
                     r.source_text = text
                     r.confidence = 0.5
-                    logger.info(f"[Inpainter] Symbol fallback recovered using {ocr_engine}: '{r.source_text}'")
-            except Exception as e:
-                logger.debug(f"[Inpainter] Symbol fallback failed with {ocr_engine}: {e}")
+                    logger.info(f"[Inpainter] Symbol fallback recovered: '{r.source_text}'")
                 
         return regions
 
