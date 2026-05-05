@@ -61,6 +61,8 @@
                                 <select id="auto_detect_engine" name="auto_detect_engine">
                                     <option value="gemini" {% if cfg.get('auto_detect_engine', 'gemini')=='gemini' %}selected{% endif %}>
                                         🤖 Gemini Multimodal (Recommended)</option>
+                                    <option value="groq" {% if cfg.get('auto_detect_engine')=='groq' %}selected{% endif %}>
+                                        ⚡ GROQ (Llama 4 Scout - Ultra Fast)</option>
                                     <option value="google" {% if cfg.get('auto_detect_engine')=='google' %}selected{% endif %}>
                                         🌐 Google Cloud Vision</option>
                                     <option value="local" {% if cfg.get('auto_detect_engine')=='local' %}selected{% endif %}>
@@ -234,6 +236,7 @@
                         </div>
                     </div>
 
+
                     <!-- Translation Engine API Keys -->
                     <div class="card">
                         <div class="card-title">API Keys</div>
@@ -248,6 +251,12 @@
                             <input type="password" id="google_api_key" name="google_api_key"
                                 placeholder="AIzaSy..."
                                 value="{{ cfg.get('google_api_key', '') }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="groq_api_key">Groq API Key (Llama 4 Scout)</label>
+                            <input type="password" id="groq_api_key" name="groq_api_key"
+                                placeholder="gsk_..."
+                                value="{{ cfg.get('groq_api_key', '') }}">
                         </div>
                         <div class="form-group">
                             <label for="sarvam_api_key">Sarvam AI Key (India)</label>

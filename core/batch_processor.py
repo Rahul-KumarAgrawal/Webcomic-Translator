@@ -136,12 +136,88 @@ LANGDETECT_TO_NLLB = {
 def _auto_detect_language(images: list, logger: logging.Logger, cfg: dict = None) -> Tuple[Optional[str], float]:
     """
     Identifies the language of the comic.
-    Respects 'auto_detect_engine' from settings.
+    Always uses pages 4 and 5 (index 3 and 4) if available.
+    Integrates with the new autodetect.DetectorManager.
     """
-    sample_pages = images[:min(3, len(images))]
-    engine = cfg.get("auto_detect_engine", "gemini") if cfg else "gemini"
+    # Prefer pages 4 and 5 (index 3 and 4)
+    if len(images) >= 5:
+        sample_pages = [images[3], images[4]]
+    elif len(images) >= 4:
+        sample_pages = [images[3]]
+    else:
+        sample_pages = images[:min(2, len(images))]
 
-    # ── Choice 1: Gemini Multimodal (Recommended) ───────────────────────────
+    logger.info("  Auto-detect: using pages %s for detection", 
+                [images.index(p)+1 for p in sample_pages])
+
+    # ── Choice 0: New Detector Plugins (Groq/Llama 4 Scout, etc.) ───────────────────────────
+    try:
+        from autodetect.manager import DetectorManager
+        manager = DetectorManager()
+        
+        engine_name = cfg.get("auto_detect_engine", "gemini") if cfg else "gemini"
+        
+        if engine_name in manager.engines:
+            active_engine = manager.engines[engine_name]
+            logger.info("  Auto-detect: using engine '%s'...", active_engine.name)
+            
+            # Set API key from cfg if available
+            key = cfg.get(f"{engine_name}_api_key")
+            if key:
+                os.environ[f"{engine_name.upper()}_API_KEY"] = key
+
+            # Use the first sample page for detection (preferring page 4)
+            test_img_path = sample_pages[0]
+            with open(test_img_path, "rb") as f:
+                img_bytes = f.read()
+            
+            result = active_engine.detect(img_bytes)
+            if result.get("hasText") and result.get("languages"):
+                top_lang = result["languages"][0]
+                lang_name = top_lang["name"].lower()
+                
+                # Map common names to ISO/NLLB
+                name_to_iso = {
+                    "japanese": "ja",
+                    "chinese": "zh-cn",
+                    "chinese (simplified)": "zh-cn",
+                    "chinese (traditional)": "zh-tw",
+                    "traditional chinese": "zh-tw",
+                    "simplified chinese": "zh-cn",
+                    "korean": "ko",
+                    "english": "en",
+                    "spanish": "es",
+                    "french": "fr",
+                    "german": "de",
+                    "italian": "it",
+                    "portuguese": "pt",
+                    "russian": "ru"
+                }
+                detected_iso = name_to_iso.get(lang_name)
+                
+                # Smart Chinese/Script disambiguation
+                script = top_lang.get("script", "").lower()
+                if lang_name == "chinese":
+                    if "traditional" in script or "hant" in script:
+                        detected_iso = "zh-tw"
+                    elif "simplified" in script or "hans" in script:
+                        detected_iso = "zh-cn"
+                elif "traditional" in lang_name:
+                    detected_iso = "zh-tw"
+                elif "simplified" in lang_name:
+                    detected_iso = "zh-cn"
+
+                if detected_iso:
+                    conf_map = {"high": 1.0, "medium": 0.8, "low": 0.5}
+                    prob = conf_map.get(top_lang.get("confidence", "medium"), 0.8)
+                    logger.info("  Auto-detect: '%s' detected '%s' (script: %s, confidence: %s)", 
+                                active_engine.name, lang_name, script or "N/A", top_lang.get("confidence"))
+                    return detected_iso, prob
+    except Exception as e:
+        logger.warning("  New DetectorManager failed: %s. Falling back to legacy engines.", e)
+
+    # ── Choice 1: Gemini Multimodal (Legacy) ───────────────────────────
+    engine = cfg.get("auto_detect_engine", "gemini") if cfg else "gemini"
     if engine == "gemini":
         google_key = cfg.get("google_api_key") if cfg else None
         if google_key:
@@ -149,7 +225,7 @@ def _auto_detect_language(images: list, logger: logging.Logger, cfg: dict = None
             try:
                 from core.google_translator import GoogleTranslator
                 detector = GoogleTranslator(api_key=google_key)
-                test_img = sample_pages[1] if len(sample_pages) > 1 else sample_pages[0]
+                test_img = sample_pages[0]
                 detected = detector.detect_language_from_image(test_img)
                 if detected and detected != "unknown":
                     logger.info("  Auto-detect: Gemini detected '%s'", detected)
@@ -166,7 +242,7 @@ def _auto_detect_language(images: list, logger: logging.Logger, cfg: dict = None
             logger.info("  Auto-detect: using Google Cloud Vision API...")
             try:
                 detector = GoogleVisionDetector(vision_key)
-                test_img = sample_pages[1] if len(sample_pages) > 1 else sample_pages[0]
+                test_img = sample_pages[0]
                 detected = detector.detect_language(test_img)
                 if detected:
                     logger.info("  Auto-detect: Google Vision detected '%s'", detected)
@@ -183,27 +259,61 @@ def _auto_detect_language(images: list, logger: logging.Logger, cfg: dict = None
         
         try:
             import easyocr
-            from langdetect import detect_langs
         except ImportError:
-            logger.error("easyocr or langdetect not installed. Cannot auto-detect language.")
+            logger.error("easyocr not installed. Cannot auto-detect language.")
             return None, 0.0
 
         easyocr_dir = os.path.join(_ROOT, "models", "easyocr")
         os.makedirs(easyocr_dir, exist_ok=True)
         _kwargs = dict(gpu=True, model_storage_directory=easyocr_dir, verbose=False)
 
+        def _count_scripts(text: str) -> Tuple[int, int, int]:
+            """Return (kana_count, hangul_count, han_count) for script-based fallback scoring."""
+            kana_count = 0
+            hangul_count = 0
+            han_count = 0
+
+            for ch in text:
+                cp = ord(ch)
+                # Hiragana + Katakana + Katakana Phonetic Extensions + Halfwidth Katakana
+                if (
+                    0x3040 <= cp <= 0x309F
+                    or 0x30A0 <= cp <= 0x30FF
+                    or 0x31F0 <= cp <= 0x31FF
+                    or 0xFF66 <= cp <= 0xFF9D
+                ):
+                    kana_count += 1
+                # Hangul Jamo + Hangul Syllables
+                elif (0x1100 <= cp <= 0x11FF) or (0xAC00 <= cp <= 0xD7AF):
+                    hangul_count += 1
+                # CJK Unified Ideographs (Han)
+                elif 0x4E00 <= cp <= 0x9FFF:
+                    han_count += 1
+
+            return kana_count, hangul_count, han_count
+
+        # Hint sets for Simplified vs Traditional Chinese disambiguation.
+        simplified_hint_chars = set("这为么国发后里学车门东风会点开关体实战业进气边话乐书画云龙岛广台电万与汉马")
+        traditional_hint_chars = set("這為麼國發後裡學車門東風會點開關體實戰業進氣邊話樂書畫雲龍島廣臺電萬與漢馬")
+
+        def _count_zh_variant_hints(text: str) -> Tuple[int, int]:
+            simplified_hits = sum(1 for ch in text if ch in simplified_hint_chars)
+            traditional_hits = sum(1 for ch in text if ch in traditional_hint_chars)
+            return simplified_hits, traditional_hits
+
         # Language groups ordered by likelihood for manga/manhwa/manhua.
         LANG_GROUPS = [
-            (['ja', 'en'],                          "Japanese + English"),
-            (['ko', 'en'],                          "Korean + English"),
-            (['ch_sim', 'en'],                      "Chinese (Simplified) + English"),
-            (['ch_tra', 'en'],                      "Chinese (Traditional) + English"),
+            (['ja', 'en'], "Japanese + English", "ja"),
+            (['ko', 'en'], "Korean + English", "ko"),
+            (['ch_sim', 'en'], "Chinese (Simplified) + English", "zh-cn"),
+            (['ch_tra', 'en'], "Chinese (Traditional) + English", "zh-tw"),
         ]
 
         best_overall_lang = None
         best_overall_prob = 0.0
+        group_scores = {}
 
-        for lang_list, group_name in LANG_GROUPS:
+        for lang_list, group_name, group_code in LANG_GROUPS:
             logger.info("  Auto-detect: trying %s ...", group_name)
             try:
                 reader = easyocr.Reader(lang_list, **_kwargs)
@@ -229,22 +339,174 @@ def _auto_detect_language(images: list, logger: logging.Logger, cfg: dict = None
             except Exception:
                 pass
 
-            # Check this group's text independently
-            if len(group_text.strip()) > 15:
-                try:
-                    langs = detect_langs(group_text)
-                    best_lang = langs[0]
-                    logger.info("  Auto-detect result for %s: %s (%.1f%%)",
-                                group_name, best_lang.lang, best_lang.prob * 100)
-                    
-                    if best_lang.prob > best_overall_prob:
-                        best_overall_prob = best_lang.prob
-                        best_overall_lang = best_lang.lang
+            # Check this group's text independently using script-aware scoring.
+            if len(group_text.strip()) > 5:
+                kana_count, hangul_count, han_count = _count_scripts(group_text)
+                total_cjk = kana_count + hangul_count + han_count
+                simplified_hits, traditional_hits = _count_zh_variant_hints(group_text)
 
-                    if best_overall_prob >= 0.90:
-                        break
-                except Exception:
-                    pass
+                group_prob = 0.0
+
+                if group_code == "ja":
+                    if kana_count >= 2:
+                        group_prob = min(0.98, 0.70 + (kana_count / max(1, total_cjk)))
+                    elif kana_count == 1 and han_count > 0:
+                        group_prob = 0.65
+                    else:
+                        group_prob = 0.20 if han_count > 0 else 0.0
+                elif group_code == "ko":
+                    # Be conservative: Korean false positives can appear when OCR hallucinates Hangul.
+                    if hangul_count >= 30:
+                        group_prob = min(0.98, 0.72 + (hangul_count / max(1, total_cjk)))
+                    elif hangul_count >= 12:
+                        group_prob = min(0.90, 0.64 + (hangul_count / max(1, total_cjk)) * 0.20)
+                    elif hangul_count >= 2:
+                        group_prob = 0.62
+                    elif hangul_count == 1:
+                        group_prob = 0.55
+                    else:
+                        group_prob = 0.02 if total_cjk > 0 else 0.0
+                else:  # zh-cn / zh-tw
+                    if han_count >= 2:
+                        # Keep Han-only confidence conservative; variant hints can boost later.
+                        group_prob = min(0.82, 0.48 + (han_count / max(1, total_cjk)) * 0.34)
+                    elif han_count == 1:
+                        group_prob = 0.45
+                    else:
+                        group_prob = 0.02 if total_cjk > 0 else 0.0
+
+                    # Penalize Chinese group confidence when kana/hangul clearly appears.
+                    if kana_count > 0 or hangul_count > 0:
+                        group_prob *= 0.50
+
+                    hint_total = simplified_hits + traditional_hits
+                    if hint_total > 0:
+                        if group_code == "zh-cn":
+                            variant_match = simplified_hits / hint_total
+                        else:  # zh-tw
+                            variant_match = traditional_hits / hint_total
+
+                        # Boost by variant consistency, but avoid unrealistically high certainty.
+                        group_prob = min(0.93, group_prob * (0.80 + 0.40 * variant_match))
+                    else:
+                        # If no differentiating hints, keep a slight default preference for zh-cn.
+                        group_prob *= 0.90 if group_code == "zh-cn" else 0.82
+
+                logger.info(
+                    "  Auto-detect result for %s: %s (%.1f%%) [kana=%d, hangul=%d, han=%d, simp=%d, trad=%d]",
+                    group_name,
+                    group_code,
+                    group_prob * 100,
+                    kana_count,
+                    hangul_count,
+                    han_count,
+                    simplified_hits,
+                    traditional_hits,
+                )
+
+                group_scores[group_code] = {
+                    "prob": group_prob,
+                    "kana": kana_count,
+                    "hangul": hangul_count,
+                    "han": han_count,
+                    "simp": simplified_hits,
+                    "trad": traditional_hits,
+                    "total_cjk": total_cjk,
+                }
+
+                if group_prob > best_overall_prob:
+                    best_overall_prob = group_prob
+                    best_overall_lang = group_code
+
+                if best_overall_prob >= 0.95:
+                    break
+
+        # Resolve known JP/KO ambiguity caused by model hallucinations.
+        ja_score = group_scores.get("ja")
+        ko_score = group_scores.get("ko")
+        if ja_score and ko_score and ja_score["prob"] >= 0.85 and ko_score["prob"] >= 0.85:
+            # Korean should dominate when hangul evidence is much stronger than kana evidence.
+            if ko_score["hangul"] >= 8 and ko_score["hangul"] >= ja_score["kana"] * 3:
+                logger.warning(
+                    "  Auto-detect conflict (ja=%.1f%%, ko=%.1f%%). Choosing ko due to dominant hangul evidence.",
+                    ja_score["prob"] * 100,
+                    ko_score["prob"] * 100,
+                )
+                best_overall_lang = "ko"
+                best_overall_prob = max(best_overall_prob, ko_score["prob"])
+            # Japanese text usually appears as kana+han mixed; prioritize this pattern when kana is meaningful.
+            elif ja_score["kana"] >= 3 and ja_score["han"] >= 1 and ja_score["kana"] * 2 >= ko_score["hangul"]:
+                logger.warning(
+                    "  Auto-detect conflict (ja=%.1f%%, ko=%.1f%%). Choosing ja due to kana+han pattern.",
+                    ja_score["prob"] * 100,
+                    ko_score["prob"] * 100,
+                )
+                best_overall_lang = "ja"
+                best_overall_prob = max(best_overall_prob, ja_score["prob"])
+            # If scripts are mixed/noisy, trust larger probability only when margin is clear.
+            elif abs(ja_score["prob"] - ko_score["prob"]) >= 0.08:
+                logger.warning(
+                    "  Auto-detect conflict (ja=%.1f%%, ko=%.1f%%). Using larger score due to clear probability margin.",
+                    ja_score["prob"] * 100,
+                    ko_score["prob"] * 100,
+                )
+                if ko_score["prob"] > ja_score["prob"]:
+                    best_overall_lang = "ko"
+                    best_overall_prob = max(best_overall_prob, ko_score["prob"])
+                else:
+                    best_overall_lang = "ja"
+                    best_overall_prob = max(best_overall_prob, ja_score["prob"])
+
+        # Resolve zh-CN vs zh-TW ambiguity when both are plausible.
+        zh_cn_score = group_scores.get("zh-cn")
+        zh_tw_score = group_scores.get("zh-tw")
+        if zh_cn_score and zh_tw_score and zh_cn_score["prob"] >= 0.50 and zh_tw_score["prob"] >= 0.50:
+            cn_diff = zh_cn_score["simp"] - zh_cn_score["trad"]
+            tw_diff = zh_tw_score["trad"] - zh_tw_score["simp"]
+
+            if cn_diff > tw_diff and cn_diff > 0:
+                logger.warning(
+                    "  Auto-detect conflict (zh-cn=%.1f%%, zh-tw=%.1f%%). Choosing zh-cn due to simplified hints.",
+                    zh_cn_score["prob"] * 100,
+                    zh_tw_score["prob"] * 100,
+                )
+                best_overall_lang = "zh-cn"
+                best_overall_prob = max(best_overall_prob, zh_cn_score["prob"])
+
+        # Prevent Han-only Chinese OCR from overriding clear Japanese kana evidence.
+        if best_overall_lang in ("zh-cn", "zh-tw") and ja_score:
+            ja_total = ja_score["kana"] + ja_score["han"]
+            kana_ratio = ja_score["kana"] / max(1, ja_total)
+            if (
+                ja_score["kana"] >= 3
+                and ja_score["prob"] >= 0.80
+                and kana_ratio >= 0.12
+                and (best_overall_prob - ja_score["prob"]) <= 0.15
+            ):
+                logger.warning(
+                    "  Auto-detect conflict (ja=%.1f%%, %s=%.1f%%). Choosing ja due to clear kana evidence.",
+                    ja_score["prob"] * 100,
+                    best_overall_lang,
+                    best_overall_prob * 100,
+                )
+                best_overall_lang = "ja"
+                best_overall_prob = max(best_overall_prob, ja_score["prob"])
+            elif tw_diff > cn_diff and tw_diff > 0:
+                logger.warning(
+                    "  Auto-detect conflict (zh-cn=%.1f%%, zh-tw=%.1f%%). Choosing zh-tw due to traditional hints.",
+                    zh_cn_score["prob"] * 100,
+                    zh_tw_score["prob"] * 100,
+                )
+                best_overall_lang = "zh-tw"
+                best_overall_prob = max(best_overall_prob, zh_tw_score["prob"])
+            else:
+                logger.warning(
+                    "  Auto-detect conflict (zh-cn=%.1f%%, zh-tw=%.1f%%). Ambiguous Han text; defaulting to zh-cn.",
+                    zh_cn_score["prob"] * 100,
+                    zh_tw_score["prob"] * 100,
+                )
+                best_overall_lang = "zh-cn"
+                best_overall_prob = max(best_overall_prob, zh_cn_score["prob"])
 
     if best_overall_prob >= 0.90:
         return best_overall_lang, best_overall_prob
@@ -770,6 +1032,8 @@ def _process_pages_standard(
 
     # ── Phase 3: Inpaint & Render All Pages ──────────────────────────────────
     logger.info("━━━ Phase 3: Inpainting and Rendering final pages...")
+    if inpainter.cfg.get("font_detection_engine") == "yuzumarker":
+        print("\n[AI] Using Yuzumarker Font Detection for rendering.")
     for page_idx, p_data in enumerate(page_data_list):
         page_num = p_data["page_num"]
         img_path = p_data["img_path"]

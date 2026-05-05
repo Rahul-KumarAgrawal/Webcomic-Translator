@@ -219,10 +219,69 @@ async function uploadFiles(files, seriesInput, srcLangSel, tgtLangSel, engineSel
       showToast(`Skipped ${file.name} — only .cbz files accepted.`, "error");
       continue;
     }
+
+    let finalSrcLang = srcLang;
+    if (srcLang === "") {
+        try {
+            showToast(`🔍 Detecting language for ${file.name}...`, "info");
+            const detectFd = new FormData();
+            detectFd.append("file", file);
+            
+            const autoEngine = localStorage.getItem("active_autodetect_engine") || "";
+            const autoKey = localStorage.getItem(`autodetect_key_${autoEngine}`) || "";
+            
+            const detectRes = await fetch(`${DETECT_API_BASE}/autodetect/detect`, {
+                method: "POST",
+                headers: { "X-API-Key": autoKey },
+                body: detectFd
+            });
+            const detectData = await detectRes.json();
+            if (detectData.languages && detectData.languages.length > 0) {
+                const topL = detectData.languages[0];
+                const dName = topL.name.toLowerCase();
+                const dScript = (topL.script || "").toLowerCase();
+                
+                if (srcLangSel) {
+                    let matched = false;
+                    // Try specific match for Chinese variants
+                    if (dName.includes("chinese")) {
+                        const target = (dScript.includes("traditional") || dName.includes("traditional")) ? "traditional" : "simplified";
+                        for (let i = 0; i < srcLangSel.options.length; i++) {
+                            const optText = srcLangSel.options[i].text.toLowerCase();
+                            if (optText.includes("chinese") && optText.includes(target)) {
+                                finalSrcLang = srcLangSel.options[i].value;
+                                matched = true;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // Fallback to general include match
+                    if (!matched) {
+                        for (let i = 0; i < srcLangSel.options.length; i++) {
+                            if (srcLangSel.options[i].text.toLowerCase().includes(dName)) {
+                                finalSrcLang = srcLangSel.options[i].value;
+                                matched = true;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (matched) {
+                        showToast(`✅ Auto-detected: ${topL.name} ${topL.script ? '('+topL.script+')' : ''}`, "success");
+                    }
+                }
+            }
+        } catch (err) {
+            console.error("Auto-detect failed:", err);
+            showToast("Auto-detection failed, proceeding with manual selection.", "warning");
+        }
+    }
+
     const fd = new FormData();
     fd.append("cbz_file", file);
     fd.append("series", series);
-    fd.append("source_lang", srcLang);
+    fd.append("source_lang", finalSrcLang);
     fd.append("target_lang", tgtLang);
     fd.append("translation_engine", engine);
     fd.append("ocr_engine", ocrEngine);
@@ -922,24 +981,6 @@ function initSearchableSelects() {
   });
 }
 
-// ── Bootstrap all features ────────────────────────────────────────────────────
-document.addEventListener("DOMContentLoaded", () => {
-  initQueueSSE();
-  initDropZone();
-  initMITToggle();
-  initDeleteOutput();
-  initReviewProgress();
-  initBubbleReview();
-  initMemoryEdit();
-  initMemorySearch();
-  initTrainButton();
-  initTrainProgressSSE();
-  initBackupActions();
-  initFontUpload();
-  initRerender();
-  initBulkLLMTranslator();
-  initSearchableSelects();
-});
 
 // ── Delete Series ─────────────────────────────────────────────────────────────
 async function deleteSeries(seriesName) {
@@ -1005,3 +1046,129 @@ if (deleteModelsBtn) {
     }
   });
 }
+
+// ── Autodetect (Language Detection) ──────────────────────────────────────────
+const DETECT_API_BASE = "http://localhost:8000"; // FastAPI port
+
+function initAutodetect() {
+    const engineSel = document.getElementById("autodetect_engine_select");
+    if (!engineSel) return;
+
+    const configArea = document.getElementById("engine_config_area");
+    const keyInput = document.getElementById("autodetect_api_key");
+    const testBtn = document.getElementById("test_engine_btn");
+    const saveBtn = document.getElementById("save_autodetect_btn");
+    const testResult = document.getElementById("test_result");
+
+    // Load engines
+    fetch(`${DETECT_API_BASE}/autodetect/engines`)
+        .then(res => res.json())
+        .then(engines => {
+            engineSel.innerHTML = '<option value="">-- Select Engine --</option>';
+            engines.forEach(eng => {
+                const opt = document.createElement("option");
+                opt.value = eng.name;
+                let badge = eng.is_free ? " [FREE]" : (eng.requires_api_key ? " [API KEY]" : " [LOCAL]");
+                opt.textContent = eng.name.toUpperCase() + badge;
+                if (eng.is_active) opt.selected = true;
+                engineSel.appendChild(opt);
+            });
+            updateEngineUI();
+        })
+        .catch(err => console.error("Failed to load autodetect engines", err));
+
+    function updateEngineUI() {
+        const selected = engineSel.value;
+        if (!selected) {
+            configArea.style.display = "none";
+            return;
+        }
+        
+        // Check if engine requires API key
+        const opt = engineSel.options[engineSel.selectedIndex];
+        const text = opt.textContent;
+        if (text.includes("[API KEY]")) {
+            configArea.style.display = "block";
+            // Load from localStorage
+            keyInput.value = localStorage.getItem(`autodetect_key_${selected}`) || "";
+        } else {
+            configArea.style.display = "none";
+        }
+    }
+
+    if (engineSel) engineSel.addEventListener("change", updateEngineUI);
+
+    if (testBtn) testBtn.addEventListener("click", async () => {
+        const engine = engineSel.value;
+        const key = keyInput.value;
+        testResult.textContent = "⏳ Testing...";
+        testResult.className = "mt-4 text-xs text-muted";
+        
+        try {
+            const res = await fetch(`${DETECT_API_BASE}/autodetect/test/${engine}`, {
+                headers: { "X-API-Key": key }
+            });
+            const data = await res.json();
+            if (data.status === "success") {
+                testResult.textContent = "✅ Connection successful!";
+                testResult.className = "mt-4 text-xs text-success";
+            } else {
+                testResult.textContent = "❌ Connection failed. Check your API key.";
+                testResult.className = "mt-4 text-xs text-danger";
+            }
+        } catch (err) {
+            testResult.textContent = "❌ API unreachable. Make sure api.py is running.";
+            testResult.className = "mt-4 text-xs text-danger";
+        }
+    });
+
+    if (saveBtn) saveBtn.addEventListener("click", async () => {
+        const engine = engineSel.value;
+        const key = keyInput.value;
+        
+        if (!engine) {
+            showToast("Please select an engine first.", "warning");
+            return;
+        }
+
+        try {
+            const res = await fetch(`${DETECT_API_BASE}/autodetect/set-engine`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ engine })
+            });
+            const data = await res.json();
+            if (data.status === "success") {
+                localStorage.setItem("active_autodetect_engine", engine);
+                if (key) {
+                    localStorage.setItem(`autodetect_key_${engine}`, key);
+                }
+                showToast(`✅ Language detection engine set to ${engine}`, "success");
+            } else {
+                showToast(`❌ Error: ${data.detail}`, "error");
+            }
+        } catch (err) {
+            showToast("❌ Failed to save settings. Is the API running?", "error");
+        }
+    });
+}
+
+// ── DOM Content Loaded ────────────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+    initQueueSSE();
+    initDropZone();
+    initMITToggle();
+    initDeleteOutput();
+    initReviewProgress();
+    initBubbleReview();
+    initMemoryEdit();
+    initMemorySearch();
+    initTrainButton();
+    initTrainProgressSSE();
+    initBackupActions();
+    initFontUpload();
+    initRerender();
+    initBulkLLMTranslator();
+    initSearchableSelects();
+    initAutodetect();
+});

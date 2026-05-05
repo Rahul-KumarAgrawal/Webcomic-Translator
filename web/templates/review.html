@@ -240,7 +240,7 @@
                 <!-- Source text column -->
                 <div class="bubble-source">
                     <div class="bubble-source-text">{{ b.source_text }}</div>
-                    <div class="flex-gap-8 mt-8">
+                    <div class="flex-gap-8 mt-8" style="align-items: center;">
                         <span class="badge badge-queued font-mono" style="font-size:0.7rem">{{ b.source_lang }}</span>
                         <span class="badge badge-{{ 'processing' if b.source == 'model' else 'done' }}"
                             style="font-size:0.7rem">{{ b.source | replace('_', ' ') }}</span>

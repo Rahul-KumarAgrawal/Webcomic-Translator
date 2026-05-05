@@ -1122,7 +1122,10 @@ def rerender_cbz(cbz_name: str):
                 logger.info("Re-render: found instant bg_cache for %s", cbz_name)
 
             all_regions = []
-            
+
+            if cfg.get("font_detection_engine") == "yuzumarker":
+                print("\n[AI] Using Yuzumarker Font Detection for rendering.")
+
             for page_idx, img_path in enumerate(images):
                 page_num = page_idx + 1
                 page_bubbles = bubbles_by_page.get(page_num, [])
@@ -1246,6 +1249,8 @@ def settings_save():
         cfg["webtoon_strip_height"] = int(request.form.get("webtoon_strip_height", 0))
     except ValueError:
         pass
+    cfg["font_detection_engine"] = request.form.get("font_detection_engine", "default").strip()
+    
     # Default font
     cfg.setdefault("default_font", {})
     cfg["default_font"]["family"] = request.form.get("font_family", "").strip() or None
@@ -1282,6 +1287,10 @@ def settings_save():
     google_key = request.form.get("google_api_key", "").strip()
     if google_key:
         cfg["google_api_key"] = google_key
+    
+    groq_key = request.form.get("groq_api_key", "").strip()
+    if groq_key:
+        cfg["groq_api_key"] = groq_key
     
     # Save custom Gemini prompt
     cfg["google_system_prompt"] = request.form.get("google_system_prompt", "").strip()

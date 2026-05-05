@@ -169,6 +169,9 @@ echo [SETUP] Checking models...
 if not exist "Pipeline Koharu\Detection and Layout\models\ogkalu-text-stable" (
     echo [SETUP] Downloading detection models...
     "%PYTHON%" scripts\download_new_models.py
+) else if not exist "Pipeline Koharu\OCR\font-detection" (
+    echo [SETUP] Downloading new font-detection models...
+    "%PYTHON%" scripts\download_new_models.py
 )
 
 REM -- Final Verification --

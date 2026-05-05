@@ -4,6 +4,8 @@ __pycache__/
 .DS_Store
 Thumbs.db
 .dll_paths.cache
+.python_path.txt
+.env
 
 # Large Assets & Models (Keep GitHub Slim)
 python/
@@ -16,8 +18,10 @@ Pipeline Koharu/
 *.onnx
 *.safetensors
 *.bin
+*.weights
+*.h5
 
-# User Data & Processing
+# Local Data (Manga & Results)
 input/
 output/
 result/
@@ -27,6 +31,12 @@ tmp/
 logs/
 backups/
 web/sessions/
+
+# Private Configuration
+config/*.yaml
+config/*.json
+.env
+.env.*
 
 # Environment & AI Tools
 .venv/

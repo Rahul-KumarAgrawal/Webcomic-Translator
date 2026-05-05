@@ -26,6 +26,8 @@ if not defined PYTHON (
 )
 
 echo [WEB] Using Python: %PYTHON%
+echo [WEB] Starting Language Detection API at http://localhost:8000
+start "Detection API" cmd /k ""%PYTHON%" web\api.py"
 echo [WEB] Starting CBZ Translator Web UI at http://localhost:5000
 echo [WEB] Press Ctrl+C to stop.
 echo.

@@ -260,12 +260,9 @@ class Inpainter:
         # ── 2b. Symbol-Only Fallback for Empty OCR Results ────────────
         regions = self._fallback_symbol_ocr(image, regions, str(ocr_engine).lower())
 
-        # ── 3. Font Style Detection ───────────────────────────────────
-        font_det_engine = self.cfg.get("font_detection_engine", "default")
-        if font_det_engine == "yuzumarker":
-            logger.info("[Modular] Running Yuzumarker Font Detection...")
-            for region in regions:
-                region.font_style = self._run_yuzumarker_font_detection(image, region)
+        # ── 3. Font Style Detection ─────────────────────────────────────
+        # NOTE: Yuzumarker runs at RENDER time (inpaint/render phase), not here.
+        # Running it here per-bubble during OCR is too early and wastes VRAM.
 
         # ── 3. Final Deduplication & Merging ───────────────────────────
         regions = self._merge_nearby_regions(regions)
@@ -704,7 +701,7 @@ class Inpainter:
         if not hasattr(self, '_font_det_session') or self._font_det_session is None:
             try:
                 import onnxruntime as ort
-                model_path = self._models_dir / "OCR" / "font-detection" / "font_detection.onnx"
+                model_path = self._models_dir / "OCR" / "font-detection" / "font-detector.onnx"
                 if not model_path.exists():
                     print("\n" + "!"*60)
                     print("⚠️  WARNING: Yuzumarker font model missing! Falling back...")
@@ -720,17 +717,24 @@ class Inpainter:
         try:
             import numpy as np
             import cv2
-            crop = np.array(region.crop(image).convert("L"))
-            crop = cv2.resize(crop, (64, 64)) # Assuming 64x64 input, adjust if model differs
+            # Model expects: [1, 3, 512, 512] — RGB, 512x512
+            crop = np.array(region.crop(image).convert("RGB"))
+            crop = cv2.resize(crop, (512, 512))
             crop = crop.astype(np.float32) / 255.0
-            crop = np.expand_dims(np.expand_dims(crop, 0), 0)
+            # Normalize with ImageNet mean/std
+            mean = np.array([0.485, 0.456, 0.406], dtype=np.float32)
+            std  = np.array([0.229, 0.224, 0.225], dtype=np.float32)
+            crop = (crop - mean) / std
+            # HWC -> CHW -> NCHW
+            crop = crop.transpose(2, 0, 1)
+            crop = np.expand_dims(crop, 0).astype(np.float32)
             
             inputs = {self._font_det_session.get_inputs()[0].name: crop}
             outputs = self._font_det_session.run(None, inputs)
-            # Map output index to font name (this depends on the model's classes)
-            # For now, we return a generic style identifier
-            idx = np.argmax(outputs[0])
-            return f"style_{idx}"
+            idx = int(np.argmax(outputs[0]))
+            # Yuzumarker classes: 0=normal, 1=bold, 2=italic, 3=handwritten, 4=sfx
+            style_map = {0: "normal", 1: "bold", 2: "italic", 3: "handwritten", 4: "sfx"}
+            return style_map.get(idx, "default")
         except Exception as e:
             logger.warning("[Yuzumarker] Font detection failed: %s", e)
             return "default"
@@ -843,6 +847,15 @@ class Inpainter:
         """
         result = image.copy()
         draw = ImageDraw.Draw(result)
+
+        # ── Font Style Detection (Yuzumarker) ─────────────────────────────
+        font_det_engine = self.cfg.get("font_detection_engine", "default")
+        if font_det_engine == "yuzumarker":
+            for region in regions:
+                if region.translated_text:
+                    detected_style = self._run_yuzumarker_font_detection(image, region)
+                    region.font_style = detected_style
+                    logger.debug("[Yuzumarker] Region style: %s", detected_style)
 
         for region in regions:
             if not region.translated_text:
@@ -1076,7 +1089,7 @@ class Inpainter:
         return self._deduplicate_contained_regions(merged)
 
     def _deduplicate_contained_regions(self, regions: List[BubbleRegion]) -> List[BubbleRegion]:
-        """Remove larger regions that contain smaller, better-defined sub-regions."""
+        """Remove smaller regions that are contained within larger, better-defined parent regions."""
         if not regions:
             return []
             
@@ -1102,10 +1115,10 @@ class Inpainter:
                 inter_area = inter_w * inter_h
                 small_area = r_small.w * r_small.h
                 
-                # If >80% of small bubble is inside large bubble, the large bubble 
-                # is likely a redundant container. Remove it to allow better OCR on pieces.
+                # If >80% of small bubble is inside large bubble, the small bubble 
+                # is likely a redundant fragment. Remove it to keep the whole text block.
                 if inter_area > 0.8 * small_area:
-                    remove_indices.add(j)
+                    remove_indices.add(i)
             
         keep = [r for idx, r in enumerate(sorted_regions) if idx not in remove_indices]
         # Return in original top-to-bottom order
