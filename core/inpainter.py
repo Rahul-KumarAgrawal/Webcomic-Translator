@@ -170,9 +170,10 @@ class Inpainter:
                 logger.info(f"[Inpainter] Applying Lanczos Global 2x Upscale: {w}x{h} -> {w*2}x{h*2}")
                 image = image.resize((w*2, h*2), resample=Image.LANCZOS)
 
-        det_engine = self.cfg.get("detection_engine", "mit")
-        ocr_engine = self.cfg.get("ocr_engine", "mit")
-        logger.info("[Modular] Using detection=%s, ocr=%s", det_engine, ocr_engine)
+        det_engine = self.cfg.get("detection_engine", "default")
+        ocr_engine = self.cfg.get("ocr_engine", "default")
+        inp_engine = self.cfg.get("inpaint_engine", "lama")
+        logger.info("[Modular] Using detection=%s, ocr=%s, inpaint=%s", det_engine, ocr_engine, inp_engine)
 
         # ── 1. Detection ──────────────────────────────────────────────────
         if str(det_engine).lower() in ("yolo", "yolo_hybrid"):
@@ -796,29 +797,39 @@ class Inpainter:
         Returns a new PIL Image with text erased.
         """
         engine = self.cfg.get("inpaint_engine", "lama").lower()
-        if engine == "aot":
-            return self._run_aot_inpaint(image, regions)
-        elif engine == "panelcleaner":
-            return self._run_panelcleaner_inpaint(image, regions)
-        elif engine == "solid":
+        use_seg = "_segmented" in engine
+        base_engine = engine.replace("_segmented", "")
+        
+        if base_engine == "aot":
+            return self._run_aot_inpaint(image, regions, use_segmentation=use_seg)
+        elif base_engine == "panelcleaner":
+            return self._run_panelcleaner_inpaint(image, regions, use_segmentation=use_seg)
+        elif base_engine == "solid":
             result = image.copy()
             for r in regions:
-                self._clean_region(result, r)
+                self._clean_region(result, r, use_segmentation=use_seg)
             return result
+            
         return self._run_mit_inpaint(image, regions)
 
-    def _run_panelcleaner_inpaint(self, image: Image.Image, regions: List[BubbleRegion]) -> Image.Image:
+    def _run_panelcleaner_inpaint(self, image: Image.Image, regions: List[BubbleRegion], use_segmentation: bool = False) -> Image.Image:
         """
         Use PanelCleaner's LaMa model for inpainting.
         """
         try:
             import numpy as np
+            import cv2
             from core.panelcleaner_wrapper import PanelCleanerPipeline
             
             # Create a full-page mask
             mask = np.zeros((image.height, image.width), dtype=np.uint8)
             for r in regions:
-                mask[r.y:r.y+r.h, r.x:r.x+r.w] = 255
+                if use_segmentation and r.mask_pts is not None:
+                    pts = np.array(r.mask_pts, np.int32)
+                    pts = pts.reshape((-1, 1, 2))
+                    cv2.fillPoly(mask, [pts], 255)
+                else:
+                    mask[r.y:r.y+r.h, r.x:r.x+r.w] = 255
 
             if np.max(mask) == 0:
                 return image
@@ -1124,7 +1135,7 @@ class Inpainter:
         # Return in original top-to-bottom order
         return sorted(keep, key=lambda r: (r.y, r.x))
 
-    def _run_aot_inpaint(self, image: Image.Image, regions: List[BubbleRegion]) -> Image.Image:
+    def _run_aot_inpaint(self, image: Image.Image, regions: List[BubbleRegion], use_segmentation: bool = False) -> Image.Image:
         """
         Use AOT-GAN ONNX model from Pipeline Koharu for high-detail inpainting.
         Falls back to MIT inpainting if the model is not found or fails.
@@ -1334,19 +1345,20 @@ class Inpainter:
         except Exception as exc:
             logger.warning("MIT inpaint failed (%s), using smart-fill fallback.", exc)
             result = image.copy()
+            use_segmentation = self.cfg.get("use_segmentation", False)
             for r in regions:
-                self._clean_region(result, r)
+                self._clean_region(result, r, use_segmentation=use_segmentation)
             return result
 
-    def _clean_region(self, image: Image.Image, region: "BubbleRegion") -> None:
+    def _clean_region(self, image: Image.Image, region: "BubbleRegion", use_segmentation: bool = False):
         """
-        Clean a text region by filling with the sampled background color
-        and blending edges with a Gaussian blur for a seamless result.
+        Inpaint a single region with a solid background color.
+        Uses a feathered mask for smoother blending.
         """
-        x1, y1, x2, y2 = region.bbox
         img_w, img_h = image.size
+        x1, y1, x2, y2 = region.bbox
 
-        # Add padding around the text region to cover stroke edges
+        # Expand region slightly to ensure we cover the text fully
         pad = 4
         fx1 = max(0, x1 - pad)
         fy1 = max(0, y1 - pad)
@@ -1366,7 +1378,7 @@ class Inpainter:
         fill_patch = Image.new("RGB", (patch_w, patch_h), bg_color)
 
         # Create a mask for blending
-        if region.mask_pts is not None:
+        if use_segmentation and region.mask_pts is not None:
             # Use the actual segmentation shape from YOLO (offset to patch coordinates)
             mask = Image.new("L", (patch_w, patch_h), 0)
             mask_draw = ImageDraw.Draw(mask)

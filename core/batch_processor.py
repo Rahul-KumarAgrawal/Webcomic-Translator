@@ -1047,12 +1047,13 @@ def _process_pages_standard(
         try:
             # Inpaint
             import numpy as np
+            base_inpaint = inpaint_engine.replace("_segmented", "")
             if inpaint_engine == "panelcleaner" and panelcleaner:
                 np_img = np.array(image)
                 mask = panelcleaner.detect_text_mask(np_img)
                 inpainted_np = panelcleaner.inpaint_lama(np_img, mask)
                 inpainted = Image.fromarray(inpainted_np)
-            elif inpaint_engine in ("lama", "aot", "solid") and regions:
+            elif base_inpaint in ("lama", "aot", "solid", "panelcleaner") and regions:
                 inpainted = inpainter.inpaint(image, regions)
             else:
                 inpainted = image.copy()
