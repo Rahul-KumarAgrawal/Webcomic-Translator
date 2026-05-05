@@ -749,6 +749,7 @@ def edit_bubble():
     source_text = data.get("source_text", "")
     source_lang = data.get("source_lang", "")
     cbz_name    = data.get("cbz_name", "")
+    skip_inpaint = data.get("skip_inpaint", False)
 
     from memory.memory_manager import MemoryManager
     mm = MemoryManager()
@@ -758,7 +759,7 @@ def edit_bubble():
         _append_approved_pair(source_lang, source_text, new_text)
         # Persist to session JSON
         if cbz_name:
-            _update_session_bubble(cbz_name, source_text, new_text, approved=True, edited=True)
+            _update_session_bubble(cbz_name, source_text, new_text, approved=True, edited=True, skip_inpaint=skip_inpaint)
         return jsonify({"ok": True})
     except Exception as exc:
         logger.error("Edit error: %s", exc)
@@ -1153,10 +1154,18 @@ def rerender_cbz(cbz_name: str):
                                  br = BubbleRegion(
                                      x=x, y=y, w=w, h=h,
                                      source_text=sb.get("source_text", ""),
-                                     translated_text=sb.get("translated_text", ""),
+                                     translated_text=sb.get("translated_text", "") if not sb.get("skip_inpaint") else "",
                                      font_cfg=font_cfg
                                  )
-                                 regions.append(br)
+                                 
+                                 if sb.get("skip_inpaint"):
+                                     if w > 0 and h > 0:
+                                         orig_img = Image.open(img_path).convert("RGB")
+                                         patch = orig_img.crop((x, y, x + w, y + h))
+                                         inpainted_image.paste(patch, (x, y))
+                                 else:
+                                     regions.append(br)
+                                     
                                  all_regions.append((None, br, page_num, ""))
                              
                              final = inpainter.render_text(inpainted_image, regions)
@@ -1168,17 +1177,24 @@ def rerender_cbz(cbz_name: str):
                         # 🐢 FALLBACK: Old slow behavior (re-run OCR and Masking)
                         image, detected_regions = inpainter.detect_and_ocr(img_path)
 
+                        filtered_regions = []
                         for region in detected_regions:
+                            skip = False
                             for sb in page_bubbles:
                                 if region.source_text.strip() == sb.get("source_text", "").strip():
                                     region.translated_text = sb.get("translated_text", "")
                                     region.font_cfg = font_cfg
+                                    if sb.get("skip_inpaint"):
+                                        skip = True
                                     break
                             else:
                                 region.font_cfg = font_cfg
+                                
                             all_regions.append((None, region, page_num, ""))
+                            if not skip:
+                                filtered_regions.append(region)
 
-                        inpainter.process_page(img_path, detected_regions, out_page)
+                        inpainter.process_page(img_path, filtered_regions, out_page)
                 
                 # Update progress
                 _tq.update(jid, progress=page_num)
@@ -1350,7 +1366,7 @@ def upload_font():
 # ── Internal helpers ──────────────────────────────────────────────────────────
 
 def _update_session_bubble(cbz_name: str, source_text: str, translated_text: str,
-                           approved: bool, edited: bool):
+                           approved: bool, edited: bool, skip_inpaint: bool = False):
     """Update a bubble in the session JSON so edits persist across page refreshes."""
     session_path = os.path.join(SESSIONS_DIR, cbz_name.replace(".cbz", "") + ".json")
     if not os.path.exists(session_path):
@@ -1363,6 +1379,7 @@ def _update_session_bubble(cbz_name: str, source_text: str, translated_text: str
                 b["translated_text"] = translated_text
                 b["approved"] = approved
                 b["edited"] = edited
+                b["skip_inpaint"] = skip_inpaint
         with open(session_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
     except Exception as exc:

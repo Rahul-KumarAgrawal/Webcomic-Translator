@@ -371,6 +371,16 @@ function initBubbleReview() {
   document.querySelectorAll(".btn-edit-save").forEach(btn => {
     btn.addEventListener("click", () => bubbleAction("edit", btn));
   });
+  document.querySelectorAll(".btn-ignore").forEach(btn => {
+    btn.dataset.action = "ignore";
+    btn.addEventListener("click", async () => {
+      const currentAction = btn.dataset.action;
+      if (currentAction === "ignore") {
+        if (!confirm("Ignore this bubble? This will restore the original text and remove any translations.")) return;
+      }
+      bubbleAction(currentAction, btn);
+    });
+  });
 }
 
 async function bubbleAction(action, btn) {
@@ -384,7 +394,9 @@ async function bubbleAction(action, btn) {
   const textarea = card.querySelector("textarea");
   const transText = textarea ? textarea.value.trim() : card.dataset.translatedText;
 
-  const endpoint = { approve: "/approve", reject: "/reject", edit: "/edit" }[action];
+  const isIgnore = action === "ignore";
+  const isUndoIgnore = action === "undo_ignore";
+  const endpoint = { approve: "/approve", reject: "/reject", edit: "/edit", ignore: "/edit", undo_ignore: "/edit" }[action];
   try {
     const resp = await fetch(endpoint, {
       method: "POST",
@@ -392,18 +404,55 @@ async function bubbleAction(action, btn) {
       body: JSON.stringify({
         memory_id: memId ? parseInt(memId) : null,
         series, source_text: srcText,
-        translated_text: transText, source_lang: srcLang,
+        translated_text: isIgnore ? "" : transText, source_lang: srcLang,
         cbz_name: cbzName,
+        skip_inpaint: isIgnore,
       }),
     });
     const data = await resp.json();
     if (data.ok) {
-      card.style.opacity = "0.5";
-      card.style.pointerEvents = "none";
-      // Update progress bar instead of showing individual toasts
-      if (action === "approve") reviewProgress.approved++;
-      else if (action === "edit") reviewProgress.edited++;
-      else if (action === "reject") reviewProgress.rejected++;
+      if (typeof reviewProgress !== "undefined") {
+        const oldState = card.dataset.currentState;
+        if (oldState === "approve") reviewProgress.approved = Math.max(0, reviewProgress.approved - 1);
+        else if (oldState === "edit") reviewProgress.edited = Math.max(0, reviewProgress.edited - 1);
+        else if (oldState === "reject") reviewProgress.rejected = Math.max(0, reviewProgress.rejected - 1);
+        else if (oldState === "ignore" || oldState === "undo_ignore") reviewProgress.edited = Math.max(0, reviewProgress.edited - 1);
+
+        if (action === "approve") reviewProgress.approved++;
+        else if (action === "edit") reviewProgress.edited++;
+        else if (action === "reject") reviewProgress.rejected++;
+        else if (action === "ignore" || action === "undo_ignore") reviewProgress.edited++;
+
+        card.dataset.currentState = action;
+      }
+
+      if (isIgnore) {
+        card.dataset.ignored = "true";
+        card.style.opacity = "0.5";
+        btn.innerHTML = "↺ Undo Ignore";
+        btn.classList.remove("btn-warning");
+        btn.classList.add("btn-info");
+        btn.dataset.action = "undo_ignore";
+      } else if (isUndoIgnore) {
+        card.dataset.ignored = "false";
+        card.style.opacity = "1";
+        btn.innerHTML = "🙈 Ignore (Keep Original)";
+        btn.classList.remove("btn-info");
+        btn.classList.add("btn-warning");
+        btn.dataset.action = "ignore";
+      } else {
+        card.style.opacity = "0.5";
+        
+        // Reset Ignore button if it was in Undo state
+        const ignoreBtn = card.querySelector(".btn-info");
+        if (ignoreBtn && ignoreBtn.dataset.action === "undo_ignore") {
+            ignoreBtn.innerHTML = "🙈 Ignore (Keep Original)";
+            ignoreBtn.classList.remove("btn-info");
+            ignoreBtn.classList.add("btn-warning");
+            ignoreBtn.dataset.action = "ignore";
+            card.dataset.ignored = "false";
+        }
+      }
       updateReviewProgressUI();
     } else {
       showToast(`Error: ${data.error}`, "error");
@@ -760,14 +809,16 @@ function initBulkLLMTranslator() {
   }
 
   btnCopy.addEventListener("click", () => {
-    const cards = document.querySelectorAll(".bubble-card");
-    if (cards.length === 0) {
-      showToast("No bubbles to translate.", "warning");
+    const allCards = document.querySelectorAll(".bubble-card");
+    const activeCards = Array.from(allCards).filter(c => c.dataset.ignored !== "true");
+    
+    if (activeCards.length === 0) {
+      showToast("No active bubbles to translate.", "warning");
       return;
     }
 
     let prompt = "Translate the following manga text blocks to English. Keep the exact numbering and line count output as a numbered list:\n\n";
-    cards.forEach((card, idx) => {
+    activeCards.forEach((card, idx) => {
       const srcText = card.querySelector(".bubble-source-text").innerText.replace(/\n /g, "").trim();
       prompt += `${idx + 1}. ${srcText}\n`;
     });
@@ -786,10 +837,11 @@ function initBulkLLMTranslator() {
       return;
     }
 
-    const cards = document.querySelectorAll(".bubble-card");
+    const allCards = document.querySelectorAll(".bubble-card");
+    const activeCards = Array.from(allCards).filter(c => c.dataset.ignored !== "true");
     let matches = [];
 
-    cards.forEach((card, idx) => {
+    activeCards.forEach((card, idx) => {
       const expectedPrefix = `${idx + 1}.`;
       const match = lines.find(l => l.trim().startsWith(expectedPrefix));
       if (match) {
