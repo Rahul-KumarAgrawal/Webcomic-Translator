@@ -68,24 +68,37 @@ async def detect(
     if file:
         filename = file.filename.lower()
         if filename.endswith(".cbz"):
-            # Handle CBZ: Extract pages 4 and 5
             import zipfile
             import io
             content = await file.read()
             with zipfile.ZipFile(io.BytesIO(content)) as z:
-                # Filter for image files and sort them
                 exts = ('.jpg', '.jpeg', '.png', '.webp')
                 images = sorted([f for f in z.namelist() if f.lower().endswith(exts)])
                 
-                if len(images) >= 4:
-                    # Page 4 is index 3
-                    with z.open(images[3]) as f:
-                        image_bytes = f.read()
-                elif images:
-                    with z.open(images[0]) as f:
-                        image_bytes = f.read()
-                else:
+                if not images:
                     raise HTTPException(status_code=400, detail="No images found in CBZ")
+
+                # Waterfall strategy: Check pages 4, 5, 6, 7, 8 in order
+                # If a page has no text, try the next one.
+                candidate_indices = [3, 4, 5, 6, 7] 
+                
+                last_result = None
+                for idx in candidate_indices:
+                    if idx >= len(images):
+                        continue
+                    
+                    with z.open(images[idx]) as f:
+                        img_bytes = f.read()
+                    
+                    result = active_engine.detect(img_bytes)
+                    # If we found text, we're done!
+                    if result.get("hasText"):
+                        return result
+                    
+                    last_result = result
+                
+                # If we tried all candidates and none had text, return the last result we got
+                return last_result or {"hasText": False, "languages": [], "summary": "No text found in sample pages."}
         else:
             image_bytes = await file.read()
     elif data and data.url:

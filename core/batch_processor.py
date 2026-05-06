@@ -136,83 +136,67 @@ LANGDETECT_TO_NLLB = {
 def _auto_detect_language(images: list, logger: logging.Logger, cfg: dict = None) -> Tuple[Optional[str], float]:
     """
     Identifies the language of the comic.
-    Always uses pages 4 and 5 (index 3 and 4) if available.
-    Integrates with the new autodetect.DetectorManager.
+    Uses a waterfall strategy checking pages 4 through 8 until text is found.
     """
-    # Prefer pages 4 and 5 (index 3 and 4)
-    if len(images) >= 5:
-        sample_pages = [images[3], images[4]]
-    elif len(images) >= 4:
-        sample_pages = [images[3]]
-    else:
-        sample_pages = images[:min(2, len(images))]
+    candidate_indices = [3, 4, 5, 6, 7] # Pages 4-8
+    sample_pages = [images[i] for i in candidate_indices if i < len(images)]
+    if not sample_pages:
+        sample_pages = images[:min(3, len(images))]
 
-    logger.info("  Auto-detect: using pages %s for detection", 
+    logger.info("  Auto-detect: sampling candidate pages %s...", 
                 [images.index(p)+1 for p in sample_pages])
 
     # ── Choice 0: New Detector Plugins (Groq/Llama 4 Scout, etc.) ───────────────────────────
     try:
         from autodetect.manager import DetectorManager
         manager = DetectorManager()
-        
         engine_name = cfg.get("auto_detect_engine", "gemini") if cfg else "gemini"
         
         if engine_name in manager.engines:
             active_engine = manager.engines[engine_name]
             logger.info("  Auto-detect: using engine '%s'...", active_engine.name)
             
-            # Set API key from cfg if available
             key = cfg.get(f"{engine_name}_api_key")
             if key:
                 os.environ[f"{engine_name.upper()}_API_KEY"] = key
 
-            # Use the first sample page for detection (preferring page 4)
-            test_img_path = sample_pages[0]
-            with open(test_img_path, "rb") as f:
-                img_bytes = f.read()
-            
-            result = active_engine.detect(img_bytes)
-            if result.get("hasText") and result.get("languages"):
-                top_lang = result["languages"][0]
-                lang_name = top_lang["name"].lower()
+            # Waterfall loop: try each sample page until one has text
+            for test_img_path in sample_pages:
+                logger.info("  Auto-detect: checking Page %d...", images.index(test_img_path) + 1)
+                with open(test_img_path, "rb") as f:
+                    img_bytes = f.read()
                 
-                # Map common names to ISO/NLLB
-                name_to_iso = {
-                    "japanese": "ja",
-                    "chinese": "zh-cn",
-                    "chinese (simplified)": "zh-cn",
-                    "chinese (traditional)": "zh-tw",
-                    "traditional chinese": "zh-tw",
-                    "simplified chinese": "zh-cn",
-                    "korean": "ko",
-                    "english": "en",
-                    "spanish": "es",
-                    "french": "fr",
-                    "german": "de",
-                    "italian": "it",
-                    "portuguese": "pt",
-                    "russian": "ru"
-                }
-                detected_iso = name_to_iso.get(lang_name)
-                
-                # Smart Chinese/Script disambiguation
-                script = top_lang.get("script", "").lower()
-                if lang_name == "chinese":
-                    if "traditional" in script or "hant" in script:
-                        detected_iso = "zh-tw"
-                    elif "simplified" in script or "hans" in script:
-                        detected_iso = "zh-cn"
-                elif "traditional" in lang_name:
-                    detected_iso = "zh-tw"
-                elif "simplified" in lang_name:
-                    detected_iso = "zh-cn"
+                result = active_engine.detect(img_bytes)
+                if result.get("hasText") and result.get("languages"):
+                    top_lang = result["languages"][0]
+                    lang_name = top_lang["name"].lower()
+                    
+                    # Map common names to ISO/NLLB
+                    name_to_iso = {
+                        "japanese": "ja", "chinese": "zh-cn", "chinese (simplified)": "zh-cn",
+                        "chinese (traditional)": "zh-tw", "traditional chinese": "zh-tw",
+                        "simplified chinese": "zh-cn", "korean": "ko", "english": "en",
+                        "spanish": "es", "french": "fr", "german": "de", "italian": "it",
+                        "portuguese": "pt", "russian": "ru"
+                    }
+                    detected_iso = name_to_iso.get(lang_name)
+                    
+                    script = top_lang.get("script", "").lower()
+                    if lang_name == "chinese":
+                        if "traditional" in script or "hant" in script: detected_iso = "zh-tw"
+                        elif "simplified" in script or "hans" in script: detected_iso = "zh-cn"
+                    elif "traditional" in lang_name: detected_iso = "zh-tw"
+                    elif "simplified" in lang_name: detected_iso = "zh-cn"
 
-                if detected_iso:
-                    conf_map = {"high": 1.0, "medium": 0.8, "low": 0.5}
-                    prob = conf_map.get(top_lang.get("confidence", "medium"), 0.8)
-                    logger.info("  Auto-detect: '%s' detected '%s' (script: %s, confidence: %s)", 
-                                active_engine.name, lang_name, script or "N/A", top_lang.get("confidence"))
-                    return detected_iso, prob
+                    if detected_iso:
+                        conf_map = {"high": 1.0, "medium": 0.8, "low": 0.5}
+                        prob = conf_map.get(top_lang.get("confidence", "medium"), 0.8)
+                        logger.info("  Auto-detect: '%s' detected '%s' on Page %d", 
+                                    active_engine.name, lang_name, images.index(test_img_path) + 1)
+                        return detected_iso, prob
+                else:
+                    logger.info("  Auto-detect: no text found on Page %d, trying next...", images.index(test_img_path) + 1)
+
     except Exception as e:
         logger.warning("  New DetectorManager failed: %s. Falling back to legacy engines.", e)
 
@@ -225,11 +209,11 @@ def _auto_detect_language(images: list, logger: logging.Logger, cfg: dict = None
             try:
                 from core.google_translator import GoogleTranslator
                 detector = GoogleTranslator(api_key=google_key)
-                test_img = sample_pages[0]
-                detected = detector.detect_language_from_image(test_img)
-                if detected and detected != "unknown":
-                    logger.info("  Auto-detect: Gemini detected '%s'", detected)
-                    return detected, 1.0
+                for test_img in sample_pages:
+                    detected = detector.detect_language_from_image(test_img)
+                    if detected and detected != "unknown":
+                        logger.info("  Auto-detect: Gemini detected '%s' on Page %d", detected, images.index(test_img) + 1)
+                        return detected, 1.0
             except Exception as e:
                 logger.warning("  Gemini auto-detect failed: %s.", e)
         else:
@@ -242,11 +226,11 @@ def _auto_detect_language(images: list, logger: logging.Logger, cfg: dict = None
             logger.info("  Auto-detect: using Google Cloud Vision API...")
             try:
                 detector = GoogleVisionDetector(vision_key)
-                test_img = sample_pages[0]
-                detected = detector.detect_language(test_img)
-                if detected:
-                    logger.info("  Auto-detect: Google Vision detected '%s'", detected)
-                    return detected, 1.0
+                for test_img in sample_pages:
+                    detected = detector.detect_language(test_img)
+                    if detected:
+                        logger.info("  Auto-detect: Google Vision detected '%s' on Page %d", detected, images.index(test_img) + 1)
+                        return detected, 1.0
             except Exception as e:
                 logger.warning("  Google Vision auto-detect failed: %s.", e)
         else:
