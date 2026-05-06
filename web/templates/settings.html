@@ -172,6 +172,16 @@
                             <small class="text-muted d-block mt-4">Scans for "floating" text missed by YOLO.</small>
                         </div>
                         
+                        <div class="form-group">
+                            <label for="enable_nuisance_filter">Nuisance Filter</label>
+                            <div class="flex-gap-8 mt-8" style="align-items:center;">
+                                <input type="checkbox" id="enable_nuisance_filter" name="enable_nuisance_filter" 
+                                       {% if cfg.get('enable_nuisance_filter', False) %}checked{% endif %} style="width:auto;">
+                                <span style="font-weight:600;">Ignore Tiny Free-Floating Noise</span>
+                            </div>
+                            <small class="text-muted d-block mt-4">Automatically rejects very small, 1-2 character detections (like noise or artifacts) that aren't inside bubbles.</small>
+                        </div>
+                        
                         <div class="mt-16">
                             <small class="text-muted"><strong>Tip:</strong> Keep <i>Strictness</i> high to ignore SFX, and <i>Confidence</i> low for faint bubbles.</small>
                         </div>

@@ -214,16 +214,28 @@
             {# Page group header whenever page number changes #}
             {% if page_num != ns.last_page %}
             {% set ns.last_page = page_num %}
-            <div class="page-group-header">📄 Page {{ page_num }}</div>
+            <div class="page-group-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <span>📄 Page {{ page_num }}</span>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-outline btn-sm btn-ignore-page" data-page="{{ page_num }}" style="font-size: 0.75rem; padding: 4px 12px;">🙈 Ignore All on Page {{ page_num }}</button>
+                    <button class="btn btn-outline btn-sm btn-undo-ignore-page" data-page="{{ page_num }}" style="font-size: 0.75rem; padding: 4px 12px; color: var(--accent-blue); border-color: var(--accent-blue);">↺ Undo All on Page {{ page_num }}</button>
+                </div>
+            </div>
             {% endif %}
 
             <div class="bubble-card {{ card_class }}"
                 id="bubble-{{ loop.index }}"
+                data-page="{{ page_num }}"
                 data-memory-id="{{ b.memory_id or '' }}"
                 data-series="{{ series or 'Unknown' }}"
                 data-source-text="{{ b.source_text | e }}"
                 data-source-lang="{{ b.source_lang | e }}"
-                data-translated-text="{{ b.translated_text | e }}">
+                data-translated-text="{{ b.translated_text | e }}"
+                data-skip-inpaint="{{ 'true' if b.skip_inpaint else 'false' }}"
+                data-approved="{{ 'true' if b.approved else 'false' }}"
+                data-edited="{{ 'true' if b.edited else 'false' }}"
+                data-rejected="{{ 'true' if b.rejected else 'false' }}"
+                style="{% if b.skip_inpaint or b.approved or b.edited or b.rejected %}opacity: 0.5;{% endif %}">
 
                 <!-- Crop image column -->
                 <div class="bubble-crop">
@@ -263,7 +275,11 @@
                     <button class="btn btn-success btn-sm btn-approve">✅ Approve</button>
                     <button class="btn btn-sm btn-outline btn-edit-save">💾 Save Edit</button>
                     <button class="btn btn-danger btn-sm btn-reject">❌ Reject</button>
-                    <button class="btn btn-warning btn-sm btn-ignore" style="margin-top:4px;">🙈 Ignore (Keep Original)</button>
+                    {% if b.skip_inpaint %}
+                    <button class="btn btn-info btn-sm btn-ignore" style="margin-top:4px;" data-action="undo_ignore">↺ Undo Ignore</button>
+                    {% else %}
+                    <button class="btn btn-warning btn-sm btn-ignore" style="margin-top:4px;" data-action="ignore">🙈 Ignore (Keep Original)</button>
+                    {% endif %}
                 </div>
             </div>
             {% endfor %}

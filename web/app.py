@@ -733,7 +733,7 @@ def reject_bubble():
         _append_rejected_pair(source_lang, source_text, translated_text)
         # Persist to session JSON
         if cbz_name:
-            _update_session_bubble(cbz_name, source_text, translated_text, approved=False, edited=False)
+            _update_session_bubble(cbz_name, source_text, translated_text, approved=False, edited=False, rejected=True)
         return jsonify({"ok": True})
     except Exception as exc:
         logger.error("Reject error: %s", exc)
@@ -1277,6 +1277,7 @@ def settings_save():
     cfg["detection_confidence"] = float(request.form.get("detection_confidence", 0.20))
     cfg["sfx_strictness"] = float(request.form.get("sfx_strictness", 0.55))
     cfg["enable_gap_filling"] = request.form.get("enable_gap_filling") == "on"
+    cfg["enable_nuisance_filter"] = request.form.get("enable_nuisance_filter") == "on"
     
     # OCR & Upscaling
     cfg["ocr_super_res"] = request.form.get("ocr_super_res") == "on"
@@ -1366,7 +1367,8 @@ def upload_font():
 # ── Internal helpers ──────────────────────────────────────────────────────────
 
 def _update_session_bubble(cbz_name: str, source_text: str, translated_text: str,
-                           approved: bool, edited: bool, skip_inpaint: bool = False):
+                           approved: bool, edited: bool, skip_inpaint: bool = False,
+                           rejected: bool = False):
     """Update a bubble in the session JSON so edits persist across page refreshes."""
     session_path = os.path.join(SESSIONS_DIR, cbz_name.replace(".cbz", "") + ".json")
     if not os.path.exists(session_path):
@@ -1380,6 +1382,7 @@ def _update_session_bubble(cbz_name: str, source_text: str, translated_text: str
                 b["approved"] = approved
                 b["edited"] = edited
                 b["skip_inpaint"] = skip_inpaint
+                b["rejected"] = rejected
         with open(session_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
     except Exception as exc:

@@ -271,6 +271,9 @@ class Inpainter:
         # ── 4. SFX / Noise Filtering ───────────────────────────────────
         regions = self._apply_sfx_strictness_filter(image, regions)
 
+        # ── 5. Nuisance (Tiny Free-Floating) Filtering ─────────────────
+        regions = self._apply_nuisance_filter(regions)
+
         logger.info(f"[DEBUG INPAINTER] Final image.size = {image.size}, Number of regions = {len(regions)}")
         for i, r in enumerate(regions):
             
@@ -772,6 +775,40 @@ class Inpainter:
                 logger.info("[SFX Filter] Dropping noise/SFX: score=%.2f, var=%.1f, conf=%.2f", 
                             score, var, r.confidence)
         
+        return filtered
+
+    def _apply_nuisance_filter(self, regions: List[BubbleRegion]) -> List[BubbleRegion]:
+        """
+        Filters out 'nuisance' detections: free-floating, very small area, and tiny text length (1-2 chars).
+        Real text (even short) should be kept if it's large or inside a bubble.
+        """
+        if not self.cfg.get("enable_nuisance_filter", False):
+            return regions
+            
+        filtered = []
+        for r in regions:
+            # Must be free-floating (no bubble parent detected)
+            is_free_floating = (r.bubble_id == -1)
+            
+            # Check size constraints
+            area = r.w * r.h
+            # Tiny area (e.g. 50x50 = 2500 pixels max)
+            is_tiny_area = area < 2500
+            
+            text_len = len(r.source_text.strip()) if r.source_text else 0
+            
+            # Common junk characters often misidentified as text by OCR when scanning speed lines/screentones
+            junk_chars = set("「」わぁあ、。.,!?~ー|/\\lI1")
+            
+            is_junk = (text_len <= 2 and all(c in junk_chars for c in r.source_text.strip() if c.strip()))
+            
+            # If it's free-floating AND tiny AND (has no text OR has short/junk text)
+            if is_free_floating and is_tiny_area and (text_len == 0 or is_junk or text_len <= 2):
+                logger.info(f"[Nuisance Filter] Dropping nuisance: text='{r.source_text}', size={r.w}x{r.h}, free-floating=True")
+                continue
+                
+            filtered.append(r)
+            
         return filtered
 
     def unload_models(self):

@@ -319,11 +319,43 @@ async function uploadFiles(files, seriesInput, srcLangSel, tgtLangSel, engineSel
 const reviewProgress = { approved: 0, edited: 0, rejected: 0, total: 0 };
 
 function initReviewProgress() {
-  const totalCards = document.querySelectorAll(".bubble-card").length;
-  reviewProgress.total = totalCards;
+  const allCards = document.querySelectorAll(".bubble-card");
+  reviewProgress.total = allCards.length;
   reviewProgress.approved = 0;
   reviewProgress.edited = 0;
   reviewProgress.rejected = 0;
+
+  // ── Restore persisted state from server-rendered data attributes ──────────
+  allCards.forEach(card => {
+    const isIgnored  = card.dataset.skipInpaint === "true";
+    const isApproved = card.dataset.approved   === "true";
+    const isEdited   = card.dataset.edited     === "true";
+    const isRejected = card.dataset.rejected   === "true";
+
+    // Restore ignore button visual state
+    if (isIgnored) {
+      card.dataset.ignored = "true";
+      card.style.opacity = "0.5";
+      const ignoreBtn = card.querySelector(".btn-ignore");
+      if (ignoreBtn) {
+        ignoreBtn.innerHTML = "↺ Undo Ignore";
+        ignoreBtn.classList.remove("btn-warning");
+        ignoreBtn.classList.add("btn-info");
+        ignoreBtn.dataset.action = "undo_ignore";
+      }
+    }
+
+    // Restore opacity for approved/edited/rejected cards
+    if (!isIgnored && (isApproved || isEdited || isRejected)) {
+      card.style.opacity = "0.5";
+    }
+
+    // Count into progress
+    if (isIgnored || isEdited) reviewProgress.edited++;
+    else if (isApproved)       reviewProgress.approved++;
+    else if (isRejected)       reviewProgress.rejected++;
+  });
+
   updateReviewProgressUI();
 }
 
@@ -372,13 +404,52 @@ function initBubbleReview() {
     btn.addEventListener("click", () => bubbleAction("edit", btn));
   });
   document.querySelectorAll(".btn-ignore").forEach(btn => {
-    btn.dataset.action = "ignore";
+    if (!btn.dataset.action) btn.dataset.action = "ignore";
     btn.addEventListener("click", async () => {
       const currentAction = btn.dataset.action;
       if (currentAction === "ignore") {
         if (!confirm("Ignore this bubble? This will restore the original text and remove any translations.")) return;
       }
       bubbleAction(currentAction, btn);
+    });
+  });
+  document.querySelectorAll(".btn-ignore-page").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const pageNum = btn.dataset.page;
+      const cards = document.querySelectorAll(`.bubble-card[data-page="${pageNum}"]`);
+      let count = 0;
+      for (const card of cards) {
+        if (card.dataset.ignored !== "true") {
+          const ignoreBtn = card.querySelector(".btn-ignore");
+          if (ignoreBtn) {
+            await bubbleAction("ignore", ignoreBtn);
+            count++;
+          }
+        }
+      }
+      if (count > 0) {
+        showToast(`🙈 Ignored ${count} bubbles on Page ${pageNum}`, "success");
+      }
+    });
+  });
+
+  document.querySelectorAll(".btn-undo-ignore-page").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const pageNum = btn.dataset.page;
+      const cards = document.querySelectorAll(`.bubble-card[data-page="${pageNum}"]`);
+      let count = 0;
+      for (const card of cards) {
+        if (card.dataset.ignored === "true") {
+          const ignoreBtn = card.querySelector(".btn-info"); // Undo button has btn-info class
+          if (ignoreBtn && ignoreBtn.dataset.action === "undo_ignore") {
+            await bubbleAction("undo_ignore", ignoreBtn);
+            count++;
+          }
+        }
+      }
+      if (count > 0) {
+        showToast(`↺ Restored ${count} bubbles on Page ${pageNum}`, "success");
+      }
     });
   });
 }
@@ -900,7 +971,8 @@ function initBulkLLMTranslator() {
             successCount = data.count || matches.length;
             matches.forEach(m => {
               m.card.style.opacity = "0.5";
-              m.card.style.pointerEvents = "none";
+              // NOTE: pointerEvents intentionally NOT set to "none" so users
+              // can still click into the textarea and edit words after autofill.
               reviewProgress.edited++;
             });
             updateReviewProgressUI();
