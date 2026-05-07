@@ -104,7 +104,7 @@ function upsertJobCard(job) {
     <div class="flex-between">
       <div class="flex-gap-8">
         <span style="font-weight:600">${escHtml(job.cbz_name)}</span>
-        <span class="badge ${badgeClass}">${job.status}</span>
+        <span class="badge ${badgeClass}">${job.status || "queued"}</span>
       </div>
       ${(job.status === "done" || job.status === "error" || job.status === "cancelled")
       ? (job.translation_engine === "Rerender"
@@ -118,9 +118,9 @@ function upsertJobCard(job) {
                 <a class="btn btn-outline btn-sm" href="/review/${encodeURIComponent(job.cbz_name)}">Review →</a>
                 <button class="btn btn-danger btn-sm delete-output-btn" data-cbz="${escAttr(job.cbz_name)}" title="Delete output & session data">🗑️ Delete</button>
                </div>`)
-      : (job.status === "queued" || job.status === "processing" 
-          ? `<button class="btn btn-danger btn-sm" onclick="cancelJob('${job.id}')" title="Cancel this job">Cancel</button>` 
-          : "")}
+      : (!job.status || job.status === "queued" || job.status === "processing"
+        ? `<button class="btn btn-danger btn-sm" onclick="cancelJob('${job.id}')" title="Cancel this job">Cancel</button>`
+        : "")}
     </div>
     ${job.series ? `<div class="text-sm text-muted mt-8">Series: ${escHtml(job.series)}</div>` : ""}
     ${job.error ? `<div class="text-danger text-sm mt-8">Error: ${escHtml(job.error)}</div>` : ""}
@@ -222,60 +222,60 @@ async function uploadFiles(files, seriesInput, srcLangSel, tgtLangSel, engineSel
 
     let finalSrcLang = srcLang;
     if (srcLang === "") {
-        try {
-            showToast(`🔍 Detecting language for ${file.name}...`, "info");
-            const detectFd = new FormData();
-            detectFd.append("file", file);
-            
-            const autoEngine = localStorage.getItem("active_autodetect_engine") || "";
-            const autoKey = localStorage.getItem(`autodetect_key_${autoEngine}`) || "";
-            
-            const detectRes = await fetch(`${DETECT_API_BASE}/autodetect/detect`, {
-                method: "POST",
-                headers: { "X-API-Key": autoKey },
-                body: detectFd
-            });
-            const detectData = await detectRes.json();
-            if (detectData.languages && detectData.languages.length > 0) {
-                const topL = detectData.languages[0];
-                const dName = topL.name.toLowerCase();
-                const dScript = (topL.script || "").toLowerCase();
-                
-                if (srcLangSel) {
-                    let matched = false;
-                    // Try specific match for Chinese variants
-                    if (dName.includes("chinese")) {
-                        const target = (dScript.includes("traditional") || dName.includes("traditional")) ? "traditional" : "simplified";
-                        for (let i = 0; i < srcLangSel.options.length; i++) {
-                            const optText = srcLangSel.options[i].text.toLowerCase();
-                            if (optText.includes("chinese") && optText.includes(target)) {
-                                finalSrcLang = srcLangSel.options[i].value;
-                                matched = true;
-                                break;
-                            }
-                        }
-                    }
-                    
-                    // Fallback to general include match
-                    if (!matched) {
-                        for (let i = 0; i < srcLangSel.options.length; i++) {
-                            if (srcLangSel.options[i].text.toLowerCase().includes(dName)) {
-                                finalSrcLang = srcLangSel.options[i].value;
-                                matched = true;
-                                break;
-                            }
-                        }
-                    }
-                    
-                    if (matched) {
-                        showToast(`✅ Auto-detected: ${topL.name} ${topL.script ? '('+topL.script+')' : ''}`, "success");
-                    }
+      try {
+        showToast(`🔍 Detecting language for ${file.name}...`, "info");
+        const detectFd = new FormData();
+        detectFd.append("file", file);
+
+        const autoEngine = localStorage.getItem("active_autodetect_engine") || "";
+        const autoKey = localStorage.getItem(`autodetect_key_${autoEngine}`) || "";
+
+        const detectRes = await fetch(`${DETECT_API_BASE}/autodetect/detect`, {
+          method: "POST",
+          headers: { "X-API-Key": autoKey },
+          body: detectFd
+        });
+        const detectData = await detectRes.json();
+        if (detectData.languages && detectData.languages.length > 0) {
+          const topL = detectData.languages[0];
+          const dName = topL.name.toLowerCase();
+          const dScript = (topL.script || "").toLowerCase();
+
+          if (srcLangSel) {
+            let matched = false;
+            // Try specific match for Chinese variants
+            if (dName.includes("chinese")) {
+              const target = (dScript.includes("traditional") || dName.includes("traditional")) ? "traditional" : "simplified";
+              for (let i = 0; i < srcLangSel.options.length; i++) {
+                const optText = srcLangSel.options[i].text.toLowerCase();
+                if (optText.includes("chinese") && optText.includes(target)) {
+                  finalSrcLang = srcLangSel.options[i].value;
+                  matched = true;
+                  break;
                 }
+              }
             }
-        } catch (err) {
-            console.error("Auto-detect failed:", err);
-            showToast("Auto-detection failed, proceeding with manual selection.", "warning");
+
+            // Fallback to general include match
+            if (!matched) {
+              for (let i = 0; i < srcLangSel.options.length; i++) {
+                if (srcLangSel.options[i].text.toLowerCase().includes(dName)) {
+                  finalSrcLang = srcLangSel.options[i].value;
+                  matched = true;
+                  break;
+                }
+              }
+            }
+
+            if (matched) {
+              showToast(`✅ Auto-detected: ${topL.name} ${topL.script ? '(' + topL.script + ')' : ''}`, "success");
+            }
+          }
         }
+      } catch (err) {
+        console.error("Auto-detect failed:", err);
+        showToast("Auto-detection failed, proceeding with manual selection.", "warning");
+      }
     }
 
     const fd = new FormData();
@@ -327,10 +327,10 @@ function initReviewProgress() {
 
   // ── Restore persisted state from server-rendered data attributes ──────────
   allCards.forEach(card => {
-    const isIgnored  = card.dataset.skipInpaint === "true";
-    const isApproved = card.dataset.approved   === "true";
-    const isEdited   = card.dataset.edited     === "true";
-    const isRejected = card.dataset.rejected   === "true";
+    const isIgnored = card.dataset.skipInpaint === "true";
+    const isApproved = card.dataset.approved === "true";
+    const isEdited = card.dataset.edited === "true";
+    const isRejected = card.dataset.rejected === "true";
 
     // Restore ignore button visual state
     if (isIgnored) {
@@ -350,10 +350,22 @@ function initReviewProgress() {
       card.style.opacity = "0.5";
     }
 
-    // Count into progress
-    if (isIgnored || isEdited) reviewProgress.edited++;
-    else if (isApproved)       reviewProgress.approved++;
-    else if (isRejected)       reviewProgress.rejected++;
+    // Count into progress and set current state
+    if (isIgnored) {
+      reviewProgress.edited++;
+      card.dataset.currentState = "ignore";
+    } else if (isEdited) {
+      reviewProgress.edited++;
+      card.dataset.currentState = "edit";
+    } else if (isApproved) {
+      reviewProgress.approved++;
+      card.dataset.currentState = "approve";
+    } else if (isRejected) {
+      reviewProgress.rejected++;
+      card.dataset.currentState = "reject";
+    } else {
+      card.dataset.currentState = "unreviewed";
+    }
   });
 
   updateReviewProgressUI();
@@ -478,6 +490,7 @@ async function bubbleAction(action, btn) {
         translated_text: isIgnore ? "" : transText, source_lang: srcLang,
         cbz_name: cbzName,
         skip_inpaint: isIgnore,
+        bubble_index: parseInt(card.dataset.bubbleNum) - 1
       }),
     });
     const data = await resp.json();
@@ -487,14 +500,14 @@ async function bubbleAction(action, btn) {
         if (oldState === "approve") reviewProgress.approved = Math.max(0, reviewProgress.approved - 1);
         else if (oldState === "edit") reviewProgress.edited = Math.max(0, reviewProgress.edited - 1);
         else if (oldState === "reject") reviewProgress.rejected = Math.max(0, reviewProgress.rejected - 1);
-        else if (oldState === "ignore" || oldState === "undo_ignore") reviewProgress.edited = Math.max(0, reviewProgress.edited - 1);
+        else if (oldState === "ignore") reviewProgress.edited = Math.max(0, reviewProgress.edited - 1);
 
         if (action === "approve") reviewProgress.approved++;
         else if (action === "edit") reviewProgress.edited++;
         else if (action === "reject") reviewProgress.rejected++;
-        else if (action === "ignore" || action === "undo_ignore") reviewProgress.edited++;
+        else if (action === "ignore") reviewProgress.edited++;
 
-        card.dataset.currentState = action;
+        card.dataset.currentState = (action === "undo_ignore") ? "unreviewed" : action;
       }
 
       if (isIgnore) {
@@ -512,16 +525,16 @@ async function bubbleAction(action, btn) {
         btn.classList.add("btn-warning");
         btn.dataset.action = "ignore";
       } else {
-        card.style.opacity = "0.5";
-        
+        if (action === "reject") card.style.opacity = "0.5";
+
         // Reset Ignore button if it was in Undo state
         const ignoreBtn = card.querySelector(".btn-info");
         if (ignoreBtn && ignoreBtn.dataset.action === "undo_ignore") {
-            ignoreBtn.innerHTML = "🙈 Ignore (Keep Original)";
-            ignoreBtn.classList.remove("btn-info");
-            ignoreBtn.classList.add("btn-warning");
-            ignoreBtn.dataset.action = "ignore";
-            card.dataset.ignored = "false";
+          ignoreBtn.innerHTML = "🙈 Ignore (Keep Original)";
+          ignoreBtn.classList.remove("btn-info");
+          ignoreBtn.classList.add("btn-warning");
+          ignoreBtn.dataset.action = "ignore";
+          card.dataset.ignored = "false";
         }
       }
       updateReviewProgressUI();
@@ -627,7 +640,7 @@ function initTrainProgressSSE() {
   };
 
   const evts = new EventSource("/train_progress_stream");
-  
+
   evts.onmessage = (e) => {
     const data = JSON.parse(e.data);
     if (data.type === "ping") return;
@@ -636,7 +649,7 @@ function initTrainProgressSSE() {
       container.classList.remove("hidden");
       btn.style.display = "none";
       idleText.style.display = "none";
-      
+
       const pct = data.total_steps > 0 ? Math.min(100, Math.round((data.step / data.total_steps) * 100)) : 0;
       fill.style.width = `${pct}%`;
       text.textContent = `Step ${data.step} / ${data.total_steps}`;
@@ -882,16 +895,17 @@ function initBulkLLMTranslator() {
   btnCopy.addEventListener("click", () => {
     const allCards = document.querySelectorAll(".bubble-card");
     const activeCards = Array.from(allCards).filter(c => c.dataset.ignored !== "true");
-    
+
     if (activeCards.length === 0) {
       showToast("No active bubbles to translate.", "warning");
       return;
     }
 
     let prompt = "Translate the following manga text blocks to English. Keep the exact numbering and line count output as a numbered list:\n\n";
-    activeCards.forEach((card, idx) => {
+    activeCards.forEach((card) => {
+      const num = card.dataset.bubbleNum;
       const srcText = card.querySelector(".bubble-source-text").innerText.replace(/\n /g, "").trim();
-      prompt += `${idx + 1}. ${srcText}\n`;
+      prompt += `${num}. ${srcText}\n`;
     });
 
     navigator.clipboard.writeText(prompt).then(() => {
@@ -902,7 +916,8 @@ function initBulkLLMTranslator() {
   });
 
   btnApply.addEventListener("click", async () => {
-    const lines = txtResult.value.split('\n').filter(l => l.trim() !== '');
+    const rawText = txtResult.value;
+    const lines = rawText.split('\n');
     if (lines.length === 0) {
       showToast("No text pasted to apply.", "warning");
       return;
@@ -910,15 +925,32 @@ function initBulkLLMTranslator() {
 
     const allCards = document.querySelectorAll(".bubble-card");
     const activeCards = Array.from(allCards).filter(c => c.dataset.ignored !== "true");
+
+    // 1. Build a map of all translations found in the pasted text
+    const translationMap = new Map();
+    lines.forEach(line => {
+      // Regex: Matches "21. text", "21) text", "21: text", or "21 text"
+      // Using a non-greedy delimiter to ensure translations starting with dots (e.g. "...") aren't eaten.
+      const match = line.match(/^\s*(\d+)(?:[\.\)\:]\s*|\s+)(.*)/);
+      if (match) {
+        const num = match[1];
+        const text = match[2].trim();
+        translationMap.set(num, text);
+      }
+    });
+
+    let matchedCount = 0;
     let matches = [];
 
-    activeCards.forEach((card, idx) => {
-      const expectedPrefix = `${idx + 1}.`;
-      const match = lines.find(l => l.trim().startsWith(expectedPrefix));
-      if (match) {
-        let translated = match.substring(match.indexOf('.') + 1).trim();
+    // 2. Map the translations to the active cards
+    activeCards.forEach((card) => {
+      const num = card.dataset.bubbleNum;
+      const translated = translationMap.get(num);
+
+      if (translated !== undefined) {
+        matchedCount++;
         const textarea = card.querySelector("textarea");
-        if (textarea && textarea.value !== translated) {
+        if (textarea) {
           textarea.value = translated;
           matches.push({ card, translated });
         }
@@ -968,12 +1000,18 @@ function initBulkLLMTranslator() {
           });
           const data = await resp.json();
           if (data.ok) {
-            successCount = data.count || matches.length;
+            successCount = matches.length;
+            // Update UI states and review progress
             matches.forEach(m => {
-              m.card.style.opacity = "0.5";
-              // NOTE: pointerEvents intentionally NOT set to "none" so users
-              // can still click into the textarea and edit words after autofill.
-              reviewProgress.edited++;
+              const oldState = m.card.dataset.currentState;
+              // Only update counts if the state actually changes to 'edit'
+              if (oldState !== "edit" && oldState !== "ignore") {
+                if (oldState === "approve") reviewProgress.approved = Math.max(0, reviewProgress.approved - 1);
+                else if (oldState === "reject") reviewProgress.rejected = Math.max(0, reviewProgress.rejected - 1);
+
+                reviewProgress.edited++;
+                m.card.dataset.currentState = "edit";
+              }
             });
             updateReviewProgressUI();
           } else {
@@ -988,11 +1026,11 @@ function initBulkLLMTranslator() {
       btnApply.disabled = false;
       btnApply.style.display = "flex";
       if (btnCancel) btnCancel.style.display = "none";
-      
+
       if (isCancelled) {
         showToast(`⚠️ Batch cancelled. Saved ${successCount} out of ${matches.length} items.`, "warning");
       } else {
-        showToast(`⚡ Batch saved ${successCount} out of ${matches.length} text boxes automatically!`, "success");
+        showToast(`⚡ Batch saved ${successCount} items automatically!`, "success");
       }
 
       // Hide bar after success
@@ -1007,7 +1045,7 @@ function initBulkLLMTranslator() {
       }
 
     } else {
-      showToast("Could not find matching numbers (e.g., '1. Text') in the pasted result.", "error");
+      showToast("Could not find any matching bubble numbers (e.g., '1.') in the pasted text.", "error");
     }
   });
 }
@@ -1021,35 +1059,35 @@ function initSearchableSelects() {
 
     const wrapper = document.createElement("div");
     wrapper.className = "searchable-select-wrapper";
-    
+
     const input = document.createElement("input");
     input.type = "text";
     input.className = "searchable-select-input";
     input.placeholder = "Search language...";
-    
+
     // Set initial text
     const updateInputText = () => {
       const selectedOpt = select.options[select.selectedIndex];
       input.value = selectedOpt ? selectedOpt.text : "";
     };
     updateInputText();
-    
+
     const chevron = document.createElement("div");
     chevron.className = "searchable-select-chevron";
     chevron.innerHTML = "▼";
-    
+
     const dropdown = document.createElement("div");
     dropdown.className = "searchable-select-dropdown";
-    
+
     select.parentNode.insertBefore(wrapper, select);
     wrapper.appendChild(input);
     wrapper.appendChild(chevron);
     wrapper.appendChild(dropdown);
-    
+
     // Original select is moved inside wrapper but hidden
     wrapper.appendChild(select);
     select.style.display = "none";
-    
+
     // Build options
     const items = [];
     Array.from(select.options).forEach(opt => {
@@ -1058,7 +1096,7 @@ function initSearchableSelects() {
       item.textContent = opt.text;
       item.dataset.value = opt.value;
       if (opt.selected) item.classList.add("selected");
-      
+
       item.addEventListener("click", () => {
         select.value = opt.value;
         updateInputText();
@@ -1070,13 +1108,13 @@ function initSearchableSelects() {
       dropdown.appendChild(item);
       items.push(item);
     });
-    
+
     input.addEventListener("focus", () => {
       input.value = ""; // clear to let user search easily
       dropdown.style.display = "block";
       items.forEach(item => item.classList.remove("hidden"));
     });
-    
+
     input.addEventListener("input", () => {
       const filter = input.value.toLowerCase();
       items.forEach(item => {
@@ -1087,7 +1125,7 @@ function initSearchableSelects() {
         }
       });
     });
-    
+
     document.addEventListener("click", (e) => {
       if (!wrapper.contains(e.target)) {
         dropdown.style.display = "none";
@@ -1111,14 +1149,14 @@ async function deleteSeries(seriesName) {
   if (!confirm(`Are you sure you want to completely delete the memory for series "${seriesName}"?`)) {
     return;
   }
-  
+
   try {
     const res = await fetch("/memory/series/delete", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ series: seriesName })
     });
-    
+
     const data = await res.json();
     if (data.ok) {
       showToast(`Series "${seriesName}" deleted successfully!`);
@@ -1175,124 +1213,124 @@ if (deleteModelsBtn) {
 const DETECT_API_BASE = "http://localhost:8000"; // FastAPI port
 
 function initAutodetect() {
-    const engineSel = document.getElementById("autodetect_engine_select");
-    if (!engineSel) return;
+  const engineSel = document.getElementById("autodetect_engine_select");
+  if (!engineSel) return;
 
-    const configArea = document.getElementById("engine_config_area");
-    const keyInput = document.getElementById("autodetect_api_key");
-    const testBtn = document.getElementById("test_engine_btn");
-    const saveBtn = document.getElementById("save_autodetect_btn");
-    const testResult = document.getElementById("test_result");
+  const configArea = document.getElementById("engine_config_area");
+  const keyInput = document.getElementById("autodetect_api_key");
+  const testBtn = document.getElementById("test_engine_btn");
+  const saveBtn = document.getElementById("save_autodetect_btn");
+  const testResult = document.getElementById("test_result");
 
-    // Load engines
-    fetch(`${DETECT_API_BASE}/autodetect/engines`)
-        .then(res => res.json())
-        .then(engines => {
-            engineSel.innerHTML = '<option value="">-- Select Engine --</option>';
-            engines.forEach(eng => {
-                const opt = document.createElement("option");
-                opt.value = eng.name;
-                let badge = eng.is_free ? " [FREE]" : (eng.requires_api_key ? " [API KEY]" : " [LOCAL]");
-                opt.textContent = eng.name.toUpperCase() + badge;
-                if (eng.is_active) opt.selected = true;
-                engineSel.appendChild(opt);
-            });
-            updateEngineUI();
-        })
-        .catch(err => console.error("Failed to load autodetect engines", err));
+  // Load engines
+  fetch(`${DETECT_API_BASE}/autodetect/engines`)
+    .then(res => res.json())
+    .then(engines => {
+      engineSel.innerHTML = '<option value="">-- Select Engine --</option>';
+      engines.forEach(eng => {
+        const opt = document.createElement("option");
+        opt.value = eng.name;
+        let badge = eng.is_free ? " [FREE]" : (eng.requires_api_key ? " [API KEY]" : " [LOCAL]");
+        opt.textContent = eng.name.toUpperCase() + badge;
+        if (eng.is_active) opt.selected = true;
+        engineSel.appendChild(opt);
+      });
+      updateEngineUI();
+    })
+    .catch(err => console.error("Failed to load autodetect engines", err));
 
-    function updateEngineUI() {
-        const selected = engineSel.value;
-        if (!selected) {
-            configArea.style.display = "none";
-            return;
-        }
-        
-        // Check if engine requires API key
-        const opt = engineSel.options[engineSel.selectedIndex];
-        const text = opt.textContent;
-        if (text.includes("[API KEY]")) {
-            configArea.style.display = "block";
-            // Load from localStorage
-            keyInput.value = localStorage.getItem(`autodetect_key_${selected}`) || "";
-        } else {
-            configArea.style.display = "none";
-        }
+  function updateEngineUI() {
+    const selected = engineSel.value;
+    if (!selected) {
+      configArea.style.display = "none";
+      return;
     }
 
-    if (engineSel) engineSel.addEventListener("change", updateEngineUI);
+    // Check if engine requires API key
+    const opt = engineSel.options[engineSel.selectedIndex];
+    const text = opt.textContent;
+    if (text.includes("[API KEY]")) {
+      configArea.style.display = "block";
+      // Load from localStorage
+      keyInput.value = localStorage.getItem(`autodetect_key_${selected}`) || "";
+    } else {
+      configArea.style.display = "none";
+    }
+  }
 
-    if (testBtn) testBtn.addEventListener("click", async () => {
-        const engine = engineSel.value;
-        const key = keyInput.value;
-        testResult.textContent = "⏳ Testing...";
-        testResult.className = "mt-4 text-xs text-muted";
-        
-        try {
-            const res = await fetch(`${DETECT_API_BASE}/autodetect/test/${engine}`, {
-                headers: { "X-API-Key": key }
-            });
-            const data = await res.json();
-            if (data.status === "success") {
-                testResult.textContent = "✅ Connection successful!";
-                testResult.className = "mt-4 text-xs text-success";
-            } else {
-                testResult.textContent = "❌ Connection failed. Check your API key.";
-                testResult.className = "mt-4 text-xs text-danger";
-            }
-        } catch (err) {
-            testResult.textContent = "❌ API unreachable. Make sure api.py is running.";
-            testResult.className = "mt-4 text-xs text-danger";
-        }
-    });
+  if (engineSel) engineSel.addEventListener("change", updateEngineUI);
 
-    if (saveBtn) saveBtn.addEventListener("click", async () => {
-        const engine = engineSel.value;
-        const key = keyInput.value;
-        
-        if (!engine) {
-            showToast("Please select an engine first.", "warning");
-            return;
-        }
+  if (testBtn) testBtn.addEventListener("click", async () => {
+    const engine = engineSel.value;
+    const key = keyInput.value;
+    testResult.textContent = "⏳ Testing...";
+    testResult.className = "mt-4 text-xs text-muted";
 
-        try {
-            const res = await fetch(`${DETECT_API_BASE}/autodetect/set-engine`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ engine })
-            });
-            const data = await res.json();
-            if (data.status === "success") {
-                localStorage.setItem("active_autodetect_engine", engine);
-                if (key) {
-                    localStorage.setItem(`autodetect_key_${engine}`, key);
-                }
-                showToast(`✅ Language detection engine set to ${engine}`, "success");
-            } else {
-                showToast(`❌ Error: ${data.detail}`, "error");
-            }
-        } catch (err) {
-            showToast("❌ Failed to save settings. Is the API running?", "error");
+    try {
+      const res = await fetch(`${DETECT_API_BASE}/autodetect/test/${engine}`, {
+        headers: { "X-API-Key": key }
+      });
+      const data = await res.json();
+      if (data.status === "success") {
+        testResult.textContent = "✅ Connection successful!";
+        testResult.className = "mt-4 text-xs text-success";
+      } else {
+        testResult.textContent = "❌ Connection failed. Check your API key.";
+        testResult.className = "mt-4 text-xs text-danger";
+      }
+    } catch (err) {
+      testResult.textContent = "❌ API unreachable. Make sure api.py is running.";
+      testResult.className = "mt-4 text-xs text-danger";
+    }
+  });
+
+  if (saveBtn) saveBtn.addEventListener("click", async () => {
+    const engine = engineSel.value;
+    const key = keyInput.value;
+
+    if (!engine) {
+      showToast("Please select an engine first.", "warning");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${DETECT_API_BASE}/autodetect/set-engine`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ engine })
+      });
+      const data = await res.json();
+      if (data.status === "success") {
+        localStorage.setItem("active_autodetect_engine", engine);
+        if (key) {
+          localStorage.setItem(`autodetect_key_${engine}`, key);
         }
-    });
+        showToast(`✅ Language detection engine set to ${engine}`, "success");
+      } else {
+        showToast(`❌ Error: ${data.detail}`, "error");
+      }
+    } catch (err) {
+      showToast("❌ Failed to save settings. Is the API running?", "error");
+    }
+  });
 }
 
 // ── DOM Content Loaded ────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
-    initQueueSSE();
-    initDropZone();
-    initMITToggle();
-    initDeleteOutput();
-    initReviewProgress();
-    initBubbleReview();
-    initMemoryEdit();
-    initMemorySearch();
-    initTrainButton();
-    initTrainProgressSSE();
-    initBackupActions();
-    initFontUpload();
-    initRerender();
-    initBulkLLMTranslator();
-    initSearchableSelects();
-    initAutodetect();
+  initQueueSSE();
+  initDropZone();
+  initMITToggle();
+  initDeleteOutput();
+  initReviewProgress();
+  initBubbleReview();
+  initMemoryEdit();
+  initMemorySearch();
+  initTrainButton();
+  initTrainProgressSSE();
+  initBackupActions();
+  initFontUpload();
+  initRerender();
+  initBulkLLMTranslator();
+  initSearchableSelects();
+  initAutodetect();
 });

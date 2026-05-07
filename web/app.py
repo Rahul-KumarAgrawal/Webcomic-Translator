@@ -261,35 +261,36 @@ class TranslationQueue:
             global_upscale: bool = False,
             global_upscale_impl: str = "none") -> str:
         job_id = f"{cbz_name}_{int(time.time())}"
+        job = {
+            "id":          job_id,
+            "cbz_name":    cbz_name,
+            "series":      series,
+            "source_lang": source_lang,
+            "target_lang": target_lang,
+            "translation_engine": translation_engine,
+            "ocr_engine":  ocr_engine,
+            "detection_engine": detection_engine,
+            "inpaint_engine": inpaint_engine,
+            "use_mit_pipeline": use_mit_pipeline,
+            "use_koharu_pipeline": use_koharu_pipeline,
+            "mit_translator": mit_translator,
+            "mit_target_lang": mit_target_lang,
+            "force_retranslate": force_retranslate,
+            "chunk_height": chunk_height,
+            "chunk_overlap": chunk_overlap,
+            "ocr_super_res": ocr_super_res,
+            "ocr_upscale_factor": ocr_upscale_factor,
+            "global_upscale": global_upscale,
+            "global_upscale_impl": global_upscale_impl,
+            "status":      "queued",
+            "progress":    0,
+            "total":       0,
+            "progress_text": "",
+            "error":       None,
+        }
         with self._lock:
-            self._jobs.append({
-                "id":          job_id,
-                "cbz_name":    cbz_name,
-                "series":      series,
-                "source_lang": source_lang,
-                "target_lang": target_lang,
-                "translation_engine": translation_engine,
-                "ocr_engine":  ocr_engine,
-                "detection_engine": detection_engine,
-                "inpaint_engine": inpaint_engine,
-                "use_mit_pipeline": use_mit_pipeline,
-                "use_koharu_pipeline": use_koharu_pipeline,
-                "mit_translator": mit_translator,
-                "mit_target_lang": mit_target_lang,
-                "force_retranslate": force_retranslate,
-                "chunk_height": chunk_height,
-                "chunk_overlap": chunk_overlap,
-                "ocr_super_res": ocr_super_res,
-                "ocr_upscale_factor": ocr_upscale_factor,
-                "global_upscale": global_upscale,
-                "global_upscale_impl": global_upscale_impl,
-                "status":      "queued",
-                "progress":    0,
-                "total":       0,
-                "progress_text": "",
-                "error":       None,
-            })
-        self._broadcast({"type": "queued", "id": job_id, "cbz_name": cbz_name})
+            self._jobs.append(job)
+        self._broadcast({"type": "queued", **job})
         return job_id
 
     def jobs(self):
@@ -678,10 +679,27 @@ def review(cbz_name: str):
         data = json.load(f)
     cfg = _load_cfg()
     threshold = cfg.get("memory", {}).get("confidence_threshold", 60)
+    
+    # Apply hallucination filter if enabled
+    bubbles = data.get("bubbles", [])
+    if cfg.get("hallucination_filter", {}).get("enabled", False):
+        try:
+            from core.hallucination_filter_integration import filter_ocr_results
+            result = filter_ocr_results(bubbles, cfg, logger)
+            bubbles = result.get("bubbles", [])
+            filter_stats = result.get("stats", {})
+            if filter_stats:
+                logger.info("Hallucination Filter: Filtered %d/%d bubbles (%.1f%%)",
+                           filter_stats.get("filtered", 0),
+                           filter_stats.get("total", 0),
+                           filter_stats.get("filtered_pct", 0))
+        except Exception as e:
+            logger.warning("Hallucination filter error: %s", e)
+    
     return render_template(
         "review.html",
         cbz_name=cbz_name,
-        bubbles=data.get("bubbles", []),
+        bubbles=bubbles,
         series=data.get("series", "Unknown"),
         threshold=threshold,
         error=None,
@@ -707,7 +725,9 @@ def approve_bubble():
         _append_approved_pair(source_lang, source_text, translated_text)
         # Persist to session JSON so edits survive page refreshes
         if cbz_name:
-            _update_session_bubble(cbz_name, source_text, translated_text, approved=True, edited=False)
+            _update_session_bubble(cbz_name, source_text, translated_text, 
+                                   approved=True, edited=False, 
+                                   bubble_index=data.get("bubble_index"))
         return jsonify({"ok": True})
     except Exception as exc:
         logger.error("Approve error: %s", exc)
@@ -733,7 +753,9 @@ def reject_bubble():
         _append_rejected_pair(source_lang, source_text, translated_text)
         # Persist to session JSON
         if cbz_name:
-            _update_session_bubble(cbz_name, source_text, translated_text, approved=False, edited=False, rejected=True)
+            _update_session_bubble(cbz_name, source_text, translated_text, 
+                                   approved=False, edited=False, rejected=True,
+                                   bubble_index=data.get("bubble_index"))
         return jsonify({"ok": True})
     except Exception as exc:
         logger.error("Reject error: %s", exc)
@@ -759,7 +781,9 @@ def edit_bubble():
         _append_approved_pair(source_lang, source_text, new_text)
         # Persist to session JSON
         if cbz_name:
-            _update_session_bubble(cbz_name, source_text, new_text, approved=True, edited=True, skip_inpaint=skip_inpaint)
+            _update_session_bubble(cbz_name, source_text, new_text, 
+                                   approved=True, edited=True, skip_inpaint=skip_inpaint,
+                                   bubble_index=data.get("bubble_index"))
         return jsonify({"ok": True})
     except Exception as exc:
         logger.error("Edit error: %s", exc)
@@ -1368,7 +1392,7 @@ def upload_font():
 
 def _update_session_bubble(cbz_name: str, source_text: str, translated_text: str,
                            approved: bool, edited: bool, skip_inpaint: bool = False,
-                           rejected: bool = False):
+                           rejected: bool = False, bubble_index: int = None):
     """Update a bubble in the session JSON so edits persist across page refreshes."""
     session_path = os.path.join(SESSIONS_DIR, cbz_name.replace(".cbz", "") + ".json")
     if not os.path.exists(session_path):
@@ -1376,13 +1400,27 @@ def _update_session_bubble(cbz_name: str, source_text: str, translated_text: str
     try:
         with open(session_path, "r", encoding="utf-8") as f:
             data = json.load(f)
-        for b in data.get("bubbles", []):
-            if b.get("source_text", "").strip() == source_text.strip():
-                b["translated_text"] = translated_text
-                b["approved"] = approved
-                b["edited"] = edited
-                b["skip_inpaint"] = skip_inpaint
-                b["rejected"] = rejected
+        
+        bubbles = data.get("bubbles", [])
+        
+        # 1. Try updating by index (most reliable)
+        if bubble_index is not None and 0 <= bubble_index < len(bubbles):
+            b = bubbles[bubble_index]
+            b["translated_text"] = translated_text
+            b["approved"] = approved
+            b["edited"] = edited
+            b["skip_inpaint"] = skip_inpaint
+            b["rejected"] = rejected
+        else:
+            # 2. Fallback to text matching (old way)
+            for b in bubbles:
+                if b.get("source_text", "").strip() == source_text.strip():
+                    b["translated_text"] = translated_text
+                    b["approved"] = approved
+                    b["edited"] = edited
+                    b["skip_inpaint"] = skip_inpaint
+                    b["rejected"] = rejected
+
         with open(session_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
     except Exception as exc:

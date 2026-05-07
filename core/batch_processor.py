@@ -1058,7 +1058,21 @@ def _process_pages_standard(
                     from core.translator import BubbleResult
                     res = BubbleResult(region.source_text, "", "", 0.0, "manual", False, False, None)
                 else:
-                    res = getattr(region, "_result", None)
+                    # Get translation result
+                    trans_result = getattr(region, "_result", None)
+                    
+                    # Create BubbleResult WITH CONFIDENCE preserved from region
+                    from core.translator import BubbleResult
+                    res = BubbleResult(
+                        source_text=region.source_text,
+                        translated_text=trans_result.translated_text if trans_result else "",
+                        source_lang=trans_result.source_lang if trans_result else "",
+                        confidence=getattr(region, 'confidence', 0.85),  # ← Use region confidence!
+                        source="inpainter_ocr",
+                        approved=False,
+                        edited=False,
+                        memory_id=None
+                    )
                 
                 if res:
                     all_bubble_results.append((res, region, page_num, crop_url))
@@ -1292,30 +1306,59 @@ def _save_session_data(cbz_name: str, bubble_results, series: str, chunk_meta: d
     os.makedirs(sessions_dir, exist_ok=True)
     out_path = os.path.join(sessions_dir, cbz_name.replace(".cbz", "") + ".json")
 
+    bubbles_data = [
+        {
+            "source_text":     b.source_text,
+            "translated_text": b.translated_text,
+            "source_lang":     b.source_lang,
+            "confidence":      b.confidence,
+            "source":          b.source,
+            "approved":        b.approved,
+            "edited":          b.edited,
+            "memory_id":       b.memory_id,
+            "page_num":        page_num,
+            "crop_url":        crop_url,
+            "x":               region.x,
+            "y":               region.y,
+            "w":               region.w,
+            "h":               region.h,
+            # All bubbles detected by bubble detector are treated as "in bubble"
+            # Use conservative threshold. If no metadata, assume it's real content.
+            "is_in_bubble":    True,
+        }
+        for b, region, page_num, crop_url in bubble_results
+    ]
+    
+    # Apply hallucination filter if enabled
+    try:
+        from core.hallucination_filter_integration import filter_ocr_results
+        import yaml
+        cfg_path = os.path.join(_ROOT, "config", "settings.yaml")
+        if os.path.exists(cfg_path):
+            with open(cfg_path, "r", encoding="utf-8") as f:
+                cfg = yaml.safe_load(f) or {}
+            if cfg.get("hallucination_filter", {}).get("enabled", False):
+                result = filter_ocr_results(bubbles_data, cfg, None)
+                bubbles_data = result.get("bubbles", bubbles_data)
+                stats = result.get("stats", {})
+                if stats:
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.info("🚀 Hallucination Filter: Filtered %d/%d bubbles (%.1f%%)",
+                               stats.get("filtered", 0),
+                               stats.get("total", 0),
+                               stats.get("filtered_pct", 0))
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.warning("⚠️ Hallucination filter error: %s", e)
+
     data = {
         "cbz_name": cbz_name,
         "series":   series,
         "created":  datetime.now().isoformat(),
         "chunk_meta": chunk_meta,
-        "bubbles":  [
-            {
-                "source_text":     b.source_text,
-                "translated_text": b.translated_text,
-                "source_lang":     b.source_lang,
-                "confidence":      b.confidence,
-                "source":          b.source,
-                "approved":        b.approved,
-                "edited":          b.edited,
-                "memory_id":       b.memory_id,
-                "page_num":        page_num,
-                "crop_url":        crop_url,
-                "x":               region.x,
-                "y":               region.y,
-                "w":               region.w,
-                "h":               region.h,
-            }
-            for b, region, page_num, crop_url in bubble_results
-        ],
+        "bubbles":  bubbles_data,
     }
     class NpEncoder(json.JSONEncoder):
         def default(self, obj):

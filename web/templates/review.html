@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,11 +13,13 @@
             grid-template-columns: 180px 260px 1fr auto;
             gap: 16px;
         }
+
         .bubble-crop {
             display: flex;
             flex-direction: column;
             gap: 6px;
         }
+
         .bubble-crop img {
             width: 100%;
             border-radius: var(--radius-sm);
@@ -25,6 +28,7 @@
             object-fit: contain;
             max-height: 160px;
         }
+
         .bubble-crop-placeholder {
             width: 100%;
             height: 80px;
@@ -36,6 +40,7 @@
             color: var(--text-muted);
             font-size: 0.78rem;
         }
+
         .page-group-header {
             font-size: 0.76rem;
             font-weight: 700;
@@ -47,6 +52,7 @@
             border-bottom: 1px solid var(--border);
             margin-bottom: 14px;
         }
+
         /* ── Review progress bar (sticky) ───────────────────── */
         .review-progress-card {
             position: sticky;
@@ -61,12 +67,14 @@
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
         }
+
         .review-progress-card .review-progress-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 8px;
         }
+
         .review-progress-card .review-progress-label {
             font-size: 0.82rem;
             font-weight: 600;
@@ -75,21 +83,36 @@
             align-items: center;
             gap: 8px;
         }
+
         .review-progress-card .review-progress-stats {
             display: flex;
             gap: 14px;
             font-size: 0.76rem;
             font-weight: 600;
         }
+
         .review-progress-card .rp-stat {
             display: flex;
             align-items: center;
             gap: 4px;
         }
-        .review-progress-card .rp-stat.approved { color: var(--accent-green); }
-        .review-progress-card .rp-stat.rejected { color: var(--accent-red); }
-        .review-progress-card .rp-stat.edited   { color: var(--accent-amber); }
-        .review-progress-card .rp-stat.remaining { color: var(--text-muted); }
+
+        .review-progress-card .rp-stat.approved {
+            color: var(--accent-green);
+        }
+
+        .review-progress-card .rp-stat.rejected {
+            color: var(--accent-red);
+        }
+
+        .review-progress-card .rp-stat.edited {
+            color: var(--accent-amber);
+        }
+
+        .review-progress-card .rp-stat.remaining {
+            color: var(--text-muted);
+        }
+
         .review-progress-track {
             background: var(--bg-elevated);
             border-radius: 99px;
@@ -97,6 +120,7 @@
             overflow: hidden;
             position: relative;
         }
+
         .review-progress-fill {
             height: 100%;
             border-radius: 99px;
@@ -105,137 +129,194 @@
             box-shadow: 0 0 12px hsl(145, 65%, 48%, 0.35);
             min-width: 0;
         }
+
         .review-progress-fill.complete {
             background: linear-gradient(90deg, var(--accent-green), var(--accent-blue));
             box-shadow: 0 0 16px var(--accent-glow);
         }
+
         .review-progress-pct {
             font-family: var(--font-mono);
             font-size: 0.82rem;
             font-weight: 700;
             color: var(--accent-green);
         }
+
         .review-progress-pct.complete {
             background: linear-gradient(90deg, var(--accent-green), var(--accent-blue));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
+
+        /* ── Confidence Badges ──────────────────────────── */
+        .conf-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        .conf-badge.conf-high {
+            background: rgba(144, 238, 144, 0.15);
+            color: #90EE90;
+            border: 1px solid rgba(144, 238, 144, 0.3);
+        }
+
+        .conf-badge.conf-medium {
+            background: rgba(255, 215, 0, 0.15);
+            color: #FFD700;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .conf-badge.conf-low {
+            background: rgba(255, 107, 107, 0.15);
+            color: #FF6B6B;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+        }
+
+        /* ── Hallucination Badge ────────────────────────── */
+        .hallucination-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            background: rgba(255, 107, 107, 0.2);
+            color: #FF6B6B;
+            border: 1px solid rgba(255, 107, 107, 0.4);
+            white-space: nowrap;
+            margin-left: 6px;
+        }
+
         @media (max-width: 900px) {
-            .bubble-card { grid-template-columns: 1fr; }
-            .bubble-crop img { max-height: 120px; }
+            .bubble-card {
+                grid-template-columns: 1fr;
+            }
+
+            .bubble-crop img {
+                max-height: 120px;
+            }
         }
     </style>
 </head>
 
 <body>
-<div class="layout">
-    {% include '_nav.html' %}
-    <main class="main-content">
-        <div class="page-header">
-            <div class="flex-between">
-                <div>
-                    <h2>🔍 Review: {{ cbz_name }}</h2>
-                    <p>Approve, edit, or reject each bubble translation. Approved pairs are saved to memory.</p>
-                </div>
-                <div class="flex-gap-8">
-                    {% if series %}
-                    <span class="badge badge-processing">Series: {{ series }}</span>
-                    {% endif %}
-                    <span class="badge badge-queued">{{ bubbles|length }} bubbles</span>
-                    {% if bubbles %}
-                    <button class="btn btn-success btn-sm" id="rerender-btn" data-cbz="{{ cbz_name }}">🔄 Re-render CBZ</button>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-
-        {% if error %}
-        <div class="alert alert-warning">⚠️ {{ error }}</div>
-        {% endif %}
-
-        {% if bubbles %}
-        <!-- ── Sticky review progress bar ────────────────────── -->
-        <div class="review-progress-card" id="review-progress-card">
-            <div class="review-progress-header">
-                <div class="review-progress-label">
-                    <span>📊 Review Progress</span>
-                    <span class="review-progress-pct" id="rp-pct">0%</span>
-                </div>
-                <div class="review-progress-stats">
-                    <span class="rp-stat approved" id="rp-approved">✅ 0</span>
-                    <span class="rp-stat edited" id="rp-edited">✏️ 0</span>
-                    <span class="rp-stat rejected" id="rp-rejected">❌ 0</span>
-                    <span class="rp-stat remaining" id="rp-remaining">⏳ {{ bubbles|length }}</span>
-                </div>
-            </div>
-            <div class="review-progress-track">
-                <div class="review-progress-fill" id="rp-fill" style="width:0%"></div>
-            </div>
-        </div>
-
-        <div class="alert alert-info" style="margin-bottom:20px">
-            💡 Bubbles with <span class="conf-badge conf-low">confidence &lt; {{ threshold }}%</span> are
-            highlighted in red — review these carefully.
-            The <strong>left column</strong> shows the cropped original bubble image so you can compare.
-        </div>
-
-        <div class="card" style="margin-bottom:20px;">
-            <div class="flex-between">
-                <h4>🤖 Free ChatGPT Bulk Translate (Manual)</h4>
-                <button class="btn btn-outline btn-sm" id="btn-copy-prompt">📋 1. Copy All Text to Clipboard</button>
-            </div>
-            <p style="font-size:0.85rem; color:var(--text-muted); margin:8px 0 16px;">
-                Paste the copied prompt into ChatGPT/Gemini, then paste its exact translated numbered list response back here and click Apply!
-            </p>
-            <div style="display:flex; gap:12px; align-items:flex-start;">
-                <textarea id="bulk-llm-result" rows="4" style="flex:1;" placeholder="Paste the output from ChatGPT here (e.g. 1. Hello\n2. Thanks)"></textarea>
-                <div style="display:flex; flex-direction:column; gap:8px; min-width:210px;">
-                    <div style="display:flex; gap:8px;">
-                        <button class="btn btn-success w-full" id="btn-apply-bulk" style="justify-content:center; flex:1;">⚡ 2. Auto-Fill Translations</button>
-                        <button class="btn btn-danger" id="btn-cancel-bulk" style="display:none; padding:4px 10px;">🛑 Cancel</button>
+    <div class="layout">
+        {% include '_nav.html' %}
+        <main class="main-content">
+            <div class="page-header">
+                <div class="flex-between">
+                    <div>
+                        <h2>🔍 Review: {{ cbz_name }}</h2>
+                        <p>Approve, edit, or reject each bubble translation. Approved pairs are saved to memory.</p>
                     </div>
-                    <div id="bulk-progress-wrap" class="progress-bar-wrap" style="display:none; margin:0;">
-                        <div id="bulk-progress-fill" class="progress-bar-fill" style="width:0%;"></div>
+                    <div class="flex-gap-8">
+                        {% if series %}
+                        <span class="badge badge-processing">Series: {{ series }}</span>
+                        {% endif %}
+                        <span class="badge badge-queued">{{ bubbles|length }} bubbles</span>
+                        {% if bubbles %}
+                        <button class="btn btn-success btn-sm" id="rerender-btn" data-cbz="{{ cbz_name }}">🔄 Re-render
+                            CBZ</button>
+                        {% endif %}
                     </div>
-                    <div id="bulk-progress-text" class="text-sm text-muted" style="display:none; text-align:center;">Saving: 0/0</div>
                 </div>
             </div>
-        </div>
 
-        <div class="bubble-grid" data-cbz-name="{{ cbz_name }}">
-            {% set ns = namespace(last_page=0) %}
-            {% for b in bubbles %}
-            {% set conf       = b.confidence|float %}
-            {% set conf_class = 'conf-high' if conf >= 80 else ('conf-medium' if conf >= threshold else 'conf-low') %}
-            {% set card_class = 'low-conf' if conf < threshold else '' %}
-            {% set page_num   = b.page_num|default(0)|int %}
+            {% if error %}
+            <div class="alert alert-warning">⚠️ {{ error }}</div>
+            {% endif %}
 
-            {# Page group header whenever page number changes #}
-            {% if page_num != ns.last_page %}
-            {% set ns.last_page = page_num %}
-            <div class="page-group-header" style="display: flex; justify-content: space-between; align-items: center;">
-                <span>📄 Page {{ page_num }}</span>
-                <div style="display: flex; gap: 8px;">
-                    <button class="btn btn-outline btn-sm btn-ignore-page" data-page="{{ page_num }}" style="font-size: 0.75rem; padding: 4px 12px;">🙈 Ignore All on Page {{ page_num }}</button>
-                    <button class="btn btn-outline btn-sm btn-undo-ignore-page" data-page="{{ page_num }}" style="font-size: 0.75rem; padding: 4px 12px; color: var(--accent-blue); border-color: var(--accent-blue);">↺ Undo All on Page {{ page_num }}</button>
+            {% if bubbles %}
+            <!-- ── Sticky review progress bar ────────────────────── -->
+            <div class="review-progress-card" id="review-progress-card">
+                <div class="review-progress-header">
+                    <div class="review-progress-label">
+                        <span>📊 Review Progress</span>
+                        <span class="review-progress-pct" id="rp-pct">0%</span>
+                    </div>
+                    <div class="review-progress-stats">
+                        <span class="rp-stat approved" id="rp-approved">✅ 0</span>
+                        <span class="rp-stat edited" id="rp-edited">✏️ 0</span>
+                        <span class="rp-stat rejected" id="rp-rejected">❌ 0</span>
+                        <span class="rp-stat remaining" id="rp-remaining">⏳ {{ bubbles|length }}</span>
+                    </div>
                 </div>
+                <div class="review-progress-track">
+                    <div class="review-progress-fill" id="rp-fill" style="width:0%"></div>
+                </div>
+            </div>
+
+            <div class="alert alert-info" style="margin-bottom:20px">
+                💡 Bubbles with <span class="conf-badge conf-low">confidence &lt; {{ threshold }}%</span> are
+                highlighted in red — review these carefully.
+                The <strong>left column</strong> shows the cropped original bubble image so you can compare.
+            </div>
+
+            <div class="card" style="margin-bottom:20px;">
+                <div class="flex-between">
+                    <h4>🤖 Free ChatGPT Bulk Translate (Manual)</h4>
+                    <button class="btn btn-outline btn-sm" id="btn-copy-prompt">📋 1. Copy All Text to
+                        Clipboard</button>
+                </div>
+                <p style="font-size:0.85rem; color:var(--text-muted); margin:8px 0 16px;">
+                    Paste the copied prompt into ChatGPT/Gemini, then paste its exact translated numbered list response
+                    back here and click Apply!
+                </p>
+                <div style="display:flex; gap:12px; align-items:flex-start;">
+                    <textarea id="bulk-llm-result" rows="4" style="flex:1;"
+                        placeholder="Paste the output from ChatGPT here (e.g. 1. Hello\n2. Thanks)"></textarea>
+                    <div style="display:flex; flex-direction:column; gap:8px; min-width:210px;">
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn btn-success w-full" id="btn-apply-bulk"
+                                style="justify-content:center; flex:1;">⚡ 2. Auto-Fill Translations</button>
+                            <button class="btn btn-danger" id="btn-cancel-bulk"
+                                style="display:none; padding:4px 10px;">🛑 Cancel</button>
+                        </div>
+                        <div id="bulk-progress-wrap" class="progress-bar-wrap" style="display:none; margin:0;">
+                            <div id="bulk-progress-fill" class="progress-bar-fill" style="width:0%;"></div>
+                        </div>
+                        <div id="bulk-progress-text" class="text-sm text-muted"
+                            style="display:none; text-align:center;">Saving: 0/0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bubble-grid" data-cbz-name="{{ cbz_name }}">
+                {% set ns = namespace(last_page=0) %}
+                {% for b in bubbles %}
+                {% set conf = b.confidence|float %}
+                {% set conf_class = 'conf-high' if conf >= 80 else ('conf-medium' if conf >= threshold else 'conf-low')
+                %}
+                {% set card_class = 'low-conf' if conf < threshold else '' %} {% set page_num=b.page_num|default(0)|int
+                    %} {# Page group header whenever page number changes #} {% if page_num !=ns.last_page %} {% set
+                    ns.last_page=page_num %} <div class="page-group-header"
+                    style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>📄 Page {{ page_num }}</span>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-outline btn-sm btn-ignore-page" data-page="{{ page_num }}"
+                            style="font-size: 0.75rem; padding: 4px 12px;">🙈 Ignore All on Page {{ page_num }}</button>
+                        <button class="btn btn-outline btn-sm btn-undo-ignore-page" data-page="{{ page_num }}"
+                            style="font-size: 0.75rem; padding: 4px 12px; color: var(--accent-blue); border-color: var(--accent-blue);">↺
+                            Undo All on Page {{ page_num }}</button>
+                    </div>
             </div>
             {% endif %}
 
-            <div class="bubble-card {{ card_class }}"
-                id="bubble-{{ loop.index }}"
-                data-page="{{ page_num }}"
-                data-memory-id="{{ b.memory_id or '' }}"
-                data-series="{{ series or 'Unknown' }}"
-                data-source-text="{{ b.source_text | e }}"
-                data-source-lang="{{ b.source_lang | e }}"
-                data-translated-text="{{ b.translated_text | e }}"
+            <div class="bubble-card {{ card_class }}" id="bubble-{{ loop.index }}" data-bubble-num="{{ loop.index }}"
+                data-page="{{ page_num }}" data-memory-id="{{ b.memory_id or '' }}"
+                data-series="{{ series or 'Unknown' }}" data-source-text="{{ b.source_text | e }}"
+                data-source-lang="{{ b.source_lang | e }}" data-translated-text="{{ b.translated_text | e }}"
                 data-skip-inpaint="{{ 'true' if b.skip_inpaint else 'false' }}"
                 data-approved="{{ 'true' if b.approved else 'false' }}"
                 data-edited="{{ 'true' if b.edited else 'false' }}"
                 data-rejected="{{ 'true' if b.rejected else 'false' }}"
-                style="{% if b.skip_inpaint or b.approved or b.edited or b.rejected %}opacity: 0.5;{% endif %}">
+                style="{% if b.skip_inpaint or b.rejected %}opacity: 0.5;{% endif %}">
 
                 <!-- Crop image column -->
                 <div class="bubble-crop">
@@ -276,27 +357,30 @@
                     <button class="btn btn-sm btn-outline btn-edit-save">💾 Save Edit</button>
                     <button class="btn btn-danger btn-sm btn-reject">❌ Reject</button>
                     {% if b.skip_inpaint %}
-                    <button class="btn btn-info btn-sm btn-ignore" style="margin-top:4px;" data-action="undo_ignore">↺ Undo Ignore</button>
+                    <button class="btn btn-info btn-sm btn-ignore" style="margin-top:4px;" data-action="undo_ignore">↺
+                        Undo Ignore</button>
                     {% else %}
-                    <button class="btn btn-warning btn-sm btn-ignore" style="margin-top:4px;" data-action="ignore">🙈 Ignore (Keep Original)</button>
+                    <button class="btn btn-warning btn-sm btn-ignore" style="margin-top:4px;" data-action="ignore">🙈
+                        Ignore (Keep Original)</button>
                     {% endif %}
                 </div>
             </div>
             {% endfor %}
-        </div>
+    </div>
 
-        {% else %}
-        <div class="card">
-            <div class="flex-center" style="padding:60px 0; flex-direction:column; gap:12px; color:var(--text-muted);">
-                <div style="font-size:3rem">📭</div>
-                <p>No bubbles to review for <strong>{{ cbz_name }}</strong>.</p>
-                <a href="/" class="btn btn-outline">← Back to Upload</a>
-            </div>
+    {% else %}
+    <div class="card">
+        <div class="flex-center" style="padding:60px 0; flex-direction:column; gap:12px; color:var(--text-muted);">
+            <div style="font-size:3rem">📭</div>
+            <p>No bubbles to review for <strong>{{ cbz_name }}</strong>.</p>
+            <a href="/" class="btn btn-outline">← Back to Upload</a>
         </div>
-        {% endif %}
+    </div>
+    {% endif %}
     </main>
-</div>
-<div id="toast-container"></div>
-<script src="/static/main.js"></script>
+    </div>
+    <div id="toast-container"></div>
+    <script src="/static/main.js"></script>
 </body>
+
 </html>

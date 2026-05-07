@@ -41,6 +41,7 @@ class BubbleRegion:
     font_cfg: dict = field(default_factory=dict)
     bubble_id: int = -1           # -1 if outside any bubble (narration), otherwise ID of the bubble mask
     mask_pts: Optional[np.ndarray] = None  # Full segmentation mask points from YOLO
+    skip_inpaint: bool = False    # True if the bubble should be ignored (keep original art)
 
     @property
     def bbox(self) -> Tuple[int, int, int, int]:
@@ -273,6 +274,8 @@ class Inpainter:
 
         # ── 5. Nuisance (Tiny Free-Floating) Filtering ─────────────────
         regions = self._apply_nuisance_filter(regions)
+        
+
 
         logger.info(f"[DEBUG INPAINTER] Final image.size = {image.size}, Number of regions = {len(regions)}")
         for i, r in enumerate(regions):
@@ -533,6 +536,10 @@ class Inpainter:
         for region in regions:
             crop = region.crop(image)
             region.source_text = self._mocr(crop)
+            # Manga-OCR doesn't return confidence, use heuristic:
+            # - If text is detected: 0.85 confidence (generally reliable)
+            # - If empty: 0.0 confidence
+            region.confidence = 0.85 if region.source_text and region.source_text.strip() else 0.0
         return regions
 
     def _run_pororo_ocr(self, image: Image.Image, regions: List[BubbleRegion]) -> List[BubbleRegion]:
@@ -810,6 +817,8 @@ class Inpainter:
             filtered.append(r)
             
         return filtered
+
+
 
     def unload_models(self):
         """Free VRAM by unloading lazy-loaded detection/OCR models."""

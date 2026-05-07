@@ -32,13 +32,15 @@
                             <div class="form-group">
                                 <label for="gpu_device">GPU Device</label>
                                 <select id="gpu_device" name="gpu_device">
-                                    <option value="cuda" {% if cfg.get('gpu_device','cuda')=='cuda' %}selected{% endif %}>
+                                    <option value="cuda" {% if cfg.get('gpu_device','cuda')=='cuda' %}selected{% endif
+                                        %}>
                                         CUDA (auto)</option>
                                     <option value="cuda:0" {% if cfg.get('gpu_device')=='cuda:0' %}selected{% endif %}>
                                         cuda:0</option>
                                     <option value="cuda:1" {% if cfg.get('gpu_device')=='cuda:1' %}selected{% endif %}>
                                         cuda:1</option>
-                                    <option value="cpu" {% if cfg.get('gpu_device')=='cpu' %}selected{% endif %}>CPU (slow)
+                                    <option value="cpu" {% if cfg.get('gpu_device')=='cpu' %}selected{% endif %}>CPU
+                                        (slow)
                                     </option>
                                 </select>
                             </div>
@@ -47,50 +49,78 @@
                             <div class="form-group">
                                 <label for="ocr_engine">OCR Engine</label>
                                 <select id="ocr_engine" name="ocr_engine">
-                                    <option value="manga-ocr" {% if cfg.get('ocr_engine','manga-ocr')=='manga-ocr' %}selected{% endif %}>🌸 Manga-OCR (JPN & CHN)</option>
-                                    <option value="paddle" {% if cfg.get('ocr_engine')=='paddle' %}selected{% endif %}>🇨🇳 PaddleOCR (v2.8 - Standard)</option>
-                                    <option value="pororo" {% if cfg.get('ocr_engine')=='pororo' %}selected{% endif %}>🇰🇷 Pororo (KOR - Ogkalu)</option>
-                                    <option value="ppocr-v5" {% if cfg.get('ocr_engine')=='ppocr-v5' %}selected{% endif %}>🔥 PaddleOCR (v5 - Latest / Ogkalu) (Supports: Ko, En, Latin)</option>
-                                    <option value="easyocr" {% if cfg.get('ocr_engine')=='easyocr' %}selected{% endif %}>🌐 EasyOCR (Multilingual)</option>
-                                    <option value="mit" {% if cfg.get('ocr_engine','mit')=='mit' %}selected{% endif %}>🛠️ MIT Mayo (JPN)</option>
-                                    <option value="none" {% if cfg.get('ocr_engine')=='none' %}selected{% endif %}>🚫 None (Skip OCR)</option>
+                                    <option value="manga-ocr" {% if cfg.get('ocr_engine','manga-ocr')=='manga-ocr'
+                                        %}selected{% endif %}>🌸 Manga-OCR (JPN & CHN)</option>
+                                    <option value="paddle" {% if cfg.get('ocr_engine')=='paddle' %}selected{% endif %}>
+                                        🇨🇳 PaddleOCR (v2.8 - Standard)</option>
+                                    <option value="pororo" {% if cfg.get('ocr_engine')=='pororo' %}selected{% endif %}>
+                                        🇰🇷 Pororo (KOR - Ogkalu)</option>
+                                    <option value="ppocr-v5" {% if cfg.get('ocr_engine')=='ppocr-v5' %}selected{% endif
+                                        %}>🔥 PaddleOCR (v5 - Latest / Ogkalu) (Supports: Ko, En, Latin)</option>
+                                    <option value="easyocr" {% if cfg.get('ocr_engine')=='easyocr' %}selected{% endif
+                                        %}>🌐 EasyOCR (Multilingual)</option>
+                                    <option value="mit" {% if cfg.get('ocr_engine','mit')=='mit' %}selected{% endif %}>
+                                        🛠️ MIT Mayo (JPN)</option>
+                                    <option value="none" {% if cfg.get('ocr_engine')=='none' %}selected{% endif %}>🚫
+                                        None (Skip OCR)</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="auto_detect_engine">Auto-Detect Engine</label>
                                 <select id="auto_detect_engine" name="auto_detect_engine">
-                                    <option value="gemini" {% if cfg.get('auto_detect_engine', 'gemini')=='gemini' %}selected{% endif %}>
+                                    <option value="gemini" {% if cfg.get('auto_detect_engine', 'gemini' )=='gemini'
+                                        %}selected{% endif %}>
                                         🤖 Gemini Multimodal (Recommended)</option>
-                                    <option value="groq" {% if cfg.get('auto_detect_engine')=='groq' %}selected{% endif %}>
+                                    <option value="groq" {% if cfg.get('auto_detect_engine')=='groq' %}selected{% endif
+                                        %}>
                                         ⚡ GROQ (Llama 4 Scout - Ultra Fast)</option>
-                                    <option value="google" {% if cfg.get('auto_detect_engine')=='google' %}selected{% endif %}>
+                                    <option value="google" {% if cfg.get('auto_detect_engine')=='google' %}selected{%
+                                        endif %}>
                                         🌐 Google Cloud Vision</option>
-                                    <option value="local" {% if cfg.get('auto_detect_engine')=='local' %}selected{% endif %}>
+                                    <option value="local" {% if cfg.get('auto_detect_engine')=='local' %}selected{%
+                                        endif %}>
                                         🏠 Local (EasyOCR + langdetect)</option>
                                 </select>
                             </div>
                         </div>
                         <div class="form-row">
-                        <div class="form-group">
-                            <label for="detection_engine">Detection Engine</label>
-                            <select id="detection_engine" name="detection_engine">
-                                <option value="mit" {% if cfg.get('detection_engine','mit')=='mit' %}selected{% endif %}>🛠️ MIT Engine (comic text and bubble detector)</option>
-                                <option value="yolo" {% if cfg.get('detection_engine', 'yolo')=='yolo' %}selected{% endif %}>🚀 YOLO Only (comic text segmenter yolov8m)</option>
-                                <option value="yolo_hybrid" {% if cfg.get('detection_engine')=='yolo_hybrid' %}selected{% endif %}>🌸 YOLO Hybrid (comic text segmenter yolov8m)</option>
-                                <option value="ogkalu_combine" {% if cfg.get('detection_engine')=='ogkalu_combine' %}selected{% endif %}>🧩 Ogkalu Combine (comic text and bubble detector)</option>
-                                <option value="ogkalu_stable_dual" {% if cfg.get('detection_engine')=='ogkalu_stable_dual' %}selected{% endif %}>🥈 Ogkalu Stable (comic text segmenter yolov8m + comic speech bubble detector yolov8m)</option>
-                                <option value="mayo_github" {% if cfg.get('detection_engine')=='mayo_github' %}selected{% endif %}>🥇 Mayo Github (comic text detector + bubble segmentation)</option>
-                            </select>
-                        </div>
+                            <div class="form-group">
+                                <label for="detection_engine">Detection Engine</label>
+                                <select id="detection_engine" name="detection_engine">
+                                    <option value="mit" {% if cfg.get('detection_engine','mit')=='mit' %}selected{%
+                                        endif %}>🛠️ MIT Engine (comic text and bubble detector)</option>
+                                    <option value="yolo" {% if cfg.get('detection_engine', 'yolo' )=='yolo' %}selected{%
+                                        endif %}>🚀 YOLO Only (comic text segmenter yolov8m)</option>
+                                    <option value="yolo_hybrid" {% if cfg.get('detection_engine')=='yolo_hybrid'
+                                        %}selected{% endif %}>🌸 YOLO Hybrid (comic text segmenter yolov8m)</option>
+                                    <option value="ogkalu_combine" {% if cfg.get('detection_engine')=='ogkalu_combine'
+                                        %}selected{% endif %}>🧩 Ogkalu Combine (comic text and bubble detector)
+                                    </option>
+                                    <option value="ogkalu_stable_dual" {% if
+                                        cfg.get('detection_engine')=='ogkalu_stable_dual' %}selected{% endif %}>🥈
+                                        Ogkalu Stable (comic text segmenter yolov8m + comic speech bubble detector
+                                        yolov8m)</option>
+                                    <option value="mayo_github" {% if cfg.get('detection_engine')=='mayo_github'
+                                        %}selected{% endif %}>🥇 Mayo Github (comic text detector + bubble segmentation)
+                                    </option>
+                                </select>
+                            </div>
                             <div class="form-group">
                                 <label for="inpaint_engine">Inpainting Engine</label>
                                 <select id="inpaint_engine" name="inpaint_engine">
-                                    <option value="lama" {% if cfg.get('inpaint_engine', 'lama')=='lama' %}selected{% endif %}>LaMa (MIT Default)</option>
-                                    <option value="panelcleaner" {% if cfg.get('inpaint_engine')=='panelcleaner' %}selected{% endif %}>🧹 PanelCleaner (High Quality)</option>
-                                    <option value="panelcleaner_segmented" {% if cfg.get('inpaint_engine')=='panelcleaner_segmented' %}selected{% endif %}>✂️ PanelCleaner (Segmented Bubble Shape)</option>
-                                    <option value="solid" {% if cfg.get('inpaint_engine')=='solid' %}selected{% endif %}>⚪ Solid Fill (Clear White Bubbles)</option>
-                                    <option value="solid_segmented" {% if cfg.get('inpaint_engine')=='solid_segmented' %}selected{% endif %}>✂️ Solid Fill (Segmented Bubble Shape)</option>
-                                    <option value="none" {% if cfg.get('inpaint_engine')=='none' %}selected{% endif %}>❌ None (Keep Original)</option>
+                                    <option value="lama" {% if cfg.get('inpaint_engine', 'lama' )=='lama' %}selected{%
+                                        endif %}>LaMa (MIT Default)</option>
+                                    <option value="panelcleaner" {% if cfg.get('inpaint_engine')=='panelcleaner'
+                                        %}selected{% endif %}>🧹 PanelCleaner (High Quality)</option>
+                                    <option value="panelcleaner_segmented" {% if
+                                        cfg.get('inpaint_engine')=='panelcleaner_segmented' %}selected{% endif %}>✂️
+                                        PanelCleaner (Segmented Bubble Shape)</option>
+                                    <option value="solid" {% if cfg.get('inpaint_engine')=='solid' %}selected{% endif
+                                        %}>⚪ Solid Fill (Clear White Bubbles)</option>
+                                    <option value="solid_segmented" {% if cfg.get('inpaint_engine')=='solid_segmented'
+                                        %}selected{% endif %}>✂️ Solid Fill (Segmented Bubble Shape)</option>
+                                    <option value="none" {% if cfg.get('inpaint_engine')=='none' %}selected{% endif %}>❌
+                                        None (Keep Original)</option>
                                 </select>
                             </div>
                         </div>
@@ -98,19 +128,21 @@
                             <div class="form-group">
                                 <label for="source-lang-select">Default Source</label>
                                 <select id="source-lang-select" name="source_lang">
-                                  {% for code, name in SUPPORTED_LANGUAGES.items() %}
-                                  <option value="{{ code }}" {% if cfg.get('source_lang', '') == code %}selected{% endif %}>{{ name }}</option>
-                                  {% endfor %}
+                                    {% for code, name in SUPPORTED_LANGUAGES.items() %}
+                                    <option value="{{ code }}" {% if cfg.get('source_lang', '' )==code %}selected{%
+                                        endif %}>{{ name }}</option>
+                                    {% endfor %}
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="target-lang-select">Default Target</label>
                                 <select id="target-lang-select" name="target_lang">
-                                  {% for code, name in SUPPORTED_LANGUAGES.items() %}
+                                    {% for code, name in SUPPORTED_LANGUAGES.items() %}
                                     {% if code != "" %}
-                                    <option value="{{ code }}" {% if cfg.get('target_lang', 'eng_Latn') == code %}selected{% endif %}>{{ name }}</option>
+                                    <option value="{{ code }}" {% if cfg.get('target_lang', 'eng_Latn' )==code
+                                        %}selected{% endif %}>{{ name }}</option>
                                     {% endif %}
-                                  {% endfor %}
+                                    {% endfor %}
                                 </select>
                             </div>
                         </div>
@@ -118,8 +150,8 @@
                             <label for="use_sam_masks">SAM Mask Expansion</label>
                             <div class="toggle-row">
                                 <label class="toggle-switch">
-                                    <input type="checkbox" name="use_sam_masks" value="on" id="use_sam_masks"
-                                        {% if cfg.get('use_sam_masks', False) %}checked{% endif %}>
+                                    <input type="checkbox" name="use_sam_masks" value="on" id="use_sam_masks" {% if
+                                        cfg.get('use_sam_masks', False) %}checked{% endif %}>
                                     <span class="toggle-slider"></span>
                                 </label>
                                 <span class="toggle-label text-sm">
@@ -130,8 +162,7 @@
                         <div class="form-group">
                             <label for="webtoon_strip_height">Webtoon Strip Height</label>
                             <input type="number" id="webtoon_strip_height" name="webtoon_strip_height"
-                                value="{{ cfg.get('webtoon_strip_height', 0) }}"
-                                placeholder="0 = disable">
+                                value="{{ cfg.get('webtoon_strip_height', 0) }}" placeholder="0 = disable">
                         </div>
                     </div>
 
@@ -141,49 +172,57 @@
                         <div class="form-group">
                             <label for="detection_confidence">YOLO Confidence (0.05-0.9)</label>
                             <div class="flex-gap-8 mt-8">
-                                <input type="range" id="detection_confidence_slider" min="0.05" max="0.9" step="0.05" 
-                                       value="{{ cfg.get('detection_confidence', 0.20) }}" 
-                                       oninput="document.getElementById('detection_confidence').value = this.value" style="flex:1;">
-                                <input type="number" id="detection_confidence" name="detection_confidence" 
-                                       value="{{ cfg.get('detection_confidence', 0.20) }}" step="0.05" min="0.05" max="0.9" 
-                                       oninput="document.getElementById('detection_confidence_slider').value = this.value" style="width:80px;">
+                                <input type="range" id="detection_confidence_slider" min="0.05" max="0.9" step="0.05"
+                                    value="{{ cfg.get('detection_confidence', 0.20) }}"
+                                    oninput="document.getElementById('detection_confidence').value = this.value"
+                                    style="flex:1;">
+                                <input type="number" id="detection_confidence" name="detection_confidence"
+                                    value="{{ cfg.get('detection_confidence', 0.20) }}" step="0.05" min="0.05" max="0.9"
+                                    oninput="document.getElementById('detection_confidence_slider').value = this.value"
+                                    style="width:80px;">
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label for="sfx_strictness">SFX Strictness (0.1-0.95)</label>
                             <div class="flex-gap-8 mt-8">
-                                <input type="range" id="sfx_strictness_slider" min="0.1" max="0.95" step="0.05" 
-                                       value="{{ cfg.get('sfx_strictness', 0.55) }}" 
-                                       oninput="document.getElementById('sfx_strictness').value = this.value" style="flex:1;">
-                                <input type="number" id="sfx_strictness" name="sfx_strictness" 
-                                       value="{{ cfg.get('sfx_strictness', 0.55) }}" step="0.05" min="0.1" max="0.95" 
-                                       oninput="document.getElementById('sfx_strictness_slider').value = this.value" style="width:80px;">
+                                <input type="range" id="sfx_strictness_slider" min="0.1" max="0.95" step="0.05"
+                                    value="{{ cfg.get('sfx_strictness', 0.55) }}"
+                                    oninput="document.getElementById('sfx_strictness').value = this.value"
+                                    style="flex:1;">
+                                <input type="number" id="sfx_strictness" name="sfx_strictness"
+                                    value="{{ cfg.get('sfx_strictness', 0.55) }}" step="0.05" min="0.1" max="0.95"
+                                    oninput="document.getElementById('sfx_strictness_slider').value = this.value"
+                                    style="width:80px;">
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label for="enable_gap_filling">Hybrid Mode</label>
                             <div class="flex-gap-8 mt-8" style="align-items:center;">
-                                <input type="checkbox" id="enable_gap_filling" name="enable_gap_filling" 
-                                       {% if cfg.get('enable_gap_filling', True) %}checked{% endif %} style="width:auto;">
+                                <input type="checkbox" id="enable_gap_filling" name="enable_gap_filling" {% if
+                                    cfg.get('enable_gap_filling', True) %}checked{% endif %} style="width:auto;">
                                 <span style="font-weight:600;">Enable Gap-Filling</span>
                             </div>
                             <small class="text-muted d-block mt-4">Scans for "floating" text missed by YOLO.</small>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="enable_nuisance_filter">Nuisance Filter</label>
                             <div class="flex-gap-8 mt-8" style="align-items:center;">
-                                <input type="checkbox" id="enable_nuisance_filter" name="enable_nuisance_filter" 
-                                       {% if cfg.get('enable_nuisance_filter', False) %}checked{% endif %} style="width:auto;">
+                                <input type="checkbox" id="enable_nuisance_filter" name="enable_nuisance_filter" {% if
+                                    cfg.get('enable_nuisance_filter', False) %}checked{% endif %} style="width:auto;">
                                 <span style="font-weight:600;">Ignore Tiny Free-Floating Noise</span>
                             </div>
-                            <small class="text-muted d-block mt-4">Automatically rejects very small, 1-2 character detections (like noise or artifacts) that aren't inside bubbles.</small>
+                            <small class="text-muted d-block mt-4">Automatically rejects very small, 1-2 character
+                                detections (like noise or artifacts) that aren't inside bubbles.</small>
                         </div>
-                        
+
+
+
                         <div class="mt-16">
-                            <small class="text-muted"><strong>Tip:</strong> Keep <i>Strictness</i> high to ignore SFX, and <i>Confidence</i> low for faint bubbles.</small>
+                            <small class="text-muted"><strong>Tip:</strong> Keep <i>Strictness</i> high to ignore SFX,
+                                and <i>Confidence</i> low for faint bubbles.</small>
                         </div>
                     </div>
 
@@ -193,14 +232,14 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="chunk_height">Default Chunk Height (px)</label>
-                                <input type="number" id="chunk_height" name="chunk_height" 
-                                       value="{{ cfg.get('chunk_height', 2500) }}" step="100" min="0">
+                                <input type="number" id="chunk_height" name="chunk_height"
+                                    value="{{ cfg.get('chunk_height', 2500) }}" step="100" min="0">
                                 <small class="text-muted d-block mt-4">Recommended: 2000-3000px.</small>
                             </div>
                             <div class="form-group">
                                 <label for="chunk_overlap">Default Overlap (px)</label>
-                                <input type="number" id="chunk_overlap" name="chunk_overlap" 
-                                       value="{{ cfg.get('chunk_overlap', 250) }}" step="50" min="0">
+                                <input type="number" id="chunk_overlap" name="chunk_overlap"
+                                    value="{{ cfg.get('chunk_overlap', 250) }}" step="50" min="0">
                                 <small class="text-muted d-block mt-4">Ensures bubbles at boundaries aren't cut.</small>
                             </div>
                         </div>
@@ -212,8 +251,10 @@
                         <div class="form-group">
                             <label for="font_detection_engine">Font Detection Engine</label>
                             <select id="font_detection_engine" name="font_detection_engine">
-                                <option value="default" {% if cfg.get('font_detection_engine','default')=='default' %}selected{% endif %}>📏 Standard (Simple)</option>
-                                <option value="yuzumarker" {% if cfg.get('font_detection_engine')=='yuzumarker' %}selected{% endif %}>🎨 Yuzumarker (AI - Ogkalu)</option>
+                                <option value="default" {% if cfg.get('font_detection_engine','default')=='default'
+                                    %}selected{% endif %}>📏 Standard (Simple)</option>
+                                <option value="yuzumarker" {% if cfg.get('font_detection_engine')=='yuzumarker'
+                                    %}selected{% endif %}>🎨 Yuzumarker (AI - Ogkalu)</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -232,11 +273,11 @@
                             <label for="font_color">Font Color</label>
                             {% set cur_color = (cfg.get('default_font') or {}).get('color','auto') %}
                             <select id="font_color" name="font_color">
-                                <option value="auto" {% if cur_color == 'auto' %}selected{% endif %}>
+                                <option value="auto" {% if cur_color=='auto' %}selected{% endif %}>
                                     🔄 Auto Adaptive</option>
-                                <option value="#FFFFFF" {% if cur_color == '#FFFFFF' %}selected{% endif %}>
+                                <option value="#FFFFFF" {% if cur_color=='#FFFFFF' %}selected{% endif %}>
                                     ⬜ White</option>
-                                <option value="#000000" {% if cur_color == '#000000' %}selected{% endif %}>
+                                <option value="#000000" {% if cur_color=='#000000' %}selected{% endif %}>
                                     ⬛ Black</option>
                             </select>
                         </div>
@@ -255,25 +296,21 @@
                         <div class="form-group">
                             <label for="deepl_api_key">DeepL API Key</label>
                             <input type="password" id="deepl_api_key" name="deepl_api_key"
-                                placeholder="Paste your DeepL key"
-                                value="{{ cfg.get('deepl_api_key', '') }}">
+                                placeholder="Paste your DeepL key" value="{{ cfg.get('deepl_api_key', '') }}">
                         </div>
                         <div class="form-group">
                             <label for="google_api_key">Gemini API Key (Google)</label>
-                            <input type="password" id="google_api_key" name="google_api_key"
-                                placeholder="AIzaSy..."
+                            <input type="password" id="google_api_key" name="google_api_key" placeholder="AIzaSy..."
                                 value="{{ cfg.get('google_api_key', '') }}">
                         </div>
                         <div class="form-group">
                             <label for="groq_api_key">Groq API Key (Llama 4 Scout)</label>
-                            <input type="password" id="groq_api_key" name="groq_api_key"
-                                placeholder="gsk_..."
+                            <input type="password" id="groq_api_key" name="groq_api_key" placeholder="gsk_..."
                                 value="{{ cfg.get('groq_api_key', '') }}">
                         </div>
                         <div class="form-group">
                             <label for="sarvam_api_key">Sarvam AI Key (India)</label>
-                            <input type="password" id="sarvam_api_key" name="sarvam_api_key"
-                                placeholder="sk_..."
+                            <input type="password" id="sarvam_api_key" name="sarvam_api_key" placeholder="sk_..."
                                 value="{{ cfg.get('sarvam_api_key', '') }}">
                         </div>
                     </div>
@@ -284,8 +321,8 @@
                         <div class="form-group">
                             <div class="toggle-row">
                                 <label class="toggle-switch">
-                                    <input type="checkbox" name="use_koharu_pipeline" value="on"
-                                        {% if cfg.get('use_koharu_pipeline', False) %}checked{% endif %}>
+                                    <input type="checkbox" name="use_koharu_pipeline" value="on" {% if
+                                        cfg.get('use_koharu_pipeline', False) %}checked{% endif %}>
                                     <span class="toggle-slider"></span>
                                 </label>
                                 <span class="toggle-label">
@@ -296,8 +333,8 @@
                         <div class="form-group">
                             <div class="toggle-row">
                                 <label class="toggle-switch">
-                                    <input type="checkbox" name="use_mit_pipeline" value="on"
-                                        {% if cfg.get('use_mit_pipeline', False) %}checked{% endif %}>
+                                    <input type="checkbox" name="use_mit_pipeline" value="on" {% if
+                                        cfg.get('use_mit_pipeline', False) %}checked{% endif %}>
                                     <span class="toggle-slider"></span>
                                 </label>
                                 <span class="toggle-label">
@@ -308,11 +345,16 @@
                         <div class="form-group">
                             <label for="translation_engine">Active Engine</label>
                             <select id="translation_engine" name="translation_engine">
-                                <option value="manual" {% if cfg.get('translation_engine')=='manual' %}selected{% endif %}>Manual</option>
-                                <option value="nllb" {% if cfg.get('translation_engine','nllb')=='nllb' %}selected{% endif %}>NLLB (Local)</option>
-                                <option value="deepl" {% if cfg.get('translation_engine')=='deepl' %}selected{% endif %}>DeepL</option>
-                                <option value="google" {% if cfg.get('translation_engine')=='google' %}selected{% endif %}>Gemini</option>
-                                <option value="ollama" {% if cfg.get('translation_engine')=='ollama' %}selected{% endif %}>Ollama</option>
+                                <option value="manual" {% if cfg.get('translation_engine')=='manual' %}selected{% endif
+                                    %}>Manual</option>
+                                <option value="nllb" {% if cfg.get('translation_engine','nllb')=='nllb' %}selected{%
+                                    endif %}>NLLB (Local)</option>
+                                <option value="deepl" {% if cfg.get('translation_engine')=='deepl' %}selected{% endif
+                                    %}>DeepL</option>
+                                <option value="google" {% if cfg.get('translation_engine')=='google' %}selected{% endif
+                                    %}>Gemini</option>
+                                <option value="ollama" {% if cfg.get('translation_engine')=='ollama' %}selected{% endif
+                                    %}>Ollama</option>
                             </select>
                         </div>
                     </div>
@@ -325,19 +367,27 @@
                             <div class="form-group">
                                 <label for="mit_translator">Translator</label>
                                 <select id="mit_translator" name="mit_translator">
-                                    <option value="sugoi" {% if mit.get('translator','sugoi')=='sugoi' %}selected{% endif %}>Sugoi</option>
-                                    <option value="nllb" {% if mit.get('translator')=='nllb' %}selected{% endif %}>NLLB</option>
-                                    <option value="chatgpt" {% if mit.get('translator')=='chatgpt' %}selected{% endif %}>ChatGPT</option>
-                                    <option value="gemini" {% if mit.get('translator')=='gemini' %}selected{% endif %}>Gemini</option>
-                                    <option value="none" {% if mit.get('translator')=='none' %}selected{% endif %}>None</option>
+                                    <option value="sugoi" {% if mit.get('translator','sugoi')=='sugoi' %}selected{%
+                                        endif %}>Sugoi</option>
+                                    <option value="nllb" {% if mit.get('translator')=='nllb' %}selected{% endif %}>NLLB
+                                    </option>
+                                    <option value="chatgpt" {% if mit.get('translator')=='chatgpt' %}selected{% endif
+                                        %}>ChatGPT</option>
+                                    <option value="gemini" {% if mit.get('translator')=='gemini' %}selected{% endif %}>
+                                        Gemini</option>
+                                    <option value="none" {% if mit.get('translator')=='none' %}selected{% endif %}>None
+                                    </option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="mit_target_lang">Target</label>
                                 <select id="mit_target_lang" name="mit_target_lang">
-                                    <option value="ENG" {% if mit.get('target_lang','ENG')=='ENG' %}selected{% endif %}>ENG</option>
-                                    <option value="JPN" {% if mit.get('target_lang')=='JPN' %}selected{% endif %}>JPN</option>
-                                    <option value="ESP" {% if mit.get('target_lang')=='ESP' %}selected{% endif %}>ESP</option>
+                                    <option value="ENG" {% if mit.get('target_lang','ENG')=='ENG' %}selected{% endif %}>
+                                        ENG</option>
+                                    <option value="JPN" {% if mit.get('target_lang')=='JPN' %}selected{% endif %}>JPN
+                                    </option>
+                                    <option value="ESP" {% if mit.get('target_lang')=='ESP' %}selected{% endif %}>ESP
+                                    </option>
                                 </select>
                             </div>
                         </div>
@@ -345,15 +395,19 @@
                             <div class="form-group">
                                 <label for="mit_inpainter">Inpainter</label>
                                 <select id="mit_inpainter" name="mit_inpainter">
-                                    <option value="default" {% if mit.get('inpainter','default')=='default' %}selected{% endif %}>LaMa</option>
-                                    <option value="none" {% if mit.get('inpainter')=='none' %}selected{% endif %}>None</option>
+                                    <option value="default" {% if mit.get('inpainter','default')=='default' %}selected{%
+                                        endif %}>LaMa</option>
+                                    <option value="none" {% if mit.get('inpainter')=='none' %}selected{% endif %}>None
+                                    </option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="mit_detector">Detector</label>
                                 <select id="mit_detector" name="mit_detector">
-                                    <option value="default" {% if mit.get('detector','default')=='default' %}selected{% endif %}>Default</option>
-                                    <option value="ctd" {% if mit.get('detector')=='ctd' %}selected{% endif %}>CTD</option>
+                                    <option value="default" {% if mit.get('detector','default')=='default' %}selected{%
+                                        endif %}>Default</option>
+                                    <option value="ctd" {% if mit.get('detector')=='ctd' %}selected{% endif %}>CTD
+                                    </option>
                                 </select>
                             </div>
                         </div>
@@ -362,16 +416,18 @@
                     <!-- OCR Advanced Options -->
                     <div class="card" style="border-left: 3px solid var(--accent-purple);">
                         <div class="card-title">✨ OCR Quality & Upscaling</div>
-                        
+
                         <div class="form-group">
                             <div class="toggle-row">
                                 <label class="toggle-switch">
-                                    <input type="checkbox" name="ocr_super_res" {% if cfg.get('ocr_super_res', True) %}checked{% endif %}>
+                                    <input type="checkbox" name="ocr_super_res" {% if cfg.get('ocr_super_res', True)
+                                        %}checked{% endif %}>
                                     <span class="toggle-slider"></span>
                                 </label>
                                 <span class="toggle-label">
                                     <strong>Super-Resolution OCR</strong>
-                                    <small class="text-muted" style="display:block">Upscale and sharpen bubbles before OCR</small>
+                                    <small class="text-muted" style="display:block">Upscale and sharpen bubbles before
+                                        OCR</small>
                                 </span>
                             </div>
                         </div>
@@ -379,9 +435,14 @@
                         <div class="form-group">
                             <label for="ocr_upscale_factor">OCR Upscale Factor</label>
                             <select id="ocr_upscale_factor" name="ocr_upscale_factor">
-                                <option value="1.5" {% if cfg.get('ocr_upscale_factor')|string == '1.5' %}selected{% endif %}>1.5x (Fast)</option>
-                                <option value="2" {% if cfg.get('ocr_upscale_factor')|string == '2' or cfg.get('ocr_upscale_factor')|string == '2.0' or not cfg.get('ocr_upscale_factor') %}selected{% endif %}>2x (Balanced)</option>
-                                <option value="3" {% if cfg.get('ocr_upscale_factor')|string == '3' or cfg.get('ocr_upscale_factor')|string == '3.0' %}selected{% endif %}>3x (Best Quality)</option>
+                                <option value="1.5" {% if cfg.get('ocr_upscale_factor')|string=='1.5' %}selected{% endif
+                                    %}>1.5x (Fast)</option>
+                                <option value="2" {% if cfg.get('ocr_upscale_factor')|string=='2' or
+                                    cfg.get('ocr_upscale_factor')|string=='2.0' or not cfg.get('ocr_upscale_factor')
+                                    %}selected{% endif %}>2x (Balanced)</option>
+                                <option value="3" {% if cfg.get('ocr_upscale_factor')|string=='3' or
+                                    cfg.get('ocr_upscale_factor')|string=='3.0' %}selected{% endif %}>3x (Best Quality)
+                                </option>
                             </select>
                         </div>
 
@@ -390,24 +451,29 @@
                         <div class="form-group">
                             <label for="global_upscale_impl">Global 2x Page Upscale</label>
                             <select name="global_upscale_impl" id="global_upscale_impl" class="select-field">
-                                <option value="none" {% if cfg.get('global_upscale_impl', 'none') == 'none' %}selected{% endif %}>None (Disabled)</option>
-                                <option value="lanczos" {% if cfg.get('global_upscale_impl') == 'lanczos' %}selected{% endif %}>Fast 2x (Lanczos Algorithm)</option>
-                                <option value="waifu2x" {% if cfg.get('global_upscale_impl') == 'waifu2x' %}selected{% endif %}>Waifu2x (AI Enhancement)</option>
+                                <option value="none" {% if cfg.get('global_upscale_impl', 'none' )=='none' %}selected{%
+                                    endif %}>None (Disabled)</option>
+                                <option value="lanczos" {% if cfg.get('global_upscale_impl')=='lanczos' %}selected{%
+                                    endif %}>Fast 2x (Lanczos Algorithm)</option>
+                                <option value="waifu2x" {% if cfg.get('global_upscale_impl')=='waifu2x' %}selected{%
+                                    endif %}>Waifu2x (AI Enhancement)</option>
                             </select>
-                            <small class="text-muted" style="display:block;margin-top:4px;">Upscales entire page BEFORE detection. Waifu2x is high quality but slower.</small>
+                            <small class="text-muted" style="display:block;margin-top:4px;">Upscales entire page BEFORE
+                                detection. Waifu2x is high quality but slower.</small>
                         </div>
                     </div>
                 </div> <!-- End card-grid -->
 
                 <div class="flex-center mt-64 mb-64" style="clear:both; width: 100%;">
-                    <button type="submit" class="btn btn-primary btn-lg" style="padding: 16px 64px; font-size: 1.1rem; box-shadow: 0 10px 30px hsla(252, 85%, 68%, 0.4);">
+                    <button type="submit" class="btn btn-primary btn-lg"
+                        style="padding: 16px 64px; font-size: 1.1rem; box-shadow: 0 10px 30px hsla(252, 85%, 68%, 0.4);">
                         💾 Save All Settings
                     </button>
                 </div>
             </form>
 
 
-        <div class="divider"></div>
+            <div class="divider"></div>
 
             <div class="card-grid">
                 <!-- Font upload -->
