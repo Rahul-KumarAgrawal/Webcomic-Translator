@@ -166,7 +166,10 @@ if not exist "model\training_data\rejected_pairs.jsonl" type nul > "model\traini
 
 REM -- Phase 7: Model Downloads --
 echo [SETUP] Checking models...
-if not exist "Pipeline Koharu\Detection and Layout\models\ogkalu-text-stable" (
+if not exist "models\inpainting\mayo_panel_cleaner.pt" (
+    echo [SETUP] Downloading specialized inpainting models...
+    "%PYTHON%" scripts\download_new_models.py
+) else if not exist "Pipeline Koharu\Detection and Layout\models\ogkalu-text-stable" (
     echo [SETUP] Downloading detection models...
     "%PYTHON%" scripts\download_new_models.py
 ) else if not exist "Pipeline Koharu\OCR\font-detection" (

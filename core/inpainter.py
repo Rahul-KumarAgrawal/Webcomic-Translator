@@ -14,11 +14,10 @@ import logging
 import os
 import sys
 from dataclasses import dataclass, field
-from pathlib import Path
-from typing import List, Optional, Tuple
-
+from PIL import Image, ImageDraw, ImageOps, ImageFont, ImageFilter
+from typing import List, Tuple, Optional, Dict
 import numpy as np
-from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -391,6 +390,7 @@ class Inpainter:
         if not self._yolo_model:
             from ultralytics import YOLO
             model_path = self._models_dir / "Detection and Layout" / "comic-text-segmenter.pt"
+            logger.info("[Modular] [VRAM] Loading YOLO text detector model...")
             self._yolo_model = YOLO(str(model_path))
             logger.info("[Modular] YOLO text detector loaded.")
 
@@ -469,6 +469,7 @@ class Inpainter:
 
         # 2. Run Text Inference
         try:
+            logger.info("[Modular] [VRAM] Loading Ogkalu Stable Text model...")
             text_model = YOLO(str(text_path))
             text_res = text_model(image, verbose=False, conf=0.20)
         except Exception as e:
@@ -481,6 +482,7 @@ class Inpainter:
 
         # 3. Run Bubble Inference
         try:
+            logger.info("[Modular] [VRAM] Loading Ogkalu Stable Bubble model...")
             bubble_model = YOLO(str(bubble_path))
             bubble_res = bubble_model(image, verbose=False, conf=0.25)
         except Exception as e:
@@ -532,6 +534,7 @@ class Inpainter:
         from manga_ocr import MangaOCR
         if not hasattr(self, '_mocr') or self._mocr is None:
             model_path = self._models_dir / "OCR" / "manga-ocr-base"
+            logger.info("[Modular] [VRAM] Loading MangaOCR model...")
             self._mocr = MangaOCR(str(model_path) if model_path.exists() else None)
         
         for region in regions:
@@ -557,11 +560,16 @@ class Inpainter:
             if not craft_path.exists() or not brain_path.exists():
                 raise FileNotFoundError(f"Ogkalu Pororo models missing at: {pororo_dir}")
 
-            # 1. Initialize Sessions
+            # 1. Initialize Sessions with Quiet Logging (No Speed Penalty)
             if not hasattr(self, '_pororo_brain_sess'):
+                import onnxruntime as ort
+                sess_options = ort.SessionOptions()
+                sess_options.log_severity_level = 3  # 0:Verbose, 1:Info, 2:Warning, 3:Error, 4:Fatal
+                
                 providers = ['CUDAExecutionProvider', 'CPUExecutionProvider']
-                self._pororo_brain_sess = ort.InferenceSession(str(brain_path), providers=providers)
-                self._pororo_craft_sess = ort.InferenceSession(str(craft_path), providers=providers)
+                logger.info("[Modular] [VRAM] Loading Pororo OCR models (ONNX)...")
+                self._pororo_brain_sess = ort.InferenceSession(str(brain_path), sess_options, providers=providers)
+                self._pororo_craft_sess = ort.InferenceSession(str(craft_path), sess_options, providers=providers)
 
             for region in regions:
                 crop = region.crop(image).convert("L")
@@ -824,17 +832,31 @@ class Inpainter:
     def unload_models(self):
         """Free VRAM by unloading lazy-loaded detection/OCR models."""
         if self._yolo_model:
+            logger.info("[Modular] [VRAM] Unloading YOLO model from VRAM...")
             del self._yolo_model
             self._yolo_model = None
-            logger.info("[Modular] YOLO model unloaded.")
         if self._mocr_model:
+            logger.info("[Modular] [VRAM] Unloading MangaOCR model from VRAM...")
             del self._mocr_model
             self._mocr_model = None
-            logger.info("[Modular] MangaOCR model unloaded.")
+            
+        if hasattr(self, '_mocr') and self._mocr is not None:
+            logger.info("[Modular] [VRAM] Unloading MangaOCR (MangaOCR object) from VRAM...")
+            del self._mocr
+            self._mocr = None
+            
+        if hasattr(self, '_pororo_brain_sess'):
+            logger.info("[Modular] [VRAM] Unloading Pororo OCR sessions from VRAM...")
+            del self._pororo_brain_sess
+            del self._pororo_craft_sess
+            del self._pororo_brain_sess
+            del self._pororo_craft_sess
+            
         try:
             import torch
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
+                logger.info("[Modular] [VRAM] VRAM Cache cleared.")
         except ImportError:
             pass
 

@@ -297,14 +297,35 @@ class Translator:
                 target_lang=self._target_lang,
                 source_lang_override=self._source_lang_override,
             )
-            logger.info("Ollama translator loaded (model=%s).", self.cfg.get("ollama_model", "llama3"))
+            logger.info("[VRAM] Loading Ollama translator (model=%s)...", self.cfg.get("ollama_model", "llama3"))
+            logger.info("Ollama translator loaded.")
 
     def _ensure_model_loaded(self):
         if self._model is None:
             from model.model_loader import ModelLoader
             loader = ModelLoader(self.cfg)
+            logger.info("[VRAM] Loading NLLB-200 Translation model onto %s...", self._device)
             self._model, self._tokenizer = loader.load()
-            logger.info("Translation model loaded on %s.", self._device)
+            logger.info("Translation model loaded.")
+
+    def unload(self):
+        """Unload the translation model from VRAM."""
+        if self._model is not None:
+            logger.info("[VRAM] Unloading NLLB-200 Translation model from VRAM...")
+            del self._model
+            del self._tokenizer
+            self._model = None
+            self._tokenizer = None
+            
+            import gc
+            gc.collect()
+            try:
+                import torch
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+                    logger.info("[VRAM] VRAM Cache cleared after translation.")
+            except ImportError:
+                pass
 
     def _run_inference(self, text: str, source_lang: str) -> Tuple[str, float]:
         """

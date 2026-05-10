@@ -73,7 +73,7 @@ def get_paddle_ocr(lang="japan"):
         raise ImportError("PaddleOCR could not be loaded.")
         
     if lang not in _paddle_ocr_instances:
-        logger.info(f"Initializing PaddleOCR (Stable 2.8.1) for language: {lang}")
+        logger.info(f"[VRAM] Loading PaddleOCR (Stable 2.8.1) model for language: {lang}...")
         # Stable 2.x arguments
         _paddle_ocr_instances[lang] = PaddleOCR(
             use_angle_cls=True, 
@@ -87,6 +87,20 @@ def get_paddle_ocr(lang="japan"):
         )
         
     return _paddle_ocr_instances[lang]
+
+def unload_paddle_models():
+    """Explicitly delete PaddleOCR instances to free VRAM."""
+    global _paddle_ocr_instances
+    if _paddle_ocr_instances:
+        logger.info(f"[VRAM] Unloading {len(_paddle_ocr_instances)} PaddleOCR instances from VRAM...")
+        _paddle_ocr_instances.clear()
+        import gc
+        gc.collect()
+        try:
+            import paddle
+            paddle.device.cuda.empty_cache()
+        except Exception:
+            pass
 
 def map_lang_to_paddle(lang_code: str) -> str:
     """Maps ISO language codes to PaddleOCR codes."""

@@ -3,6 +3,16 @@ import cv2
 import numpy as np
 import torch
 import onnxruntime as ort
+import logging
+
+logger = logging.getLogger("core.panelcleaner")
+if not logger.handlers:
+    import sys
+    sh = logging.StreamHandler(sys.stdout)
+    sh.setFormatter(logging.Formatter("[PanelCleaner] %(message)s"))
+    logger.addHandler(sh)
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
 
 # Relative paths to models in the workspace
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -16,28 +26,67 @@ if not os.path.exists(LAMA_MODEL_PATH):
     # Try AOT model from Koharu as a fallback if LaMa isn't found
     LAMA_MODEL_PATH = os.path.join(_ROOT, "Pipeline Koharu", "Inpainting", "aot-inpainting", "aot_traced.pt")
 
+# Persistent instances to avoid re-loading for every page
+_DETECTOR_SESS = None
+_LAMA_MODEL = None
+
 class PanelCleanerPipeline:
     def __init__(self, device="cuda"):
         self.device = device
+        global _DETECTOR_SESS, _LAMA_MODEL
         
-        # Load ONNX Text Detector
-        providers = ['CUDAExecutionProvider'] if device == 'cuda' else ['CPUExecutionProvider']
-        if device == 'cuda' and 'CUDAExecutionProvider' not in ort.get_available_providers():
-            print("WARNING: CUDAExecutionProvider not found in ONNXRuntime. Falling back to CPU for text detection.")
-            providers = ['CPUExecutionProvider']
+        # 1. Text Detector Session
+        if _DETECTOR_SESS is None:
+            providers = ['CUDAExecutionProvider', 'CPUExecutionProvider']
+            sess_options = ort.SessionOptions()
+            sess_options.log_severity_level = 3
             
-        try:
-            self.detector_sess = ort.InferenceSession(ONNX_MODEL_PATH, providers=providers)
-        except Exception as e:
-            raise RuntimeError(f"Failed to load ONNX model: {e}")
+            # Search for detector.onnx
+            possible_det = [
+                ONNX_MODEL_PATH,
+                os.path.join(_ROOT, "Pipeline Koharu", "Detection and Layout", "detector.onnx"),
+                os.path.join(_ROOT, "models", "detector.onnx")
+            ]
+            actual_det = next((p for p in possible_det if os.path.exists(p)), None)
             
-        # Load Torch LaMa
-        try:
-            self.lama_model = torch.jit.load(LAMA_MODEL_PATH, map_location=device)
-            self.lama_model.eval()
-            self.lama_model.to(device)
-        except Exception as e:
-            raise RuntimeError(f"Failed to load LaMa model: {e}")
+            if not actual_det:
+                logger.error("[PanelCleaner] detector.onnx not found in any expected location!")
+                raise FileNotFoundError("detector.onnx missing")
+                
+            logger.info(f"[VRAM] Loading PanelCleaner Detector: {os.path.basename(actual_det)}")
+            _DETECTOR_SESS = ort.InferenceSession(actual_det, sess_options, providers=providers)
+            
+        self.detector_sess = _DETECTOR_SESS
+
+        # 2. Inpainting Model (LaMa or AOT)
+        if _LAMA_MODEL is None:
+            possible_inp = [
+                os.path.join(_ROOT, "models", "inpainting", "mayo_panel_cleaner.pt"),
+                LAMA_MODEL_PATH,
+                # Fix: Check both hyphen and underscore versions
+                os.path.join(_ROOT, "Pipeline Koharu", "Inpainting", "lama-manga", "lama_manga.pt"),
+                os.path.join(_ROOT, "Pipeline Koharu", "Inpainting", "lama_manga", "lama_manga.pt"),
+                os.path.join(_ROOT, "Pipeline Koharu", "Inpainting", "aot-inpainting", "aot_traced.pt"),
+                os.path.join(_ROOT, "models", "inpainting", "anime-manga-big-lama.pt"),
+                os.path.join(_ROOT, "models", "lama.pt")
+            ]
+            actual_inp = next((p for p in possible_inp if os.path.exists(p)), None)
+            
+            if not actual_inp:
+                logger.error("[PanelCleaner] Inpainting model (LaMa/AOT) not found!")
+                raise FileNotFoundError("Inpainting model missing")
+                
+            model_name = os.path.basename(actual_inp)
+            if "mayo" in model_name.lower():
+                logger.info(f"[VRAM] Loading High-Quality Mayo Inpainter: {model_name}")
+            else:
+                logger.info(f"[VRAM] Loading PanelCleaner Inpainter: {model_name}")
+            
+            _LAMA_MODEL = torch.jit.load(actual_inp, map_location=device)
+            _LAMA_MODEL.eval()
+            _LAMA_MODEL.to(device)
+            
+        self.lama_model = _LAMA_MODEL
 
     def detect_text_mask(self, image: np.ndarray) -> np.ndarray:
         """
@@ -60,10 +109,30 @@ class PanelCleanerPipeline:
         input_tensor = padded.astype(np.float32) / 255.0
         input_tensor = input_tensor.transpose((2, 0, 1))[np.newaxis, ...]
         
-        # Run ONNX inference
-        outputs = self.detector_sess.run(None, {'images': input_tensor})
-        seg = outputs[1][0, 0] # segmentation logits/probs
+        # Newer RT-DETR models require original target sizes
+        orig_target_sizes = np.array([[1024, 1024]], dtype=np.int64)
         
+        # Run ONNX inference
+        try:
+            outputs = self.detector_sess.run(None, {
+                'images': input_tensor,
+                'orig_target_sizes': orig_target_sizes
+            })
+        except Exception:
+            # Fallback for older models that only take 'images'
+            outputs = self.detector_sess.run(None, {'images': input_tensor})
+            
+        # Get segmentation output (usually at index 1)
+        seg_output = outputs[1]
+        
+        # Robust indexing: handle both [1, 1, 1024, 1024] and flatter shapes
+        if len(seg_output.shape) == 4:
+            seg = seg_output[0, 0]
+        elif len(seg_output.shape) == 3:
+            seg = seg_output[0]
+        else:
+            seg = seg_output # Already 2D or 1D
+            
         # Threshold and create mask
         mask = (seg > 0.3).astype(np.uint8) * 255
         
@@ -80,35 +149,69 @@ class PanelCleanerPipeline:
 
     def inpaint_lama(self, image: np.ndarray, mask: np.ndarray) -> np.ndarray:
         """
-        Inpaint image given the mask using LaMa model.
+        Inpaint image given the mask using LaMa/AOT model.
         """
-        img_tensor = image.astype(np.float32) / 255.0
-        img_tensor = torch.from_numpy(img_tensor).permute(2, 0, 1).unsqueeze(0).to(self.device)
+        # 1. Pre-process image: fill masked areas with neutral color to "help" the AI
+        h, w = image.shape[:2]
         
-        # Format mask
-        mask_tensor = mask.astype(np.float32) / 255.0
-        mask_tensor = torch.from_numpy(mask_tensor).unsqueeze(0).unsqueeze(0).to(self.device)
+        # Binary mask
+        mask_bin = (mask > 127).astype(np.uint8) * 255
+        mask_bool = mask_bin > 0
         
+        # Fill with median color of the background to provide a stable baseline for the AI
+        img_for_inp = image.copy()
+        if np.any(mask_bool):
+            median_color = np.median(image[~mask_bool], axis=0) if np.any(~mask_bool) else [255, 255, 255]
+            img_for_inp[mask_bool] = median_color
+
+        # Convert to tensors [0, 1]
+        img_tensor = torch.from_numpy(img_for_inp).permute(2, 0, 1).unsqueeze(0).float() / 255.0
+        mask_tensor = torch.from_numpy(mask_bin).unsqueeze(0).unsqueeze(0).float() / 255.0
+        
+        img_tensor = img_tensor.to(self.device)
+        mask_tensor = mask_tensor.to(self.device)
+
         with torch.inference_mode():
-            # Pad size to multiple of 8 (LaMa requirement)
-            h, w = img_tensor.shape[2:]
-            pad_h = (8 - h % 8) % 8
-            pad_w = (8 - w % 8) % 8
+            # 3. Model Inference with fallback for different architectures
+            try:
+                # Strategy A: Standard separate arguments (img, mask)
+                inpainted = self.lama_model(img_tensor, mask_tensor)
+            except Exception:
+                try:
+                    # Strategy B: Unified 4-channel input (Concatenate Image + Mask)
+                    unified_input = torch.cat([img_tensor, mask_tensor], dim=1)
+                    inpainted = self.lama_model(unified_input)
+                except Exception:
+                    # Strategy C: Flipped arguments (mask, img)
+                    inpainted = self.lama_model(mask_tensor, img_tensor)
+
+            # 4. Handle output variations (Some models return (img, mask), some return just img)
+            if isinstance(inpainted, (list, tuple)):
+                inpainted = inpainted[0]
+
+            # 5. Robust Range Normalization
+            res = inpainted.detach().cpu().squeeze(0).permute(1, 2, 0).numpy()
             
-            if pad_h > 0 or pad_w > 0:
-                import torch.nn.functional as F
-                img_tensor = F.pad(img_tensor, (0, pad_w, 0, pad_h), mode='reflect')
-                mask_tensor = F.pad(mask_tensor, (0, pad_w, 0, pad_h), mode='reflect')
-                
-            inpainted = self.lama_model(img_tensor, mask_tensor)
+            # If output is mostly zero or extremely small, it might expect 0-255 input
+            if np.max(res) < 0.05:
+                # Re-run with 0-255 input if the 0-1 run failed
+                inpainted = self.lama_model(img_tensor * 255.0, mask_tensor)
+                if isinstance(inpainted, (list, tuple)): inpainted = inpainted[0]
+                res = inpainted.detach().cpu().squeeze(0).permute(1, 2, 0).numpy()
+
+            # Final mapping to 0-255 uint8
+            if np.max(res) <= 1.05:
+                if np.min(res) < -0.1:
+                    res = (res + 1) / 2 # Handle [-1, 1] range
+                res = res * 255.0
             
-            if pad_h > 0 or pad_w > 0:
-                inpainted = inpainted[:, :, :h, :w]
-                
-            res = inpainted[0].permute(1, 2, 0).detach().cpu().numpy()
-            res = np.clip(res * 255, 0, 255).astype(np.uint8)
+            res = np.clip(res, 0, 255).astype(np.uint8)
             
-        return res
+            # Resize back to original if needed
+            if res.shape[0] != h or res.shape[1] != w:
+                res = cv2.resize(res, (w, h), interpolation=cv2.INTER_LANCZOS4)
+            
+            return res
         
     def clean_panel(self, image_path: str, output_path: str):
         """

@@ -990,6 +990,13 @@ def _process_pages_standard(
 
     # Unload detection/OCR models to free VRAM for translation/inpainting
     inpainter.unload_models()
+    
+    # Also unload Paddle if it was used
+    try:
+        from core.paddleocr_wrapper import unload_paddle_models
+        unload_paddle_models()
+    except ImportError:
+        pass
 
     # ── Phase 2: Chapter-Wide Batch Translation ──────────────────────────────
     if cfg.get("translation_engine") == "manual":
@@ -1030,8 +1037,12 @@ def _process_pages_standard(
         else:
             logger.info("━━━ Phase 2: No text found to translate.")
 
+        # Scale 100% for Phase 2
+        if progress_callback:
+            progress_callback(1, 1, text="Translation complete.")
+
     # Unload translation model to free VRAM for inpainting
-    translator.unload_model()
+    translator.unload()
 
     # ── Phase 3: Inpaint & Render All Pages ──────────────────────────────────
     logger.info("━━━ Phase 3: Inpainting (%s) and Rendering final pages...", inpaint_engine)
