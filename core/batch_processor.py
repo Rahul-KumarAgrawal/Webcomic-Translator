@@ -602,6 +602,19 @@ def process_cbz(
             logger.info(f"Auto-detection successful. Confirmed source language: {nllb_code}")
             cfg["source_lang_override"] = nllb_code
 
+        # ── Smart OCR Selection ──────────────────────────────────────────────
+        if cfg.get("ocr_engine") == "auto":
+            src = cfg.get("source_lang_override") or cfg.get("source_lang")
+            if src == "jpn_Jpan" or (src and "zho" in src):
+                selected_ocr = "manga-ocr"
+            elif src == "kor_Hang":
+                selected_ocr = "pororo"
+            else:
+                selected_ocr = "paddle"
+            
+            logger.info(f"  ✨ Smart OCR Selection: source language is '{src}', choosing engine '{selected_ocr}'")
+            cfg["ocr_engine"] = selected_ocr
+
         # Always inject the resolved source language into the config for the OCR engines
         cfg["source_lang"] = cfg.get("source_lang_override")
 
@@ -939,7 +952,7 @@ def _process_pages_standard(
     page_data_list = []
 
     # ── Phase 1: OCR All Pages ───────────────────────────────────────────────
-    logger.info("━━━ Phase 1: Extracting text from all pages...")
+    logger.info("━━━ Phase 1: Extracting text (det=%s, ocr=%s)...", cfg.get("detection_engine", "auto"), cfg.get("ocr_engine", "auto"))
     for page_idx, img_path in enumerate(images):
         page_num = page_idx + 1
         logger.info("  OCR Page %d/%d: %s", page_num, total_pages, Path(img_path).name)
@@ -975,6 +988,9 @@ def _process_pages_standard(
             # Scale 0-100% for Phase 1
             progress_callback(page_idx + 1, total_pages, text=f"Scanning Page {page_num}/{total_pages}")
 
+    # Unload detection/OCR models to free VRAM for translation/inpainting
+    inpainter.unload_models()
+
     # ── Phase 2: Chapter-Wide Batch Translation ──────────────────────────────
     if cfg.get("translation_engine") == "manual":
         logger.info("  Manual mode: skipping translation phase.")
@@ -991,7 +1007,7 @@ def _process_pages_standard(
                 region_map.append((p_idx, r_idx))
 
         if all_texts_to_translate:
-            logger.info("━━━ Phase 2: Translating entire chapter batch (%d bubbles)...", len(all_texts_to_translate))
+            logger.info("━━━ Phase 2: Translating (%s) batch of %d bubbles...", cfg.get("translation_engine", "nllb"), len(all_texts_to_translate))
             if progress_callback:
                 progress_callback(1, 1, text=f"Translating {len(all_texts_to_translate)} bubbles...")
 
@@ -1014,8 +1030,11 @@ def _process_pages_standard(
         else:
             logger.info("━━━ Phase 2: No text found to translate.")
 
+    # Unload translation model to free VRAM for inpainting
+    translator.unload_model()
+
     # ── Phase 3: Inpaint & Render All Pages ──────────────────────────────────
-    logger.info("━━━ Phase 3: Inpainting and Rendering final pages...")
+    logger.info("━━━ Phase 3: Inpainting (%s) and Rendering final pages...", inpaint_engine)
     if inpainter.cfg.get("font_detection_engine") == "yuzumarker":
         print("\n[AI] Using Yuzumarker Font Detection for rendering.")
     for page_idx, p_data in enumerate(page_data_list):
@@ -1087,6 +1106,8 @@ def _process_pages_standard(
             # Scale 0-100% for Phase 3
             progress_callback(page_idx + 1, total_pages, text=f"Rendering Page {page_num}/{total_pages}")
 
+    if panelcleaner:
+        panelcleaner.unload()
     inpainter.unload_models()
     translator.unload_model()
     return all_bubble_results
@@ -1329,30 +1350,7 @@ def _save_session_data(cbz_name: str, bubble_results, series: str, chunk_meta: d
         for b, region, page_num, crop_url in bubble_results
     ]
     
-    # Apply hallucination filter if enabled
-    try:
-        from core.hallucination_filter_integration import filter_ocr_results
-        import yaml
-        cfg_path = os.path.join(_ROOT, "config", "settings.yaml")
-        if os.path.exists(cfg_path):
-            with open(cfg_path, "r", encoding="utf-8") as f:
-                cfg = yaml.safe_load(f) or {}
-            if cfg.get("hallucination_filter", {}).get("enabled", False):
-                result = filter_ocr_results(bubbles_data, cfg, None)
-                bubbles_data = result.get("bubbles", bubbles_data)
-                stats = result.get("stats", {})
-                if stats:
-                    import logging
-                    logger = logging.getLogger(__name__)
-                    logger.info("🚀 Hallucination Filter: Filtered %d/%d bubbles (%.1f%%)",
-                               stats.get("filtered", 0),
-                               stats.get("total", 0),
-                               stats.get("filtered_pct", 0))
-    except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.warning("⚠️ Hallucination filter error: %s", e)
-
+    # Final bubbles data
     data = {
         "cbz_name": cbz_name,
         "series":   series,

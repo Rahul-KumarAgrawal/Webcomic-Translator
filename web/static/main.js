@@ -197,7 +197,7 @@ async function uploadFiles(files, seriesInput, srcLangSel, tgtLangSel, engineSel
   const mitTargetLang = mitLangSel ? mitLangSel.value || "ENG" : "ENG";
   const forceRetranslate = forceToggle ? forceToggle.checked : false;
   const ocrEngineSel = document.getElementById("ocr-engine-select");
-  const ocrEngine = ocrEngineSel ? ocrEngineSel.value : "mit";
+  const ocrEngine = ocrEngineSel ? ocrEngineSel.value : "auto";
   const detEngineSel = document.getElementById("detection-engine-select");
   const detEngine = detEngineSel ? detEngineSel.value : "mit";
 
@@ -221,6 +221,8 @@ async function uploadFiles(files, seriesInput, srcLangSel, tgtLangSel, engineSel
     }
 
     let finalSrcLang = srcLang;
+    let finalOcrEngine = ocrEngine;
+
     if (srcLang === "") {
       try {
         showToast(`🔍 Detecting language for ${file.name}...`, "info");
@@ -278,13 +280,26 @@ async function uploadFiles(files, seriesInput, srcLangSel, tgtLangSel, engineSel
       }
     }
 
+    // JPN/CHN -> manga-ocr, KOR -> pororo, others -> paddle
+    if (finalSrcLang === "jpn_Jpan" || finalSrcLang.includes("zho")) {
+      finalOcrEngine = "manga-ocr";
+    } else if (finalSrcLang === "kor_Hang") {
+      finalOcrEngine = "pororo";
+    } else if (finalSrcLang !== "") {
+      finalOcrEngine = "paddle";
+    }
+
+    if (finalOcrEngine !== ocrEngine) {
+      console.log(`[Auto-OCR] Switched ${ocrEngine} -> ${finalOcrEngine} for lang ${finalSrcLang}`);
+    }
+
     const fd = new FormData();
     fd.append("cbz_file", file);
     fd.append("series", series);
     fd.append("source_lang", finalSrcLang);
     fd.append("target_lang", tgtLang);
     fd.append("translation_engine", engine);
-    fd.append("ocr_engine", ocrEngine);
+    fd.append("ocr_engine", finalOcrEngine);
     fd.append("detection_engine", detEngine);
     fd.append("inpaint_engine", inpaintEngine);
     fd.append("use_mit_pipeline", useMit ? "true" : "false");
@@ -345,9 +360,9 @@ function initReviewProgress() {
       }
     }
 
-    // Restore opacity for approved/edited/rejected cards
+    // Restore opacity for approved/edited/rejected cards - GOAL 2: Keep them bright
     if (!isIgnored && (isApproved || isEdited || isRejected)) {
-      card.style.opacity = "0.5";
+      card.style.opacity = "1.0";
     }
 
     // Count into progress and set current state
@@ -525,7 +540,7 @@ async function bubbleAction(action, btn) {
         btn.classList.add("btn-warning");
         btn.dataset.action = "ignore";
       } else {
-        if (action === "reject") card.style.opacity = "0.5";
+        card.style.opacity = "1.0"; // Approved/Edited/Rejected remain fully bright
 
         // Reset Ignore button if it was in Undo state
         const ignoreBtn = card.querySelector(".btn-info");
@@ -1011,6 +1026,7 @@ function initBulkLLMTranslator() {
 
                 reviewProgress.edited++;
                 m.card.dataset.currentState = "edit";
+                m.card.style.opacity = "1.0"; // Ensure bright after auto-fill
               }
             });
             updateReviewProgressUI();

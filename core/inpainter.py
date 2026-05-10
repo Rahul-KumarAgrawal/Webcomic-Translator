@@ -217,10 +217,11 @@ class Inpainter:
                 self._gap_fill_off_logged = True
 
         # ── 2. OCR ────────────────────────────────────────────────────────
-        if str(ocr_engine).lower() == "paddle":
+        if str(ocr_engine).lower() in ("paddle", "paddle_vertical"):
             try:
                 from core.paddleocr_wrapper import run_paddle_ocr_on_regions
-                regions = run_paddle_ocr_on_regions(image, regions, self.cfg)
+                force_vert = str(ocr_engine).lower() == "paddle_vertical"
+                regions = run_paddle_ocr_on_regions(image, regions, self.cfg, force_vertical=force_vert)
             except Exception as e:
                 logger.error(f"Failed to run PaddleOCR, falling back: {e}")
         elif str(ocr_engine).lower() == "easyocr":
@@ -887,8 +888,11 @@ class Inpainter:
             logger.info("[PanelCleaner] Inpainting complete.")
             return Image.fromarray(inpainted)
         except Exception as exc:
-            logger.warning("[PanelCleaner] Inpainting failed (%s). Falling back to MIT inpainting.", exc)
-            return self._run_mit_inpaint(image, regions)
+            logger.warning("[PanelCleaner] Inpainting failed (%s). Falling back to Solid Fill.", exc)
+            result = image.copy()
+            for r in regions:
+                self._clean_region(result, r, use_segmentation=use_segmentation)
+            return result
 
     def render_text(
         self,
@@ -1188,8 +1192,11 @@ class Inpainter:
         """
         aot_model_path = self._models_dir / "Inpainting" / "aot-inpainting" / "aot.onnx"
         if not aot_model_path.exists():
-            logger.warning("[AOT] Model not found at %s. Falling back to MIT inpainting.", aot_model_path)
-            return self._run_mit_inpaint(image, regions)
+            logger.warning("[AOT] Model not found at %s. Falling back to Solid Fill.", aot_model_path)
+            result = image.copy()
+            for r in regions:
+                self._clean_region(result, r, use_segmentation=use_segmentation)
+            return result
 
         try:
             import onnxruntime as ort
@@ -1251,8 +1258,11 @@ class Inpainter:
             return Image.fromarray(composite)
 
         except Exception as exc:
-            logger.warning("[AOT] Inpainting failed (%s). Falling back to MIT inpainting.", exc)
-            return self._run_mit_inpaint(image, regions)
+            logger.warning("[AOT] Inpainting failed (%s). Falling back to Solid Fill.", exc)
+            result = image.copy()
+            for r in regions:
+                self._clean_region(result, r, use_segmentation=use_segmentation)
+            return result
 
     # ── MIT integration (detection + inpainting) ──────────────────────────────
 

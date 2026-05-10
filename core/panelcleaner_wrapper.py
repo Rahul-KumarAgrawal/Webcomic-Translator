@@ -4,9 +4,17 @@ import numpy as np
 import torch
 import onnxruntime as ort
 
-# Point to Panel Cleaner models
-ONNX_MODEL_PATH = r"D:\PanelCleaner-Windows-2.11.4_unzip_me\_internal\pcleaner\cache\model\comictextdetector.pt.onnx"
-LAMA_MODEL_PATH = r"D:\PanelCleaner-Windows-2.11.4_unzip_me\_internal\pcleaner\cache\model\anime-manga-big-lama.pt"
+# Relative paths to models in the workspace
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ONNX_MODEL_PATH = os.path.join(_ROOT, "models", "detection", "comictextdetector.pt.onnx")
+LAMA_MODEL_PATH = os.path.join(_ROOT, "models", "inpainting", "anime-manga-big-lama.pt")
+
+# Fallback to Pipeline Koharu if main models folder is missing them
+if not os.path.exists(ONNX_MODEL_PATH):
+    ONNX_MODEL_PATH = os.path.join(_ROOT, "Pipeline Koharu", "Detection and Layout", "detector.onnx")
+if not os.path.exists(LAMA_MODEL_PATH):
+    # Try AOT model from Koharu as a fallback if LaMa isn't found
+    LAMA_MODEL_PATH = os.path.join(_ROOT, "Pipeline Koharu", "Inpainting", "aot-inpainting", "aot_traced.pt")
 
 class PanelCleanerPipeline:
     def __init__(self, device="cuda"):
@@ -117,3 +125,15 @@ class PanelCleanerPipeline:
         out_pil = Image.fromarray(inpainted)
         out_pil.save(output_path, format="PNG")
         return output_path
+
+    def unload(self):
+        """Free GPU memory by unloading models."""
+        if hasattr(self, 'lama_model'):
+            del self.lama_model
+        if hasattr(self, 'detector_sess'):
+            del self.detector_sess
+        if self.device == 'cuda':
+            try:
+                torch.cuda.empty_cache()
+            except:
+                pass

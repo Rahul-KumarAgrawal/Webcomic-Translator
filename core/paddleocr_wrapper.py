@@ -4,9 +4,13 @@ import numpy as np
 from PIL import Image
 import logging
 
-logger = logging.getLogger(__name__)
-
-# ── Redirect ALL Paddle downloads to D drive ─────────────────────────────────
+logger = logging.getLogger("core.paddleocr_wrapper")
+if not logger.handlers:
+    sh = logging.StreamHandler(sys.stdout)
+    sh.setFormatter(logging.Formatter("[core.paddleocr] %(message)s"))
+    logger.addHandler(sh)
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _PADDLE_CACHE = os.path.join(_ROOT, "model", "paddle_cache")
 os.makedirs(_PADDLE_CACHE, exist_ok=True)
@@ -77,9 +81,9 @@ def get_paddle_ocr(lang="japan"):
             show_log=False, 
             use_gpu=True, 
             gpu_mem=500,
-            det_db_thresh=0.15,      # More sensitive to faint/jagged text
-            det_db_box_thresh=0.3,    # Lower threshold for box creation
-            det_db_unclip_ratio=2.0   # Slightly larger boxes to catch outlines
+            det_db_thresh=0.3,       # Standard sensitivity to prevent ghost boxes
+            det_db_box_thresh=0.5,    # Minimum confidence for a box to be valid
+            det_db_unclip_ratio=1.6   # Tighter boxes for cleaner character separation
         )
         
     return _paddle_ocr_instances[lang]
@@ -98,81 +102,68 @@ def map_lang_to_paddle(lang_code: str) -> str:
     if "fr" in lang_code or "fra" in lang_code: return "fr"
     if "es" in lang_code or "spa" in lang_code: return "es"
     if "de" in lang_code or "ger" in lang_code: return "german"
-    if "it" in lang_code or "ita" in lang_code: return "it"
-    if "pt" in lang_code or "por" in lang_code: return "pt"
-    if "ru" in lang_code or "rus" in lang_code: return "ru"
-    if "ar" in lang_code or "ara" in lang_code: return "ar"
-    if "hi" in lang_code or "hin" in lang_code: return "hi"
-    return "japan"
+    return "en"
 
-def run_paddle_ocr_on_regions(image: Image.Image, regions: list, cfg: dict) -> list:
+def run_paddle_ocr_on_regions(image: Image.Image, regions: list, cfg: dict, force_vertical: bool = False) -> list:
     """Runs OCR on cropped regions using PaddleOCR 2.8.1."""
     if not regions:
         return regions
         
-    source_lang_hint = cfg.get("source_lang") if cfg else "japan"
-    paddle_lang = map_lang_to_paddle(source_lang_hint)
-    
+    from paddleocr import PaddleOCR
+    import numpy as np
+    from PIL import Image, ImageOps
+
+    paddle_lang = map_lang_to_paddle(cfg.get("source_lang_override") or cfg.get("source_lang"))
     ocr = get_paddle_ocr(paddle_lang)
-    img_np = np.array(image.convert("RGB"))
-    img_np = img_np[:, :, ::-1] # RGB to BGR for OpenCV-based OCR
+    
+    super_res = cfg.get("ocr_super_res", True)
+    upscale_factor = float(cfg.get("ocr_upscale_factor", 2.0))
     
     for region in regions:
-        x1, y1, x2, y2 = region.bbox
-        pad = 5
-        h, w = img_np.shape[:2]
-        crop_y1, crop_y2 = max(0, int(y1)-pad), min(h, int(y2)+pad)
-        crop_x1, crop_x2 = max(0, int(x1)-pad), min(w, int(x2)+pad)
-        
-        crop = img_np[crop_y1:crop_y2, crop_x1:crop_x2]
-        if crop.size == 0 or crop.shape[0] < 5 or crop.shape[1] < 5:
-            continue
-            
-        # ── Pre-OCR Upscaling (Better for low-res comics) ──
-        from PIL import Image, ImageOps
-        super_res = cfg.get("ocr_super_res", True) if cfg else True
-        upscale_factor = float(cfg.get("ocr_upscale_factor", 2.0)) if cfg else 2.0
+        # Crop the region
+        crop_pil = image.crop(region.bbox)
         
         if super_res:
-            crop_pil = Image.fromarray(crop)
             w_c, h_c = crop_pil.size
             crop_pil = crop_pil.resize((int(w_c*upscale_factor), int(h_c*upscale_factor)), resample=Image.LANCZOS)
             crop_pil = ImageOps.autocontrast(crop_pil.convert("L"), cutoff=2).convert("RGB")
-            crop = np.array(crop_pil)
+
+        if force_vertical:
+            # Rotate 90 degrees Counter-Clockwise
+            # This transforms Right-to-Left vertical columns into Top-to-Bottom horizontal rows.
+            # PaddleOCR handles horizontal rows much more reliably.
+            crop_pil = crop_pil.rotate(90, expand=True)
+            logger.info("!!!!! [PaddleOCR] ROTATING BUBBLE 90° CCW FOR VERTICAL RECOGNITION !!!!!")
+            print("!!!!! [PaddleOCR] ROTATING BUBBLE 90° CCW FOR VERTICAL RECOGNITION !!!!!")
+
+        crop = np.array(crop_pil)
             
         # Run PaddleOCR (Stable 2.x format)
         result = ocr.ocr(crop, cls=True)
         
         if result and result[0]:
-            line_entries = []
+            # With the rotation trick, PaddleOCR's default result order (Top-to-Bottom rows)
+            # corresponds perfectly to our Right-to-Left vertical columns.
+            lines = []
+            confs = []
             for line in result[0]:
                 if len(line) >= 2 and len(line[1]) >= 1:
-                    text = line[1][0]
-                    box = line[0]
-                    x_center = sum(pt[0] for pt in box) / 4
-                    y_center = sum(pt[1] for pt in box) / 4
-                    xs = [pt[0] for pt in box]
-                    ys = [pt[1] for pt in box]
-                    box_w = max(xs) - min(xs)
-                    box_h = max(ys) - min(ys)
+                    text = line[1][0].strip()
                     conf = line[1][1]
-                    line_entries.append((x_center, y_center, text, box_w, box_h, conf))
+                    
+                    # ── Hallucination Filter ──────────────────────────────────
+                    if conf < 0.45:
+                        if text.lower() in ("foo", "fooo", "ooo", "v", "2", "z", "x"):
+                            continue
+                        if len(text) == 1 and text.isalnum() and not any('\u4e00' <= c <= '\u9fff' for c in text):
+                            continue
+                    
+                    lines.append(text)
+                    confs.append(conf)
             
-            if line_entries:
-                is_cjk = paddle_lang in ("japan", "korean", "ch", "chinese_cht")
-                avg_aspect = sum(e[4] / max(e[3], 1) for e in line_entries) / len(line_entries)
-                is_vertical = is_cjk and avg_aspect > 1.5
-
-                if is_cjk and is_vertical:
-                    line_entries.sort(key=lambda e: (-round(e[0] / 15), e[1]))
-                else:
-                    line_entries.sort(key=lambda e: (round(e[1] / 15), e[0]))
-                
-                lines = [entry[2] for entry in line_entries]
-                avg_conf = sum(entry[5] for entry in line_entries) / len(line_entries)
-                
+            if lines:
                 region.source_text = "\n".join(lines)
-                region.confidence = avg_conf
+                region.confidence = sum(confs) / len(confs)
                 
     return regions
 

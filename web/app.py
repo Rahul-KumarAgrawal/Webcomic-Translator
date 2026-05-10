@@ -594,8 +594,8 @@ def upload():
     )
     pipeline_label = "Koharu" if use_koharu else ("MIT" if use_mit else engine)
     logger.info(
-        "Queued: %s (series=%s, src=%s, tgt=%s, pipeline=%s, det=%s, ocr=%s, force=%s, chunk=%d/%d, job=%s)",
-        f.filename, series, source_lang or "auto", target_lang, pipeline_label, detection_engine, ocr_engine, force_retranslate, chunk_height, chunk_overlap, job_id,
+        "Queued: %s (series=%s, src=%s, tgt=%s, pipeline=%s, det=%s, ocr=%s, inpaint=%s, force=%s, chunk=%d/%d, job=%s)",
+        f.filename, series, source_lang or "auto", target_lang, pipeline_label, detection_engine, ocr_engine, inpaint_engine, force_retranslate, chunk_height, chunk_overlap, job_id,
     )
     return jsonify({"ok": True, "job_id": job_id, "cbz_name": f.filename})
 
@@ -680,21 +680,7 @@ def review(cbz_name: str):
     cfg = _load_cfg()
     threshold = cfg.get("memory", {}).get("confidence_threshold", 60)
     
-    # Apply hallucination filter if enabled
     bubbles = data.get("bubbles", [])
-    if cfg.get("hallucination_filter", {}).get("enabled", False):
-        try:
-            from core.hallucination_filter_integration import filter_ocr_results
-            result = filter_ocr_results(bubbles, cfg, logger)
-            bubbles = result.get("bubbles", [])
-            filter_stats = result.get("stats", {})
-            if filter_stats:
-                logger.info("Hallucination Filter: Filtered %d/%d bubbles (%.1f%%)",
-                           filter_stats.get("filtered", 0),
-                           filter_stats.get("total", 0),
-                           filter_stats.get("filtered_pct", 0))
-        except Exception as e:
-            logger.warning("Hallucination filter error: %s", e)
     
     return render_template(
         "review.html",

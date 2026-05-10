@@ -49,7 +49,8 @@
                             <div class="form-group">
                                 <label for="ocr_engine">OCR Engine</label>
                                 <select id="ocr_engine" name="ocr_engine">
-                                    <option value="manga-ocr" {% if cfg.get('ocr_engine','manga-ocr')=='manga-ocr'
+                                    <option value="auto" {% if cfg.get('ocr_engine','auto')=='auto' %}selected{% endif %}>✨ Auto (Smart Selection)</option>
+                                    <option value="manga-ocr" {% if cfg.get('ocr_engine')=='manga-ocr'
                                         %}selected{% endif %}>🌸 Manga-OCR (JPN & CHN)</option>
                                     <option value="paddle" {% if cfg.get('ocr_engine')=='paddle' %}selected{% endif %}>
                                         🇨🇳 PaddleOCR (v2.8 - Standard)</option>
@@ -207,16 +208,6 @@
                             <small class="text-muted d-block mt-4">Scans for "floating" text missed by YOLO.</small>
                         </div>
 
-                        <div class="form-group">
-                            <label for="enable_nuisance_filter">Nuisance Filter</label>
-                            <div class="flex-gap-8 mt-8" style="align-items:center;">
-                                <input type="checkbox" id="enable_nuisance_filter" name="enable_nuisance_filter" {% if
-                                    cfg.get('enable_nuisance_filter', False) %}checked{% endif %} style="width:auto;">
-                                <span style="font-weight:600;">Ignore Tiny Free-Floating Noise</span>
-                            </div>
-                            <small class="text-muted d-block mt-4">Automatically rejects very small, 1-2 character
-                                detections (like noise or artifacts) that aren't inside bubbles.</small>
-                        </div>
 
 
 
