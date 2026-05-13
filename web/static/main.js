@@ -434,9 +434,6 @@ function initBubbleReview() {
     if (!btn.dataset.action) btn.dataset.action = "ignore";
     btn.addEventListener("click", async () => {
       const currentAction = btn.dataset.action;
-      if (currentAction === "ignore") {
-        if (!confirm("Ignore this bubble? This will restore the original text and remove any translations.")) return;
-      }
       bubbleAction(currentAction, btn);
     });
   });
@@ -445,15 +442,17 @@ function initBubbleReview() {
       const pageNum = btn.dataset.page;
       const cards = document.querySelectorAll(`.bubble-card[data-page="${pageNum}"]`);
       let count = 0;
+      const promises = [];
       for (const card of cards) {
         if (card.dataset.ignored !== "true") {
           const ignoreBtn = card.querySelector(".btn-ignore");
           if (ignoreBtn) {
-            await bubbleAction("ignore", ignoreBtn);
+            promises.push(bubbleAction("ignore", ignoreBtn));
             count++;
           }
         }
       }
+      await Promise.all(promises);
       if (count > 0) {
         showToast(`🙈 Ignored ${count} bubbles on Page ${pageNum}`, "success");
       }

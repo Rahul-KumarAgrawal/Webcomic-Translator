@@ -255,6 +255,12 @@ class Inpainter:
                 regions = self._run_manga_ocr_on_regions(image, regions)
         elif str(ocr_engine).lower() == "manga-ocr":
             regions = self._run_manga_ocr_on_regions(image, regions)
+        elif str(ocr_engine).lower() == "ogkalu_ocr":
+            try:
+                regions = self._run_ogkalu_ocr_onnx(image, regions)
+            except Exception as e:
+                logger.warning(f"[Ogkalu OCR] Failed: {e}. Falling back to Manga-OCR.")
+                regions = self._run_manga_ocr_on_regions(image, regions)
         elif str(ocr_engine).lower() == "mit":
             # MIT Mayo (JPN) fallback/direct
             regions = self._run_mit_ocr_on_regions(image, regions)
@@ -647,6 +653,93 @@ class Inpainter:
                 region.source_text = " ".join(texts)
         return regions
 
+    def _run_ogkalu_ocr_onnx(self, image: Image.Image, regions: List[BubbleRegion]) -> List[BubbleRegion]:
+        """🏮 Ogaklu OCR (CHN+JPN vertical) ONNX implementation."""
+        import onnxruntime as ort
+        import numpy as np
+        from PIL import Image
+
+        try:
+            mocr_dir = self._models_dir / "OCR" / "manga-ocr-onnx"
+            encoder_path = mocr_dir / "encoder_model_int8.onnx"
+            decoder_path = mocr_dir / "decoder_model_int8.onnx"
+            vocab_path = mocr_dir / "vocab.txt"
+
+            if not encoder_path.exists() or not decoder_path.exists() or not vocab_path.exists():
+                logger.warning(f"[Ogkalu OCR] Models missing at {mocr_dir}. Falling back to standard MangaOCR.")
+                return self._run_manga_ocr_on_regions(image, regions)
+
+            # 1. Initialize Sessions
+            if not hasattr(self, '_ogkalu_ocr_encoder') or self._ogkalu_ocr_encoder is None:
+                sess_options = ort.SessionOptions()
+                sess_options.log_severity_level = 3
+                providers = ['CUDAExecutionProvider', 'CPUExecutionProvider']
+                logger.info("[Modular] [VRAM] Loading Ogkalu OCR (ONNX)...")
+                self._ogkalu_ocr_encoder = ort.InferenceSession(str(encoder_path), sess_options, providers=providers)
+                self._ogkalu_ocr_decoder = ort.InferenceSession(str(decoder_path), sess_options, providers=providers)
+                
+                # Load vocab
+                with open(vocab_path, "r", encoding="utf-8") as f:
+                    self._ogkalu_ocr_vocab = [line.strip() for line in f.readlines()]
+
+            for region in regions:
+                try:
+                    # 2. Preprocess
+                    # TrOCR typically expects 224x224 RGB
+                    crop = region.crop(image).convert("RGB").resize((224, 224), Image.LANCZOS)
+                    img_np = np.array(crop).astype(np.float32) / 255.0
+                    # Normalization (standard ViT)
+                    img_np = (img_np - 0.5) / 0.5
+                    img_np = img_np.transpose(2, 0, 1) # HWC -> CHW
+                    img_np = np.expand_dims(img_np, 0) # CHW -> BCHW
+
+                    # 3. Run Encoder
+                    encoder_inputs = {self._ogkalu_ocr_encoder.get_inputs()[0].name: img_np}
+                    encoder_outputs = self._ogkalu_ocr_encoder.run(None, encoder_inputs)
+                    last_hidden_state = encoder_outputs[0]
+
+                    # 4. Greedy Decode
+                    # Standard BERT/ViT-GPT2: BOS=2 [CLS], EOS=3 [SEP], PAD=0 [PAD]
+                    input_ids = np.array([[2]], dtype=np.int64)
+                    generated_tokens = []
+                    
+                    for _ in range(128): # Max tokens per bubble
+                        decoder_inputs = {
+                            self._ogkalu_ocr_decoder.get_inputs()[0].name: input_ids,
+                            self._ogkalu_ocr_decoder.get_inputs()[1].name: last_hidden_state
+                        }
+                        decoder_outputs = self._ogkalu_ocr_decoder.run(None, decoder_inputs)
+                        logits = decoder_outputs[0]
+                        
+                        # Get next token (greedy)
+                        next_token = np.argmax(logits[0, -1, :])
+                        if next_token == 3: # SEP/EOS
+                            break
+                        generated_tokens.append(int(next_token))
+                        
+                        # Append and continue
+                        input_ids = np.concatenate([input_ids, np.array([[next_token]], dtype=np.int64)], axis=1)
+
+                    # 5. Convert tokens to text
+                    text = ""
+                    for token in generated_tokens:
+                        if 0 <= token < len(self._ogkalu_ocr_vocab):
+                            t = self._ogkalu_ocr_vocab[token]
+                            # Handle common subword markers if present, though likely char-level
+                            if t.startswith("##"):
+                                text += t[2:]
+                            elif t not in ["[PAD]", "[UNK]", "[CLS]", "[SEP]", "[MASK]"]:
+                                text += t
+                    region.source_text = text.strip()
+                    region.confidence = 0.9
+                except Exception as e:
+                    logger.warning(f"[Ogkalu OCR] Region processing failed: {e}")
+                    region.source_text = ""
+            return regions
+        except Exception as e:
+            logger.error(f"[Ogkalu OCR] Engine runtime failed: {e}")
+            return self._run_manga_ocr_on_regions(image, regions)
+
     def _run_mayo_github_detect(self, image: Image.Image) -> List[BubbleRegion]:
         """
         Mayo Github (Classic) Engine:
@@ -721,7 +814,9 @@ class Inpainter:
         if not hasattr(self, '_font_det_session') or self._font_det_session is None:
             try:
                 import onnxruntime as ort
-                model_path = self._models_dir / "OCR" / "font-detection" / "font-detector.onnx"
+                model_path = self._models_dir / "OCR" / "font-detection" / "font-detector_int8.onnx"
+                if not model_path.exists():
+                    model_path = self._models_dir / "OCR" / "font-detection" / "font-detector.onnx"
                 if not model_path.exists():
                     print("\n" + "!"*60)
                     print("⚠️  WARNING: Yuzumarker font model missing! Falling back...")
@@ -848,9 +943,20 @@ class Inpainter:
         if hasattr(self, '_pororo_brain_sess'):
             logger.info("[Modular] [VRAM] Unloading Pororo OCR sessions from VRAM...")
             del self._pororo_brain_sess
-            del self._pororo_craft_sess
-            del self._pororo_brain_sess
-            del self._pororo_craft_sess
+            if hasattr(self, '_pororo_craft_sess'):
+                del self._pororo_craft_sess
+                
+        if hasattr(self, '_ogkalu_ocr_encoder') and self._ogkalu_ocr_encoder is not None:
+            logger.info("[Modular] [VRAM] Unloading Ogkalu OCR sessions from VRAM...")
+            del self._ogkalu_ocr_encoder
+            del self._ogkalu_ocr_decoder
+            self._ogkalu_ocr_encoder = None
+            self._ogkalu_ocr_decoder = None
+        
+        if hasattr(self, '_ogkalu_inpaint_sess'):
+            logger.info("[Modular] [VRAM] Unloading Ogkalu Inpaint session from VRAM...")
+            del self._ogkalu_inpaint_sess
+            self._ogkalu_inpaint_sess = None
             
         try:
             import torch
@@ -871,6 +977,8 @@ class Inpainter:
         
         if base_engine == "aot":
             return self._run_aot_inpaint(image, regions, use_segmentation=use_seg)
+        elif base_engine == "ogkalu":
+            return self._run_ogkalu_inpaint(image, regions, use_segmentation=use_seg)
         elif base_engine == "panelcleaner":
             return self._run_panelcleaner_inpaint(image, regions, use_segmentation=use_seg)
         elif base_engine == "solid":
@@ -1233,12 +1341,27 @@ class Inpainter:
             if np.max(mask) == 0:
                 return image
 
+            # 1.5 Resolution Safety Cap
+            MAX_DIM = 2048
+            orig_h, orig_w = image.height, image.width
+            if max(orig_h, orig_w) > MAX_DIM:
+                scale = MAX_DIM / max(orig_h, orig_w)
+                new_h, new_w = int(orig_h * scale), int(orig_w * scale)
+                img_to_proc = np.array(image.resize((new_w, new_h), Image.LANCZOS))
+                import cv2
+                mask_to_proc = cv2.resize(mask, (new_w, new_h), interpolation=cv2.INTER_NEAREST)
+                h, w = new_h, new_w
+                logger.info("[AOT] Page too large (%dx%d), scaling to %dx%d for VRAM safety.", orig_w, orig_h, new_w, new_h)
+            else:
+                img_to_proc = np.array(image)
+                mask_to_proc = mask
+                h, w = orig_h, orig_w
+
             # Convert to numpy arrays
-            original = np.array(image)
-            mask_3ch = np.stack([mask]*3, axis=-1) / 255.0
+            mask_3ch_full = np.stack([mask]*3, axis=-1) / 255.0
 
             # Preprocess image
-            np_img = original.astype(np.float32) / 255.0
+            np_img = img_to_proc.astype(np.float32) / 255.0
             
             h, w = np_img.shape[:2]
             
@@ -1247,9 +1370,9 @@ class Inpainter:
             pad_w = (8 - w % 8) % 8
             if pad_h > 0 or pad_w > 0:
                 np_img = np.pad(np_img, ((0, pad_h), (0, pad_w), (0, 0)), mode='reflect')
-                mask_padded = np.pad(mask, ((0, pad_h), (0, pad_w)), mode='constant', constant_values=0)
+                mask_padded = np.pad(mask_to_proc, ((0, pad_h), (0, pad_w)), mode='constant', constant_values=0)
             else:
-                mask_padded = mask
+                mask_padded = mask_to_proc
 
             # AOT expects [1, 3, H, W] image and [1, 1, H, W] mask
             # Image is scaled to [-1, 1], Mask is scaled to [0, 1]
@@ -1274,13 +1397,131 @@ class Inpainter:
             out = (out_tensor[0].transpose(1, 2, 0) + 1.0) / 2.0 * 255.0
             out = np.clip(out, 0, 255)
 
-            composite = (original * (1 - mask_3ch) + out * mask_3ch).astype(np.uint8)
+            # Scale back up if necessary
+            if out.shape[0] != image.height or out.shape[1] != image.width:
+                import cv2
+                out = cv2.resize(out, (image.width, image.height), interpolation=cv2.INTER_LANCZOS4)
+
+            original_full = np.array(image)
+            composite = (original_full * (1 - mask_3ch_full) + out * mask_3ch_full).astype(np.uint8)
 
             logger.info("[AOT] Inpainting complete via AOT-GAN ONNX.")
             return Image.fromarray(composite)
 
         except Exception as exc:
             logger.warning("[AOT] Inpainting failed (%s). Falling back to Solid Fill.", exc)
+            result = image.copy()
+            for r in regions:
+                self._clean_region(result, r, use_segmentation=use_segmentation)
+            return result
+
+    def _run_ogkalu_inpaint(self, image: Image.Image, regions: List[BubbleRegion], use_segmentation: bool = False) -> Image.Image:
+        """
+        Elite Ogkalu LaMa Inpainting Engine.
+        Uses the dynamic-size LaMa ONNX model optimized for manga restoration.
+        """
+        model_path = self._models_dir / "Inpainting" / "ogkalu" / "lama-manga-dynamic.onnx"
+        
+        if not model_path.exists():
+            logger.warning("[Ogkalu Inpaint] Model not found at %s. Falling back to Solid Fill.", model_path)
+            print("\n" + "!"*60)
+            print("⚠️  WARNING: Ogkalu LaMa model missing!")
+            print(f"Please download lama-manga-dynamic.onnx and place it in: {model_path.parent}")
+            print("!"*60 + "\n")
+            result = image.copy()
+            for r in regions:
+                self._clean_region(result, r, use_segmentation=use_segmentation)
+            return result
+
+        try:
+            import onnxruntime as ort
+            import numpy as np
+            import cv2
+
+            # 1. Create Mask
+            mask = np.zeros((image.height, image.width), dtype=np.uint8)
+            for r in regions:
+                if use_segmentation and r.mask_pts is not None:
+                    pts = np.array(r.mask_pts, np.int32)
+                    pts = pts.reshape((-1, 1, 2))
+                    cv2.fillPoly(mask, [pts], 255)
+                else:
+                    # Expand mask slightly for cleaner edges in LaMa
+                    kernel = np.ones((5,5), np.uint8)
+                    region_mask = np.zeros((image.height, image.width), dtype=np.uint8)
+                    region_mask[r.y:r.y+r.h, r.x:r.x+r.w] = 255
+                    dilated = cv2.dilate(region_mask, kernel, iterations=1)
+                    mask = cv2.bitwise_or(mask, dilated)
+
+            if np.max(mask) == 0:
+                return image
+
+            # 2. Preprocess with Resolution Safety Cap
+            # We scale down to 2048px if necessary to avoid VRAM OOM.
+            MAX_DIM = 2048
+            orig_h, orig_w = image.height, image.width
+            
+            if max(orig_h, orig_w) > MAX_DIM:
+                scale = MAX_DIM / max(orig_h, orig_w)
+                new_h, new_w = int(orig_h * scale), int(orig_w * scale)
+                # Resize image and mask
+                img_np_orig = np.array(image.resize((new_w, new_h), Image.LANCZOS))
+                mask_np_orig = cv2.resize(mask, (new_w, new_h), interpolation=cv2.INTER_NEAREST)
+                h, w = new_h, new_w
+                logger.info("[Ogkalu Inpaint] Page too large (%dx%d), scaling to %dx%d for VRAM safety.", orig_w, orig_h, new_w, new_h)
+            else:
+                img_np_orig = np.array(image)
+                mask_np_orig = mask
+                h, w = orig_h, orig_w
+            
+            # Pad to multiple of 8 (standard for LaMa)
+            pad_h = (8 - h % 8) % 8
+            pad_w = (8 - w % 8) % 8
+            
+            img_np = img_np_orig.astype(np.float32) / 255.0
+            mask_np = (mask_np_orig.astype(np.float32) / 255.0)
+            
+            if pad_h > 0 or pad_w > 0:
+                img_np = np.pad(img_np, ((0, pad_h), (0, pad_w), (0, 0)), mode='reflect')
+                mask_np = np.pad(mask_np, ((0, pad_h), (0, pad_w)), mode='constant', constant_values=0)
+
+            # [1, 3, H, W] and [1, 1, H, W]
+            img_tensor = img_np.transpose(2, 0, 1)[np.newaxis].astype(np.float32)
+            mask_tensor = mask_np[np.newaxis, np.newaxis].astype(np.float32)
+
+            # 3. Inference
+            providers = ["CUDAExecutionProvider", "CPUExecutionProvider"]
+            if not hasattr(self, '_ogkalu_inpaint_sess') or self._ogkalu_inpaint_sess is None:
+                logger.info("[Ogkalu Inpaint] [VRAM] Loading Dynamic LaMa Engine...")
+                self._ogkalu_inpaint_sess = ort.InferenceSession(str(model_path), providers=providers)
+
+            inputs = {
+                self._ogkalu_inpaint_sess.get_inputs()[0].name: img_tensor,
+                self._ogkalu_inpaint_sess.get_inputs()[1].name: mask_tensor
+            }
+            out_tensor = self._ogkalu_inpaint_sess.run(None, inputs)[0]
+
+            # 4. Post-process
+            if pad_h > 0 or pad_w > 0:
+                out_tensor = out_tensor[:, :, :h, :w]
+            
+            out_img = out_tensor[0].transpose(1, 2, 0)
+            out_img = np.clip(out_img * 255.0, 0, 255).astype(np.uint8)
+
+            # If we scaled down, scale the result back up to match original image
+            if out_img.shape[0] != image.height or out_img.shape[1] != image.width:
+                out_img = cv2.resize(out_img, (image.width, image.height), interpolation=cv2.INTER_LANCZOS4)
+
+            # Composite (only replace masked areas)
+            original_full = np.array(image)
+            mask_3ch = np.stack([mask/255.0]*3, axis=-1)
+            final_np = (original_full * (1 - mask_3ch) + out_img * mask_3ch).astype(np.uint8)
+
+            logger.info("[Ogkalu Inpaint] Inpainting complete.")
+            return Image.fromarray(final_np)
+
+        except Exception as exc:
+            logger.error("[Ogkalu Inpaint] Failed: %s", exc)
             result = image.copy()
             for r in regions:
                 self._clean_region(result, r, use_segmentation=use_segmentation)

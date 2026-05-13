@@ -1043,6 +1043,17 @@ def _process_pages_standard(
 
     # Unload translation model to free VRAM for inpainting
     translator.unload()
+    
+    # Aggressive VRAM Cleanup before Inpainting
+    try:
+        import torch
+        import gc
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            logger.info("[VRAM] Flushed GPU cache to prepare for inpainting.")
+    except:
+        pass
 
     # ── Phase 3: Inpaint & Render All Pages ──────────────────────────────────
     logger.info("━━━ Phase 3: Inpainting (%s) and Rendering final pages...", inpaint_engine)
@@ -1067,7 +1078,7 @@ def _process_pages_standard(
                 mask = panelcleaner.detect_text_mask(np_img)
                 inpainted_np = panelcleaner.inpaint_lama(np_img, mask)
                 inpainted = Image.fromarray(inpainted_np)
-            elif base_inpaint in ("lama", "aot", "solid", "panelcleaner") and regions:
+            elif base_inpaint in ("lama", "aot", "solid", "panelcleaner", "ogkalu") and regions:
                 inpainted = inpainter.inpaint(image, regions)
             else:
                 inpainted = image.copy()

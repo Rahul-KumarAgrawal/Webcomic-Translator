@@ -172,8 +172,14 @@ if not exist "models\inpainting\mayo_panel_cleaner.pt" (
 ) else if not exist "Pipeline Koharu\Detection and Layout\models\ogkalu-text-stable" (
     echo [SETUP] Downloading detection models...
     "%PYTHON%" scripts\download_new_models.py
-) else if not exist "Pipeline Koharu\OCR\font-detection" (
+) else if not exist "Pipeline Koharu\OCR\font-detection\font-detector_int8.onnx" (
     echo [SETUP] Downloading new font-detection models...
+    "%PYTHON%" scripts\download_new_models.py
+) else if not exist "Pipeline Koharu\Inpainting\aot-inpainting\aot.onnx" (
+    echo [SETUP] Downloading AOT-Inpainting ONNX...
+    "%PYTHON%" scripts\download_new_models.py
+) else if not exist "Pipeline Koharu\Detection and Layout\models\detector_int8.onnx" (
+    echo [SETUP] Downloading combined models...
     "%PYTHON%" scripts\download_new_models.py
 )
 

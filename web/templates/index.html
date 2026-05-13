@@ -44,6 +44,7 @@
               <option value="easyocr" {% if cfg.get('ocr_engine')=='easyocr' %}selected{% endif %}>🌐 EasyOCR (Multilingual)</option>
               <option value="tesseract" {% if cfg.get('ocr_engine')=='tesseract' %}selected{% endif %}>Tesseract (Local)</option>
               <option value="manga-ocr" {% if cfg.get('ocr_engine','manga-ocr')=='manga-ocr' %}selected{% endif %}>🌸 Manga-OCR (JPN & CHN)</option>
+              <option value="ogkalu_ocr" {% if cfg.get('ocr_engine')=='ogkalu_ocr' %}selected{% endif %}>🏮 Ogkalu OCR (CHN+JPN vertical)</option>
               <option value="pororo" {% if cfg.get('ocr_engine')=='pororo' %}selected{% endif %}>🇰🇷 Pororo (KOR - Ogkalu)</option>
               <option value="ppocr-v5" {% if cfg.get('ocr_engine')=='ppocr-v5' %}selected{% endif %}>🔥 PaddleOCR (v5 - Latest / Ogkalu) (Supports: Ko, En, Latin)</option>
               <option value="none" {% if cfg.get('ocr_engine')=='none' %}selected{% endif %}>❌ None (Skip OCR)</option>
@@ -55,7 +56,7 @@
               <option value="mit" {% if cfg.get('detection_engine','mit')=='mit' %}selected{% endif %}>🛠️ MIT Engine (comic text and bubble detector)</option>
               <option value="yolo" {% if cfg.get('detection_engine')=='yolo' %}selected{% endif %}>🚀 YOLO Only (comic text segmenter yolov8m)</option>
               <option value="yolo_hybrid" {% if cfg.get('detection_engine')=='yolo_hybrid' %}selected{% endif %}>🌸 YOLO Hybrid (comic text segmenter yolov8m)</option>
-              <option value="ogkalu_combine" {% if cfg.get('detection_engine')=='ogkalu_combine' %}selected{% endif %}>🧩 Ogkalu Combine (comic text and bubble detector)</option>
+              <option value="ogkalu_combine" {% if cfg.get('detection_engine')=='ogkalu_combine' %}selected{% endif %}>🧩 Ogkalu Combined (comic text and bubble detector)</option>
               <option value="ogkalu_stable_dual" {% if cfg.get('detection_engine')=='ogkalu_stable_dual' %}selected{% endif %}>🥈 Ogkalu Stable (comic text segmenter yolov8m + comic speech bubble detector yolov8m)</option>
               <option value="mayo_github" {% if cfg.get('detection_engine')=='mayo_github' %}selected{% endif %}>🥇 Mayo Github (comic text detector + bubble segmentation)</option>
             </select>
@@ -64,10 +65,12 @@
             <label for="inpaint-engine-select">Inpainting Engine</label>
             <select id="inpaint-engine-select" name="inpaint_engine">
               <option value="lama" {% if cfg.get('inpaint_engine', 'lama' )=='lama' %}selected{% endif %}>LaMa (MIT Default)</option>
-              <option value="aot" {% if cfg.get('inpaint_engine')=='aot' %}selected{% endif %}>🎨 AOT-GAN (High Detail / Koharu)</option>
-              <option value="aot_segmented" {% if cfg.get('inpaint_engine')=='aot_segmented' %}selected{% endif %}>✂️ AOT-GAN (Segmented Bubble Shape)</option>
+              <option value="aot" {% if cfg.get('inpaint_engine')=='aot' %}selected{% endif %}>🎨 Ogkalu AOT (High Detail / Koharu)</option>
+              <option value="aot_segmented" {% if cfg.get('inpaint_engine')=='aot_segmented' %}selected{% endif %}>✂️ Ogkalu AOT (Segmented Bubble Shape)</option>
               <option value="panelcleaner" {% if cfg.get('inpaint_engine')=='panelcleaner' %}selected{% endif %}>🧹 PanelCleaner (High Quality)</option>
               <option value="panelcleaner_segmented" {% if cfg.get('inpaint_engine')=='panelcleaner_segmented' %}selected{% endif %}>✂️ PanelCleaner (Segmented Bubble Shape)</option>
+              <option value="ogkalu" {% if cfg.get('inpaint_engine')=='ogkalu' %}selected{% endif %}>🪄 Ogkalu Inpainting (Dynamic LaMa)</option>
+              <option value="ogkalu_segmented" {% if cfg.get('inpaint_engine')=='ogkalu_segmented' %}selected{% endif %}>✂️ Ogkalu Inpainting (Segmented Bubble Shape)</option>
               <option value="solid" {% if cfg.get('inpaint_engine')=='solid' %}selected{% endif %}>⚪ Solid Fill (Clear White Bubbles)</option>
               <option value="solid_segmented" {% if cfg.get('inpaint_engine')=='solid_segmented' %}selected{% endif %}>✂️ Solid Fill (Segmented Bubble Shape)</option>
               <option value="none" {% if cfg.get('inpaint_engine')=='none' %}selected{% endif %}>❌ None (Keep Original)</option>
