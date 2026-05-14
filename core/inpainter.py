@@ -1380,13 +1380,16 @@ class Inpainter:
             mask_tensor = (mask_padded / 255.0)[np.newaxis, np.newaxis].astype(np.float32)
 
             providers = ["CUDAExecutionProvider", "CPUExecutionProvider"]
-            sess = ort.InferenceSession(str(aot_model_path), providers=providers)
+            sess_options = ort.SessionOptions()
+            sess_options.log_severity_level = 3
+            sess = ort.InferenceSession(str(aot_model_path), sess_options=sess_options, providers=providers)
 
             inp_name  = sess.get_inputs()[0].name
             mask_name = sess.get_inputs()[1].name
             out_name  = sess.get_outputs()[0].name
 
             # Run inference
+            img_tensor = img_tensor * (1.0 - mask_tensor)
             out_tensor = sess.run([out_name], {inp_name: img_tensor, mask_name: mask_tensor})[0]
 
             # Crop padding back off
@@ -1493,7 +1496,9 @@ class Inpainter:
             providers = ["CUDAExecutionProvider", "CPUExecutionProvider"]
             if not hasattr(self, '_ogkalu_inpaint_sess') or self._ogkalu_inpaint_sess is None:
                 logger.info("[Ogkalu Inpaint] [VRAM] Loading Dynamic LaMa Engine...")
-                self._ogkalu_inpaint_sess = ort.InferenceSession(str(model_path), providers=providers)
+                sess_options = ort.SessionOptions()
+                sess_options.log_severity_level = 3
+                self._ogkalu_inpaint_sess = ort.InferenceSession(str(model_path), sess_options=sess_options, providers=providers)
 
             inputs = {
                 self._ogkalu_inpaint_sess.get_inputs()[0].name: img_tensor,
