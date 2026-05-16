@@ -114,6 +114,8 @@ from flask_cors import CORS
 import core.inpainter
 print(f"\n[DEBUG] Loading Inpainter from: {core.inpainter.__file__}\n")
 
+_session_lock = threading.Lock()
+
 SESSIONS_DIR  = os.path.join(_ROOT, "web", "sessions")
 BACKUPS_DIR   = os.path.join(_ROOT, "backups")
 FONTS_DIR     = os.path.join(_ROOT, "fonts")
@@ -833,22 +835,23 @@ def edit_bubble_bulk():
                 cbz_session_updates[cbz_name].append((source_text, new_text))
                 
         # Bulk update sessions
-        for cbz_name, updates in cbz_session_updates.items():
-            session_path = os.path.join(SESSIONS_DIR, cbz_name.replace(".cbz", "") + ".json")
-            if os.path.exists(session_path):
-                with open(session_path, "r", encoding="utf-8") as f:
-                    session = json.load(f)
-                
-                # Apply all updates
-                for src_text, new_text in updates:
-                    for b in session.get("bubbles", []):
-                        if b.get("source_text", "").strip() == src_text.strip():
-                            b["translated_text"] = new_text
-                            b["approved"] = True
-                            b["edited"] = True
-                            
-                with open(session_path, "w", encoding="utf-8") as f:
-                    json.dump(session, f, ensure_ascii=False, indent=2)
+        with _session_lock:
+            for cbz_name, updates in cbz_session_updates.items():
+                session_path = os.path.join(SESSIONS_DIR, cbz_name.replace(".cbz", "") + ".json")
+                if os.path.exists(session_path):
+                    with open(session_path, "r", encoding="utf-8") as f:
+                        session = json.load(f)
+                    
+                    # Apply all updates
+                    for src_text, new_text in updates:
+                        for b in session.get("bubbles", []):
+                            if b.get("source_text", "").strip() == src_text.strip():
+                                b["translated_text"] = new_text
+                                b["approved"] = True
+                                b["edited"] = True
+                                
+                    with open(session_path, "w", encoding="utf-8") as f:
+                        json.dump(session, f, ensure_ascii=False, indent=2)
 
         return jsonify({"ok": True, "count": len(data_list)})
     except Exception as exc:
@@ -1418,31 +1421,32 @@ def _update_session_bubble(cbz_name: str, source_text: str, translated_text: str
     if not os.path.exists(session_path):
         return
     try:
-        with open(session_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        
-        bubbles = data.get("bubbles", [])
-        
-        # 1. Try updating by index (most reliable)
-        if bubble_index is not None and 0 <= bubble_index < len(bubbles):
-            b = bubbles[bubble_index]
-            b["translated_text"] = translated_text
-            b["approved"] = approved
-            b["edited"] = edited
-            b["skip_inpaint"] = skip_inpaint
-            b["rejected"] = rejected
-        else:
-            # 2. Fallback to text matching (old way)
-            for b in bubbles:
-                if b.get("source_text", "").strip() == source_text.strip():
-                    b["translated_text"] = translated_text
-                    b["approved"] = approved
-                    b["edited"] = edited
-                    b["skip_inpaint"] = skip_inpaint
-                    b["rejected"] = rejected
+        with _session_lock:
+            with open(session_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            
+            bubbles = data.get("bubbles", [])
+            
+            # 1. Try updating by index (most reliable)
+            if bubble_index is not None and 0 <= bubble_index < len(bubbles):
+                b = bubbles[bubble_index]
+                b["translated_text"] = translated_text
+                b["approved"] = approved
+                b["edited"] = edited
+                b["skip_inpaint"] = skip_inpaint
+                b["rejected"] = rejected
+            else:
+                # 2. Fallback to text matching (old way)
+                for b in bubbles:
+                    if b.get("source_text", "").strip() == source_text.strip():
+                        b["translated_text"] = translated_text
+                        b["approved"] = approved
+                        b["edited"] = edited
+                        b["skip_inpaint"] = skip_inpaint
+                        b["rejected"] = rejected
 
-        with open(session_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
+            with open(session_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
     except Exception as exc:
         logger.error("Session update error: %s", exc)
 
