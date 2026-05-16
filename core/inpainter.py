@@ -982,12 +982,44 @@ class Inpainter:
         elif base_engine == "panelcleaner":
             return self._run_panelcleaner_inpaint(image, regions, use_segmentation=use_seg)
         elif base_engine == "solid":
+            global_mask = None
+            if use_seg:
+                global_mask = self._generate_precise_text_mask(image, regions)
+                
             result = image.copy()
             for r in regions:
-                self._clean_region(result, r, use_segmentation=use_seg)
+                self._clean_region(result, r, use_segmentation=use_seg, global_mask=global_mask)
             return result
             
         return self._run_mit_inpaint(image, regions)
+
+    def _generate_precise_text_mask(self, image: Image.Image, regions: List[BubbleRegion]) -> "np.ndarray":
+        """
+        Generate a precise context-aware text mask using ComicTextDetector.
+        Intersects the global CTD mask with the region bounding boxes.
+        """
+        import numpy as np
+        import cv2
+        from core.panelcleaner_wrapper import PanelCleanerPipeline
+        
+        np_img = np.array(image)
+        pipeline = PanelCleanerPipeline(device=self.device)
+        ctd_mask = pipeline.detect_text_mask(np_img)
+        
+        mask = np.zeros((image.height, image.width), dtype=np.uint8)
+        for r in regions:
+            # Expand bounding box slightly
+            pad = 6
+            x1 = max(0, r.x - pad)
+            y1 = max(0, r.y - pad)
+            x2 = min(image.width, r.x + r.w + pad)
+            y2 = min(image.height, r.y + r.h + pad)
+            
+            # Keep only the CTD mask within this text region
+            region_mask = ctd_mask[y1:y2, x1:x2]
+            mask[y1:y2, x1:x2] = cv2.bitwise_or(mask[y1:y2, x1:x2], region_mask)
+            
+        return mask
 
     def _run_panelcleaner_inpaint(self, image: Image.Image, regions: List[BubbleRegion], use_segmentation: bool = False) -> Image.Image:
         """
@@ -998,14 +1030,11 @@ class Inpainter:
             import cv2
             from core.panelcleaner_wrapper import PanelCleanerPipeline
             
-            # Create a full-page mask
-            mask = np.zeros((image.height, image.width), dtype=np.uint8)
-            for r in regions:
-                if use_segmentation and r.mask_pts is not None:
-                    pts = np.array(r.mask_pts, np.int32)
-                    pts = pts.reshape((-1, 1, 2))
-                    cv2.fillPoly(mask, [pts], 255)
-                else:
+            if use_segmentation:
+                mask = self._generate_precise_text_mask(image, regions)
+            else:
+                mask = np.zeros((image.height, image.width), dtype=np.uint8)
+                for r in regions:
                     mask[r.y:r.y+r.h, r.x:r.x+r.w] = 255
 
             if np.max(mask) == 0:
@@ -1333,9 +1362,12 @@ class Inpainter:
             import numpy as np
 
             # Create a full-page mask
-            mask = np.zeros((image.height, image.width), dtype=np.uint8)
-            for r in regions:
-                mask[r.y:r.y+r.h, r.x:r.x+r.w] = 255
+            if use_segmentation:
+                mask = self._generate_precise_text_mask(image, regions)
+            else:
+                mask = np.zeros((image.height, image.width), dtype=np.uint8)
+                for r in regions:
+                    mask[r.y:r.y+r.h, r.x:r.x+r.w] = 255
 
             # If nothing to inpaint, return image
             if np.max(mask) == 0:
@@ -1442,13 +1474,11 @@ class Inpainter:
             import cv2
 
             # 1. Create Mask
-            mask = np.zeros((image.height, image.width), dtype=np.uint8)
-            for r in regions:
-                if use_segmentation and r.mask_pts is not None:
-                    pts = np.array(r.mask_pts, np.int32)
-                    pts = pts.reshape((-1, 1, 2))
-                    cv2.fillPoly(mask, [pts], 255)
-                else:
+            if use_segmentation:
+                mask = self._generate_precise_text_mask(image, regions)
+            else:
+                mask = np.zeros((image.height, image.width), dtype=np.uint8)
+                for r in regions:
                     # Expand mask slightly for cleaner edges in LaMa
                     kernel = np.ones((5,5), np.uint8)
                     region_mask = np.zeros((image.height, image.width), dtype=np.uint8)
@@ -1674,7 +1704,7 @@ class Inpainter:
                 self._clean_region(result, r, use_segmentation=use_segmentation)
             return result
 
-    def _clean_region(self, image: Image.Image, region: "BubbleRegion", use_segmentation: bool = False):
+    def _clean_region(self, image: Image.Image, region: "BubbleRegion", use_segmentation: bool = False, global_mask = None):
         """
         Inpaint a single region with a solid background color.
         Uses a feathered mask for smoother blending.
@@ -1701,33 +1731,31 @@ class Inpainter:
         # Fill the region with the sampled background color
         fill_patch = Image.new("RGB", (patch_w, patch_h), bg_color)
 
-        # Create a mask for blending
-        if use_segmentation and region.mask_pts is not None:
-            # Use the actual segmentation shape from YOLO (offset to patch coordinates)
-            mask = Image.new("L", (patch_w, patch_h), 0)
-            mask_draw = ImageDraw.Draw(mask)
-            poly = [(p[0] - fx1, p[1] - fy1) for p in region.mask_pts]
-            mask_draw.polygon(poly, fill=255)
-            # Add a small blur to the edges for smoothness
-            mask = mask.filter(ImageFilter.GaussianBlur(radius=1.5))
+        # Create mask for blending
+        if use_segmentation and global_mask is not None:
+            import numpy as np
+            patch_mask_np = global_mask[fy1:fy2, fx1:fx2]
+            mask = Image.fromarray(patch_mask_np).convert("L")
+            # Slightly soften the precise text mask for blending
+            mask = mask.filter(ImageFilter.GaussianBlur(radius=0.5))
         else:
-            # Fallback: Create a soft-edged rectangular mask for blending (feathered edges)
+            # Create a soft-edged rectangular mask for blending (feathered edges)
             mask = Image.new("L", (patch_w, patch_h), 255)
             mask_draw = ImageDraw.Draw(mask)
             # Make edges transparent (feather = 6px)
-            feather = 6
-            for i in range(feather):
-                alpha = int(255 * (i / feather))
-                # Top edge
-                mask_draw.rectangle([i, i, patch_w - 1 - i, i], fill=alpha)
-                # Bottom edge
-                mask_draw.rectangle([i, patch_h - 1 - i, patch_w - 1 - i, patch_h - 1 - i], fill=alpha)
-                # Left edge
-                mask_draw.rectangle([i, i, i, patch_h - 1 - i], fill=alpha)
-                # Right edge
-                mask_draw.rectangle([patch_w - 1 - i, i, patch_w - 1 - i, patch_h - 1 - i], fill=alpha)
-            # Blur the mask slightly for smoother blending
-            mask = mask.filter(ImageFilter.GaussianBlur(radius=2))
+        feather = 6
+        for i in range(feather):
+            alpha = int(255 * (i / feather))
+            # Top edge
+            mask_draw.rectangle([i, i, patch_w - 1 - i, i], fill=alpha)
+            # Bottom edge
+            mask_draw.rectangle([i, patch_h - 1 - i, patch_w - 1 - i, patch_h - 1 - i], fill=alpha)
+            # Left edge
+            mask_draw.rectangle([i, i, i, patch_h - 1 - i], fill=alpha)
+            # Right edge
+            mask_draw.rectangle([patch_w - 1 - i, i, patch_w - 1 - i, patch_h - 1 - i], fill=alpha)
+        # Blur the mask slightly for smoother blending
+        mask = mask.filter(ImageFilter.GaussianBlur(radius=2))
 
         # Paste the filled patch using the feathered mask
         image.paste(fill_patch, (fx1, fy1), mask)

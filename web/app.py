@@ -757,7 +757,6 @@ def edit_bubble():
     source_text = data.get("source_text", "")
     source_lang = data.get("source_lang", "")
     cbz_name    = data.get("cbz_name", "")
-    skip_inpaint = data.get("skip_inpaint", False)
 
     from memory.memory_manager import MemoryManager
     mm = MemoryManager()
@@ -768,11 +767,42 @@ def edit_bubble():
         # Persist to session JSON
         if cbz_name:
             _update_session_bubble(cbz_name, source_text, new_text, 
-                                   approved=True, edited=True, skip_inpaint=skip_inpaint,
+                                   approved=True, edited=True, skip_inpaint=False,
                                    bubble_index=data.get("bubble_index"))
         return jsonify({"ok": True})
     except Exception as exc:
         logger.error("Edit error: %s", exc)
+        return jsonify({"error": str(exc)}), 500
+
+@app.route("/ignore", methods=["POST"])
+def ignore_bubble():
+    data        = request.json or {}
+    cbz_name    = data.get("cbz_name", "")
+    source_text = data.get("source_text", "")
+    try:
+        if cbz_name:
+            _update_session_bubble(cbz_name, source_text, "", 
+                                   approved=False, edited=False, skip_inpaint=True,
+                                   bubble_index=data.get("bubble_index"))
+        return jsonify({"ok": True})
+    except Exception as exc:
+        logger.error("Ignore error: %s", exc)
+        return jsonify({"error": str(exc)}), 500
+
+@app.route("/undo_ignore", methods=["POST"])
+def undo_ignore_bubble():
+    data        = request.json or {}
+    cbz_name    = data.get("cbz_name", "")
+    source_text = data.get("source_text", "")
+    translated_text = data.get("translated_text", "")
+    try:
+        if cbz_name:
+            _update_session_bubble(cbz_name, source_text, translated_text, 
+                                   approved=False, edited=False, skip_inpaint=False,
+                                   bubble_index=data.get("bubble_index"))
+        return jsonify({"ok": True})
+    except Exception as exc:
+        logger.error("Undo Ignore error: %s", exc)
         return jsonify({"error": str(exc)}), 500
 
 
@@ -1171,6 +1201,8 @@ def rerender_cbz(cbz_name: str):
                                  if sb.get("skip_inpaint"):
                                      if w > 0 and h > 0:
                                          orig_img = Image.open(img_path).convert("RGB")
+                                         if orig_img.size != inpainted_image.size:
+                                             orig_img = orig_img.resize(inpainted_image.size, Image.LANCZOS)
                                          patch = orig_img.crop((x, y, x + w, y + h))
                                          inpainted_image.paste(patch, (x, y))
                                  else:
@@ -1204,7 +1236,9 @@ def rerender_cbz(cbz_name: str):
                             if not skip:
                                 filtered_regions.append(region)
 
-                        inpainter.process_page(img_path, filtered_regions, out_page)
+                        inpainted_img = inpainter.inpaint(image, filtered_regions)
+                        final_img = inpainter.render_text(inpainted_img, filtered_regions)
+                        final_img.save(out_page, format="PNG", optimize=False)
                 
                 # Update progress
                 _tq.update(jid, progress=page_num)

@@ -464,15 +464,17 @@ function initBubbleReview() {
       const pageNum = btn.dataset.page;
       const cards = document.querySelectorAll(`.bubble-card[data-page="${pageNum}"]`);
       let count = 0;
+      const promises = [];
       for (const card of cards) {
         if (card.dataset.ignored === "true") {
           const ignoreBtn = card.querySelector(".btn-info"); // Undo button has btn-info class
           if (ignoreBtn && ignoreBtn.dataset.action === "undo_ignore") {
-            await bubbleAction("undo_ignore", ignoreBtn);
+            promises.push(bubbleAction("undo_ignore", ignoreBtn));
             count++;
           }
         }
       }
+      await Promise.all(promises);
       if (count > 0) {
         showToast(`↺ Restored ${count} bubbles on Page ${pageNum}`, "success");
       }
@@ -493,7 +495,7 @@ async function bubbleAction(action, btn) {
 
   const isIgnore = action === "ignore";
   const isUndoIgnore = action === "undo_ignore";
-  const endpoint = { approve: "/approve", reject: "/reject", edit: "/edit", ignore: "/edit", undo_ignore: "/edit" }[action];
+  const endpoint = { approve: "/approve", reject: "/reject", edit: "/edit", ignore: "/ignore", undo_ignore: "/undo_ignore" }[action];
   try {
     const resp = await fetch(endpoint, {
       method: "POST",
@@ -908,18 +910,21 @@ function initBulkLLMTranslator() {
 
   btnCopy.addEventListener("click", () => {
     const allCards = document.querySelectorAll(".bubble-card");
-    const activeCards = Array.from(allCards).filter(c => c.dataset.ignored !== "true");
 
-    if (activeCards.length === 0) {
+    if (allCards.length === 0) {
       showToast("No active bubbles to translate.", "warning");
       return;
     }
 
     let prompt = "Translate the following manga text blocks to English. Keep the exact numbering and line count output as a numbered list:\n\n";
-    activeCards.forEach((card) => {
+    allCards.forEach((card) => {
       const num = card.dataset.bubbleNum;
-      const srcText = card.querySelector(".bubble-source-text").innerText.replace(/\n /g, "").trim();
-      prompt += `${num}. ${srcText}\n`;
+      if (card.dataset.ignored === "true") {
+        prompt += `${num}. \n`;
+      } else {
+        const srcText = card.querySelector(".bubble-source-text").innerText.replace(/\n /g, "").trim();
+        prompt += `${num}. ${srcText}\n`;
+      }
     });
 
     navigator.clipboard.writeText(prompt).then(() => {
