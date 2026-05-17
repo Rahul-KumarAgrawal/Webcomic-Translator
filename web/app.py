@@ -1200,17 +1200,14 @@ def rerender_cbz(cbz_name: str):
                                      translated_text=sb.get("translated_text", "") if not sb.get("skip_inpaint") else "",
                                      font_cfg=font_cfg
                                  )
-                                 
+
                                  if sb.get("skip_inpaint"):
                                      if w > 0 and h > 0:
                                          orig_img = Image.open(img_path).convert("RGB")
-                                         if orig_img.size != inpainted_image.size:
-                                             orig_img = orig_img.resize(inpainted_image.size, Image.LANCZOS)
-                                         patch = orig_img.crop((x, y, x + w, y + h))
-                                         inpainted_image.paste(patch, (x, y))
+                                         _restore_ignored_bubble(inpainted_image, orig_img, sb)
                                  else:
                                      regions.append(br)
-                                     
+
                                  all_regions.append((None, br, page_num, ""))
                              
                              final = inpainter.render_text(inpainted_image, regions)
@@ -1412,6 +1409,41 @@ def upload_font():
     return jsonify({"ok": True, "path": f"./fonts/{f.filename}"})
 
 # ── Internal helpers ──────────────────────────────────────────────────────────
+
+def _restore_ignored_bubble(target_img, original_img, bubble: dict):
+    """Restore ignored bubble pixels from the original page without a hard crop seam."""
+    from PIL import Image, ImageDraw, ImageFilter
+
+    if original_img.size != target_img.size:
+        original_img = original_img.resize(target_img.size, Image.LANCZOS)
+
+    width, height = target_img.size
+    x = int(bubble.get("x", 0))
+    y = int(bubble.get("y", 0))
+    w = int(bubble.get("w", 0))
+    h = int(bubble.get("h", 0))
+    if w <= 0 or h <= 0:
+        return
+
+    mask = Image.new("L", target_img.size, 0)
+    draw = ImageDraw.Draw(mask)
+    mask_pts = bubble.get("mask_pts")
+
+    if mask_pts and len(mask_pts) > 2:
+        pts = [(int(px), int(py)) for px, py in mask_pts]
+        draw.polygon(pts, fill=255)
+        mask = mask.filter(ImageFilter.MaxFilter(7)).filter(ImageFilter.GaussianBlur(1))
+    else:
+        pad = 12
+        x1 = max(0, x - pad)
+        y1 = max(0, y - pad)
+        x2 = min(width, x + w + pad)
+        y2 = min(height, y + h + pad)
+        draw.rectangle((x1, y1, x2, y2), fill=255)
+        mask = mask.filter(ImageFilter.GaussianBlur(2))
+
+    target_img.paste(original_img, (0, 0), mask)
+
 
 def _update_session_bubble(cbz_name: str, source_text: str, translated_text: str,
                            approved: bool, edited: bool, skip_inpaint: bool = False,

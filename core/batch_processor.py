@@ -1365,6 +1365,7 @@ def _save_session_data(cbz_name: str, bubble_results, series: str, chunk_meta: d
             "y":               region.y,
             "w":               region.w,
             "h":               region.h,
+            "mask_pts":        getattr(region, "mask_pts", None),
             # All bubbles detected by bubble detector are treated as "in bubble"
             # Use conservative threshold. If no metadata, assume it's real content.
             "is_in_bubble":    True,
