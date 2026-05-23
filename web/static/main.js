@@ -379,8 +379,7 @@ async function uploadFiles(files, seriesInput, srcLangSel, tgtLangSel, engineSel
           }
         }
       } catch (err) {
-        console.error("Auto-detect failed:", err);
-        showToast("Auto-detection failed, proceeding with manual selection.", "warning");
+        console.warn("Frontend auto-detect preflight failed (normal on Vercel), backend will handle it automatically.");
       }
     }
 

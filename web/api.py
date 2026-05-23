@@ -72,7 +72,7 @@ async def detect(
             import io
             content = await file.read()
             with zipfile.ZipFile(io.BytesIO(content)) as z:
-                exts = ('.jpg', '.jpeg', '.png', '.webp')
+                exts = ('.jpg', '.jpeg', '.png', '.webp', '.avif')
                 images = sorted([f for f in z.namelist() if f.lower().endswith(exts)])
                 
                 if not images:
@@ -83,12 +83,23 @@ async def detect(
                 candidate_indices = [3, 4, 5, 6, 7] 
                 
                 last_result = None
+                from PIL import Image
                 for idx in candidate_indices:
                     if idx >= len(images):
                         continue
                     
                     with z.open(images[idx]) as f:
-                        img_bytes = f.read()
+                        try:
+                            with Image.open(f) as tmp_img:
+                                if tmp_img.mode != "RGB":
+                                    tmp_img = tmp_img.convert("RGB")
+                                buf = io.BytesIO()
+                                tmp_img.save(buf, format="JPEG", quality=80)
+                                img_bytes = buf.getvalue()
+                        except Exception:
+                            # Fallback if Pillow fails
+                            f.seek(0)
+                            img_bytes = f.read()
                     
                     result = active_engine.detect(img_bytes)
                     # If we found text, we're done!
