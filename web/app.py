@@ -132,7 +132,14 @@ app = Flask(
     static_folder  =os.path.join(_ROOT, "web", "static"),
 )
 app.secret_key = "cbz-translator-secret-key-change-me"
-CORS(app)
+CORS(app, origins=[
+    "http://localhost:5000",
+    "http://127.0.0.1:5000",
+    "https://verceldeploy-gray.vercel.app",
+    "https://*.vercel.app",
+    "https://*.trycloudflare.com",
+    "https://*.ngrok-free.dev",
+], supports_credentials=True)
 
 # Use a standard logger for the web server itself to avoid triggering heavy imports early
 logger = logging.getLogger("web.app")
@@ -600,6 +607,19 @@ def upload():
         f.filename, series, source_lang or "auto", target_lang, pipeline_label, detection_engine, ocr_engine, inpaint_engine, force_retranslate, chunk_height, chunk_overlap, job_id,
     )
     return jsonify({"ok": True, "job_id": job_id, "cbz_name": f.filename})
+
+
+@app.route("/download/<path:cbz_name>")
+def download_output(cbz_name: str):
+    """Serve a translated output CBZ for download through the tunnel."""
+    cfg = _load_cfg()
+    output_dir = cfg.get("output_folder", "./output")
+    if not os.path.isabs(output_dir):
+        output_dir = os.path.join(_ROOT, output_dir)
+    file_path = os.path.join(output_dir, cbz_name)
+    if not os.path.exists(file_path):
+        return jsonify({"error": f"File not found: {cbz_name}"}), 404
+    return send_file(file_path, as_attachment=True, download_name=cbz_name)
 
 
 @app.route("/delete_output/<cbz_name>", methods=["POST"])
@@ -1289,6 +1309,14 @@ def settings_page():
     fonts = [f.name for f in Path(FONTS_DIR).iterdir() if f.suffix.lower() == ".ttf"]
     series_list = _get_series_list()
     return render_template("settings.html", cfg=cfg, fonts=fonts, series_list=series_list, SUPPORTED_LANGUAGES=SUPPORTED_LANGUAGES)
+
+
+@app.route("/settings/data")
+def settings_data():
+    """Return the current config as JSON so the Vercel UI shell can populate the settings form."""
+    cfg = _load_cfg()
+    fonts = [f.name for f in Path(FONTS_DIR).iterdir() if f.suffix.lower() == ".ttf"]
+    return jsonify({"cfg": cfg, "fonts": fonts})
 
 
 @app.route("/settings/save", methods=["POST"])

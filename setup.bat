@@ -123,6 +123,18 @@ if not exist ".\Tesseract-OCR\tesseract.exe" (
 )
 "%PYTHON%" -m pip install --upgrade pip setuptools wheel
 
+REM -- Check for Node.js (npx) for ngrok --
+call npx --version >nul 2>&1
+if errorlevel 1 (
+    echo.
+    echo  [!] WARNING: Node.js (npx) not found!
+    echo      The permanent ngrok tunnel in run_web.bat requires Node.js.
+    echo      Download it here: https://nodejs.org/
+    echo.
+) else (
+    echo [SETUP] Node.js (npx) found.
+)
+
 REM -- Phase 1: PyTorch --
 echo [SETUP] Installing PyTorch (CUDA 12.6)...
 "%PYTHON%" -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cu126

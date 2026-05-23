@@ -51,3 +51,6 @@ scratch/
 memory/series/
 memory/global/*.db
 !memory/global/schema.sql
+.vercel
+node_modules/
+vercel_deploy/

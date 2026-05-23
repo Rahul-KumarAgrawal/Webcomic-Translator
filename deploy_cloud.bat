@@ -25,13 +25,5 @@ if not defined PYTHON (
     pause & exit /b 1
 )
 
-echo [WEB] Using Python: %PYTHON%
-echo [WEB] Starting Language Detection API at http://localhost:8000
-start "Detection API" cmd /k ""%PYTHON%" web\api.py"
-echo [WEB] Starting Permanent ngrok Tunnel at https://cod-concave-glucose.ngrok-free.dev
-start "ngrok Tunnel" cmd /k "npx ngrok http 5000 --domain=cod-concave-glucose.ngrok-free.dev"
-echo [WEB] Starting CBZ Translator Web UI at http://localhost:5000
-echo [WEB] Press Ctrl+C to stop.
-echo.
-"%PYTHON%" web\app.py
+"%PYTHON%" scripts\deploy_cloud.py
 pause

@@ -8,6 +8,34 @@
  * - Toast notifications
  */
 
+// ── Secure Local PC Backend Tunnel Redirect ───────────────────────────────────
+const BACKEND_API_BASE = "https://cod-concave-glucose.ngrok-free.dev";
+
+// Automatically route relative fetch calls to our private backend tunnel
+// Also injects 'ngrok-skip-browser-warning' to bypass ngrok's interstitial page
+const originalFetch = window.fetch;
+window.fetch = function (url, options) {
+  if (typeof url === "string" && url.startsWith("/")) {
+    url = BACKEND_API_BASE + url;
+    options = options || {};
+    options.headers = Object.assign({}, options.headers, {
+      "ngrok-skip-browser-warning": "true"
+    });
+  }
+  return originalFetch(url, options);
+};
+
+// Automatically route relative SSE streams (EventSource) to the tunnel
+// Note: EventSource doesn't support custom headers natively,
+// so we append the bypass as a query param which Flask ignores safely.
+const originalEventSource = window.EventSource;
+window.EventSource = function (url, options) {
+  if (typeof url === "string" && url.startsWith("/")) {
+    url = BACKEND_API_BASE + url + (url.includes("?") ? "&" : "?") + "_ngrok_skip=1";
+  }
+  return new originalEventSource(url, options);
+};
+
 // ── Toast helper ──────────────────────────────────────────────────────────────
 function showToast(message, type = "success") {
   const container = document.getElementById("toast-container");
@@ -19,18 +47,53 @@ function showToast(message, type = "success") {
   setTimeout(() => el.remove(), 4200);
 }
 
+// ── Fetch-based SSE helper (supports custom headers, works with ngrok) ────────
+async function connectSSE(path, onMessage, onError) {
+  const url = BACKEND_API_BASE + path;
+  while (true) { // auto-reconnect loop
+    try {
+      const resp = await originalFetch(url, {
+        headers: {
+          "Accept": "text/event-stream",
+          "ngrok-skip-browser-warning": "true",
+          "Cache-Control": "no-cache"
+        }
+      });
+      if (!resp.ok || !resp.body) throw new Error(`HTTP ${resp.status}`);
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop(); // keep incomplete line in buffer
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            try { onMessage(line.slice(6)); } catch (e) { console.error("SSE parse error", e); }
+          }
+        }
+      }
+    } catch (err) {
+      if (onError) onError(err);
+      console.warn(`[SSE] ${path} disconnected, retrying in 3s...`, err.message);
+    }
+    await new Promise(r => setTimeout(r, 3000)); // wait before reconnect
+  }
+}
+
 // ── SSE Queue Progress ────────────────────────────────────────────────────────
 function initQueueSSE() {
   const list = document.getElementById("queue-list");
   if (!list) return;
 
-  const evts = new EventSource("/progress_stream");
-
-  evts.onmessage = (e) => {
-    const data = JSON.parse(e.data);
+  connectSSE("/progress_stream", (raw) => {
+    const data = JSON.parse(raw);
     if (data.type === "ping") return;
     if (data.type === "init") {
-      // Clear and re-render
       const ql = document.getElementById("queue-list");
       const cl = document.getElementById("completed-list");
       if (ql) ql.innerHTML = '';
@@ -64,11 +127,7 @@ function initQueueSSE() {
         if (card) card.remove();
       }
     }
-  };
-
-  evts.onerror = () => {
-    console.warn("SSE disconnected, retrying...");
-  };
+  }, () => { /* silent reconnect */ });
 }
 
 function upsertJobCard(job) {
@@ -109,13 +168,15 @@ function upsertJobCard(job) {
       ${(job.status === "done" || job.status === "error" || job.status === "cancelled")
       ? (job.translation_engine === "Rerender"
         ? `<div class="flex-gap-8">
-                ${job.status === "done" ? `<span class="badge badge-done" style="font-weight:bold;">✅ Final CBZ Ready in /output!</span>` : ""}
+                ${job.status === "done" ? `<span class="badge badge-done" style="font-weight:bold;">✅ Final CBZ Ready!</span>` : ""}
                 <a class="btn btn-outline btn-sm" href="/review/${encodeURIComponent(job.cbz_name)}">Review →</a>
-                <button class="btn btn-sm" style="background:#4ade80;color:#000;font-weight:600;" onclick="rerenderFromCard(this)" data-cbz="${escAttr(job.cbz_name)}">🔄 Re-render</button>
+                ${job.status === "done" ? `<button class="btn btn-sm" style="background:#4ade80;color:#000;font-weight:600;" onclick="downloadCBZ('${escAttr(job.cbz_name)}', this)">⬇️ Download</button>` : ""}
+                <button class="btn btn-sm" onclick="rerenderFromCard(this)" data-cbz="${escAttr(job.cbz_name)}">🔄 Re-render</button>
                 <button class="btn btn-danger btn-sm delete-output-btn" data-cbz="${escAttr(job.cbz_name)}" title="Delete output & session data">🗑️ Delete</button>
                </div>`
         : `<div class="flex-gap-8">
                 <a class="btn btn-outline btn-sm" href="/review/${encodeURIComponent(job.cbz_name)}">Review →</a>
+                ${job.status === "done" ? `<button class="btn btn-sm" style="background:#4ade80;color:#000;font-weight:600;" onclick="downloadCBZ('${escAttr(job.cbz_name)}', this)">⬇️ Download</button>` : ""}
                 <button class="btn btn-danger btn-sm delete-output-btn" data-cbz="${escAttr(job.cbz_name)}" title="Delete output & session data">🗑️ Delete</button>
                </div>`)
       : (!job.status || job.status === "queued" || job.status === "processing"
@@ -142,6 +203,49 @@ function cancelJob(jobId) {
   if (confirm("Are you sure you want to cancel this job?")) {
     fetch(`/cancel_job/${jobId}`, { method: 'POST' })
       .catch(err => console.error("Cancel failed", err));
+  }
+}
+
+async function downloadCBZ(cbzName, btn) {
+  try {
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = "⏳ Downloading...";
+      btn.style.opacity = "0.7";
+      btn.style.cursor = "wait";
+    }
+    showToast(`Downloading ${cbzName}... (This may take 10-15s for large files)`, "info");
+    
+    const resp = await originalFetch(BACKEND_API_BASE + `/download/${encodeURIComponent(cbzName)}`, {
+      headers: {
+        "ngrok-skip-browser-warning": "true"
+      }
+    });
+    
+    if (!resp.ok) {
+      throw new Error(`Download failed: HTTP ${resp.status}`);
+    }
+
+    const blob = await resp.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.style.display = "none";
+    a.href = url;
+    a.download = cbzName; // Trigger save dialog
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    a.remove();
+  } catch (err) {
+    console.error("Download error:", err);
+    showToast(`❌ Failed to download: ${err.message}`, "error");
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = "⬇️ Download";
+      btn.style.opacity = "1";
+      btn.style.cursor = "pointer";
+    }
   }
 }
 
@@ -1335,6 +1439,257 @@ function initAutodetect() {
   });
 }
 
+// ── Settings Loader ───────────────────────────────────────────────────────────
+// Vercel renders settings.html with empty cfg (no access to local config file).
+// This fetches the real config from the local Flask backend and populates the form.
+async function initSettingsLoader() {
+  const form = document.querySelector("form[action='/settings/save']");
+  if (!form) return; // only run on settings page
+
+  try {
+    const resp = await fetch("/settings/data");
+    if (!resp.ok) return;
+    const data = await resp.json();
+    const cfg = data.cfg;
+    const fonts = data.fonts || [];
+
+    // Dynamically populate font dropdown (since Vercel shell has empty fonts)
+    const fontSelect = form.querySelector("#font_family");
+    if (fontSelect) {
+      fontSelect.innerHTML = '<option value="">— Use bundled default —</option>';
+      fonts.forEach(f => {
+        const opt = document.createElement("option");
+        opt.value = `./fonts/${f}`;
+        opt.textContent = f;
+        fontSelect.appendChild(opt);
+      });
+    }
+
+    // Helper to set a select value safely
+    function setSelect(name, value) {
+      const el = form.querySelector(`select[name="${name}"]`);
+      if (!el || value === undefined || value === null) return;
+      const opt = [...el.options].find(o => o.value === String(value));
+      if (opt) el.value = opt.value;
+    }
+
+    // Helper to set an input value
+    function setInput(name, value) {
+      const el = form.querySelector(`[name="${name}"]`);
+      if (!el || value === undefined || value === null) return;
+      if (el.type === "checkbox") {
+        el.checked = Boolean(value);
+      } else {
+        el.value = value;
+      }
+    }
+
+    // Global settings
+    setInput("output_folder", cfg.output_folder);
+    setSelect("gpu_device", cfg.gpu_device);
+    setSelect("ocr_engine", cfg.ocr_engine);
+    setSelect("auto_detect_engine", cfg.auto_detect_engine);
+    setSelect("detection_engine", cfg.detection_engine);
+    setSelect("inpaint_engine", cfg.inpaint_engine);
+    setSelect("source_lang", cfg.source_lang);
+    setSelect("target_lang", cfg.target_lang);
+    setInput("use_sam_masks", cfg.use_sam_masks);
+    setInput("webtoon_strip_height", cfg.webtoon_strip_height);
+
+    // Advanced detection
+    if (cfg.detection_confidence !== undefined) {
+      setInput("detection_confidence", cfg.detection_confidence);
+      const slider = document.getElementById("detection_confidence_slider");
+      if (slider) slider.value = cfg.detection_confidence;
+    }
+    if (cfg.sfx_strictness !== undefined) {
+      setInput("sfx_strictness", cfg.sfx_strictness);
+      const slider = document.getElementById("sfx_strictness_slider");
+      if (slider) slider.value = cfg.sfx_strictness;
+    }
+    setInput("enable_gap_filling", cfg.enable_gap_filling);
+
+    // Font settings
+    setSelect("font_detection_engine", cfg.font_detection_engine);
+    if (cfg.default_font) {
+      setSelect("font_family", cfg.default_font.family);
+      setSelect("font_color", cfg.default_font.color);
+      setInput("font_size", cfg.default_font.size);
+    }
+
+    // API keys (only set if present — don't show empty strings for passwords)
+    if (cfg.deepl_api_key) setInput("deepl_api_key", cfg.deepl_api_key);
+    if (cfg.google_api_key) setInput("google_api_key", cfg.google_api_key);
+    if (cfg.groq_api_key) setInput("groq_api_key", cfg.groq_api_key);
+    if (cfg.sarvam_api_key) setInput("sarvam_api_key", cfg.sarvam_api_key);
+
+    // Pipelines
+    setInput("use_koharu_pipeline", cfg.use_koharu_pipeline);
+    setInput("use_mit_pipeline", cfg.use_mit_pipeline);
+    setSelect("translation_engine", cfg.translation_engine);
+
+    // MIT settings
+    if (cfg.mit) {
+      setSelect("mit_translator", cfg.mit.translator);
+      setSelect("mit_target_lang", cfg.mit.target_lang);
+      setSelect("mit_inpainter", cfg.mit.inpainter);
+      setSelect("mit_detector", cfg.mit.detector);
+    }
+
+    // OCR Quality
+    setInput("ocr_super_res", cfg.ocr_super_res);
+    if (cfg.ocr_upscale_factor !== undefined) setSelect("ocr_upscale_factor", cfg.ocr_upscale_factor);
+    setSelect("global_upscale_impl", cfg.global_upscale_impl);
+
+    // Manhwa chunking
+    setInput("chunk_height", cfg.chunk_height);
+    setInput("chunk_overlap", cfg.chunk_overlap);
+
+  } catch (err) {
+    console.warn("[Settings] Could not load config from backend:", err.message);
+  }
+}
+
+// ── Homepage Defaults Loader ──────────────────────────────────────────────────
+// Populates the Upload & Translate page dropdowns with saved config defaults.
+async function initHomeDefaults() {
+  // Only run on the main upload page (has drop-zone)
+  if (!document.getElementById("drop-zone")) return;
+
+  try {
+    const resp = await fetch("/settings/data");
+    if (!resp.ok) return;
+    const data = await resp.json();
+    const cfg = data.cfg || {};
+
+    function setById(id, value) {
+      const el = document.getElementById(id);
+      if (!el || value === undefined || value === null) return;
+      if (el.tagName === "SELECT") {
+        const opt = [...el.options].find(o => o.value === String(value));
+        if (opt) el.value = opt.value;
+      } else {
+        el.value = value;
+      }
+    }
+
+    setById("ocr-engine-select",       cfg.ocr_engine);
+    setById("detection-engine-select",  cfg.detection_engine);
+    setById("inpaint-engine-select",    cfg.inpaint_engine);
+    setById("engine-select",            cfg.translation_engine);
+    setById("source-lang-select",       cfg.source_lang);
+    setById("target-lang-select",       cfg.target_lang);
+    setById("mit-translator-select",    cfg.mit?.translator);
+    setById("mit-target-lang-select",   cfg.mit?.target_lang);
+    setById("ocr-upscale-factor-select",
+      cfg.ocr_upscale_factor !== undefined ? String(cfg.ocr_upscale_factor) : undefined);
+      
+    // Inputs
+    setById("chunk-height-input", cfg.chunk_height);
+    setById("chunk-overlap-input", cfg.chunk_overlap);
+
+    // Toggles
+    const superRes = document.getElementById("ocr-super-res-toggle");
+    if (superRes && cfg.ocr_super_res !== undefined) superRes.checked = Boolean(cfg.ocr_super_res);
+
+  } catch (err) {
+    console.warn("[HomeDefaults] Could not load config from backend:", err.message);
+  }
+}
+
+// ── Form POST Interceptor ─────────────────────────────────────────────────────
+// Native HTML form submissions bypass window.fetch, so we intercept them here
+// and convert them to fetch() calls which ARE routed through the tunnel proxy.
+function initFormInterceptor() {
+  document.querySelectorAll("form[method='POST'], form[method='post']").forEach(form => {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const action = form.getAttribute("action") || window.location.pathname;
+      const formData = new FormData(form);
+      try {
+        const resp = await fetch(action, { method: "POST", body: formData });
+        // Flask redirects after saving — but the redirect URL points to the ngrok tunnel.
+        // We must NOT follow it with window.location (would show ngrok warning page).
+        // Instead, show success toast and reload the current Vercel page.
+        if (resp.redirected || resp.status === 200 || resp.status === 302) {
+          const ct = resp.headers.get("content-type") || "";
+          if (ct.includes("application/json")) {
+            const data = await resp.json();
+            if (data.ok === false) {
+              showToast(`Error: ${data.error || "Unknown error"}`, "error");
+              return;
+            }
+          }
+          showToast("✅ Settings saved!", "success");
+          // Reload the current Vercel page after a short delay so the toast is visible
+          setTimeout(() => window.location.reload(), 1200);
+          return;
+        }
+        showToast("✅ Saved!", "success");
+      } catch (err) {
+        showToast(`Save failed: ${err.message}`, "error");
+      }
+    });
+  });
+}
+
+// ── Remote Review Loader ──────────────────────────────────────────────────────
+async function initRemoteReviewLoader() {
+  const match = window.location.pathname.match(/^\/review\/(.+)$/);
+  if (!match) return;
+
+  const cbzName = decodeURIComponent(match[1]);
+  // If the page was rendered with no bubbles (e.g. Vercel empty shell), fetch real data
+  if (!document.querySelector(".bubble-grid")) {
+    try {
+      showToast(`Loading review data from tunnel...`, "success");
+      const resp = await originalFetch(BACKEND_API_BASE + `/review/${encodeURIComponent(cbzName)}`, {
+        headers: { "ngrok-skip-browser-warning": "true" }
+      });
+      if (!resp.ok) throw new Error("Backend returned " + resp.status);
+      const html = await resp.text();
+      
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
+      const newMain = doc.querySelector(".main-content");
+      
+      if (newMain) {
+        document.querySelector(".main-content").innerHTML = newMain.innerHTML;
+        // Re-bind listeners for newly injected DOM
+        initReviewProgress();
+        initBubbleReview();
+        initRerender();
+        initBulkLLMTranslator();
+
+        // Fetch images bypassing ngrok warning
+        const imgs = document.querySelectorAll('.bubble-crop img');
+        imgs.forEach(async (img) => {
+          let originalSrc = img.getAttribute('src');
+          if (!originalSrc) return;
+          if (originalSrc.startsWith('/')) {
+            originalSrc = BACKEND_API_BASE + originalSrc;
+          }
+          
+          try {
+            const res = await originalFetch(originalSrc, {
+              headers: { "ngrok-skip-browser-warning": "true" }
+            });
+            if (res.ok) {
+              const blob = await res.blob();
+              img.src = window.URL.createObjectURL(blob);
+            }
+          } catch (err) {
+            console.error("Failed to load bubble crop image:", err);
+          }
+        });
+      }
+    } catch (err) {
+      console.error("Failed to load remote review data:", err);
+      showToast("Failed to load review data from backend.", "error");
+    }
+  }
+}
+
 // ── DOM Content Loaded ────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
   initQueueSSE();
@@ -1353,4 +1708,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initBulkLLMTranslator();
   initSearchableSelects();
   initAutodetect();
+  initSettingsLoader(); // Load real cfg from backend to populate settings form
+  initHomeDefaults();   // Load real cfg from backend to populate homepage dropdowns
+  initRemoteReviewLoader(); // Load real review data from backend if missing
+  initFormInterceptor(); // Must be last so all other listeners register first
 });

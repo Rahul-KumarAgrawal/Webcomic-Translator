@@ -340,16 +340,16 @@
                         <div class="form-group">
                             <label for="translation_engine">Active Engine</label>
                             <select id="translation_engine" name="translation_engine">
-                                <option value="manual" {% if cfg.get('translation_engine')=='manual' %}selected{% endif
-                                    %}>Manual</option>
-                                <option value="nllb" {% if cfg.get('translation_engine','nllb')=='nllb' %}selected{%
-                                    endif %}>NLLB (Local)</option>
-                                <option value="deepl" {% if cfg.get('translation_engine')=='deepl' %}selected{% endif
-                                    %}>DeepL</option>
-                                <option value="google" {% if cfg.get('translation_engine')=='google' %}selected{% endif
-                                    %}>Gemini</option>
-                                <option value="ollama" {% if cfg.get('translation_engine')=='ollama' %}selected{% endif
-                                    %}>Ollama</option>
+                                <option value="manual" {% if cfg.get('translation_engine')=='manual' %}selected{% endif %}>Manual (DeepL App/Browser)</option>
+                                <option value="nllb" {% if cfg.get('translation_engine','nllb')=='nllb' %}selected{% endif %}>NLLB-200 (Local Model)</option>
+                                <option value="deepl" {% if cfg.get('translation_engine')=='deepl' %}selected{% endif %}>DeepL API (Cloud)</option>
+                                <option value="google" {% if cfg.get('translation_engine')=='google' %}selected{% endif %}>Google Gemini (Cloud)</option>
+                                <option value="baidu" {% if cfg.get('translation_engine')=='baidu' %}selected{% endif %}>Baidu API (Cloud)</option>
+                                <option value="sarvam" {% if cfg.get('translation_engine')=='sarvam' %}selected{% endif %}>Sarvam AI (India / Indic)</option>
+                                <option value="papago" {% if cfg.get('translation_engine')=='papago' %}selected{% endif %}>Papago (Korean API)</option>
+                                <option value="ollama" {% if cfg.get('translation_engine')=='ollama' %}selected{% endif %}>Ollama (Local LLM)</option>
+                                <option value="koharu" {% if cfg.get('translation_engine')=='koharu' or cfg.get('use_koharu_pipeline') %}selected{% endif %}>Koharu (Local V2 pipeline)</option>
+                                <option value="mit" {% if cfg.get('translation_engine')=='mit' or cfg.get('use_mit_pipeline') %}selected{% endif %}>Manga Image Translator (Full Pipeline)</option>
                             </select>
                         </div>
                     </div>
