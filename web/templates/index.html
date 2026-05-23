@@ -95,6 +95,7 @@
                 (Naver — No API Key)</option>
               <option value="ollama" {% if cfg.get('translation_engine')=='ollama' %}selected{% endif %}>🦙 Ollama ({{
                 cfg.get('ollama_model', 'llama3') }})</option>
+              <option value="groq_llama" {% if cfg.get('translation_engine')=='groq_llama' %}selected{% endif %}>⚡ Groq (Llama 3.3 70B — Batched)</option>
               <option value="koharu" {% if cfg.get('translation_engine')=='koharu' or cfg.get('use_koharu_pipeline')
                 %}selected{% endif %}>🌸 Koharu Pipeline (End-to-End)</option>
               <option value="mit" {% if cfg.get('translation_engine')=='mit' or cfg.get('use_mit_pipeline') %}selected{%

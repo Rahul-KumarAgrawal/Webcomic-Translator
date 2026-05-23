@@ -88,6 +88,7 @@ class Translator:
         self._sarvam = None
         self._papago = None
         self._ollama = None
+        self._groq   = None
         self._device = cfg.get("gpu_device", "cuda")
 
     # ── Public API ────────────────────────────────────────────────────────────
@@ -107,7 +108,7 @@ class Translator:
         source_lang = self._source_lang_override or detect_language(source_text)
 
         # Step 1 & 2: Memory lookup (series → global) — skip for cloud API engines
-        _cloud_engines = {"deepl", "google", "gemini", "baidu", "sarvam", "papago", "ollama"}
+        _cloud_engines = {"deepl", "google", "gemini", "baidu", "sarvam", "papago", "ollama", "groq_llama"}
         if self._engine not in _cloud_engines:
             memory_result = self._checker.lookup(source_text, self.series)
             if memory_result:
@@ -153,6 +154,10 @@ class Translator:
             self._ensure_ollama_loaded()
             translated, confidence = self._ollama.translate(source_text, source_lang)
             engine_source = "ollama"
+        elif self._engine == "groq_llama":
+            self._ensure_groq_loaded()
+            translated, confidence = self._groq.translate(source_text, source_lang)
+            engine_source = "groq_llama"
         else:
             self._ensure_model_loaded()
             translated, confidence = self._run_inference(source_text, source_lang)
@@ -188,14 +193,14 @@ class Translator:
 
         source_lang = self._source_lang_override or detect_language("\n".join(texts[:5])) # detect from first few
 
-        # Step 1: Check if engine supports native batching (Gemini)
+        # Step 1: Check if engine supports native batching (Gemini or Groq)
         if self._engine in ("google", "gemini"):
             self._ensure_google_loaded()
             raw_results = self._google.translate_batch(texts, source_lang)
-            
+            engine_source = "google"
+
             results = []
             for i, (translated, confidence) in enumerate(raw_results):
-                # Save to memory (unapproved)
                 mem_id = self._checker.memory_manager.save(
                     source_lang=source_lang,
                     source_text=texts[i],
@@ -210,7 +215,33 @@ class Translator:
                     translated_text=translated,
                     source_lang=source_lang,
                     confidence=confidence,
-                    source="google",
+                    source=engine_source,
+                    approved=False,
+                    memory_id=mem_id,
+                ))
+            return results
+
+        if self._engine == "groq_llama":
+            self._ensure_groq_loaded()
+            raw_results = self._groq.translate_batch(texts, source_lang)
+
+            results = []
+            for i, (translated, confidence) in enumerate(raw_results):
+                mem_id = self._checker.memory_manager.save(
+                    source_lang=source_lang,
+                    source_text=texts[i],
+                    translated_text=translated,
+                    approved=False,
+                    edited=False,
+                    confidence_score=confidence,
+                    series=self.series,
+                )
+                results.append(BubbleResult(
+                    source_text=texts[i],
+                    translated_text=translated,
+                    source_lang=source_lang,
+                    confidence=confidence,
+                    source="groq_llama",
                     approved=False,
                     memory_id=mem_id,
                 ))
@@ -299,6 +330,21 @@ class Translator:
             )
             logger.info("[VRAM] Loading Ollama translator (model=%s)...", self.cfg.get("ollama_model", "llama3"))
             logger.info("Ollama translator loaded.")
+
+    def _ensure_groq_loaded(self):
+        if self._groq is None:
+            from core.groq_translator import GroqTranslator
+            api_key = self.cfg.get("groq_api_key", "")
+            if not api_key:
+                raise ValueError(
+                    "Groq API key is missing. Please add it in Settings → Groq API Key."
+                )
+            self._groq = GroqTranslator(
+                api_key=api_key,
+                target_lang=self._target_lang,
+                source_lang_override=self._source_lang_override,
+            )
+            logger.info("[Groq] Groq Llama 3.3 70B translator loaded.")
 
     def _ensure_model_loaded(self):
         if self._model is None:
