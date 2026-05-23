@@ -583,6 +583,77 @@ function initBubbleReview() {
       }
     });
   });
+
+  // ── OCR Edit / Save / Cancel ────────────────────────────────────────────────
+  document.querySelectorAll(".btn-ocr-edit").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const src = btn.closest(".bubble-source");
+      src.querySelector(".ocr-display").style.display = "none";
+      src.querySelector(".ocr-edit-area").style.display = "block";
+      btn.style.display = "none";
+      src.querySelector(".btn-ocr-save").style.display   = "inline-flex";
+      src.querySelector(".btn-ocr-cancel").style.display = "inline-flex";
+      src.querySelector(".ocr-edit-area").focus();
+    });
+  });
+
+  document.querySelectorAll(".btn-ocr-cancel").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const src = btn.closest(".bubble-source");
+      const display = src.querySelector(".ocr-display");
+      const area    = src.querySelector(".ocr-edit-area");
+      area.value = display.textContent; // reset to original
+      area.style.display = "none";
+      display.style.display = "";
+      src.querySelector(".btn-ocr-edit").style.display   = "inline-flex";
+      src.querySelector(".btn-ocr-save").style.display   = "none";
+      btn.style.display = "none";
+    });
+  });
+
+  document.querySelectorAll(".btn-ocr-save").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const src      = btn.closest(".bubble-source");
+      const card     = btn.closest(".bubble-card");
+      const grid     = card.closest(".bubble-grid");
+      const cbzName  = grid ? grid.dataset.cbzName : "";
+      const newOcr   = src.querySelector(".ocr-edit-area").value.trim();
+      const oldOcr   = card.dataset.sourceText;
+      const idx      = parseInt(card.dataset.bubbleNum) - 1;
+
+      if (!newOcr) { showToast("OCR text cannot be empty.", "error"); return; }
+      btn.disabled = true;
+      btn.textContent = "Saving…";
+
+      try {
+        const resp = await fetch("/edit_ocr", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cbz_name: cbzName, bubble_index: idx, old_source_text: oldOcr, new_source_text: newOcr })
+        });
+        const data = await resp.json();
+        if (data.ok) {
+          // Update display and card attribute so future actions use new text
+          src.querySelector(".ocr-display").textContent = newOcr;
+          card.dataset.sourceText = newOcr;
+          showToast("✅ OCR text updated!", "success");
+          // Collapse back to display mode
+          src.querySelector(".ocr-edit-area").style.display = "none";
+          src.querySelector(".ocr-display").style.display   = "";
+          src.querySelector(".btn-ocr-edit").style.display   = "inline-flex";
+          src.querySelector(".btn-ocr-save").style.display   = "none";
+          src.querySelector(".btn-ocr-cancel").style.display = "none";
+        } else {
+          showToast("Failed to save OCR: " + (data.error || "Unknown error"), "error");
+        }
+      } catch (e) {
+        showToast("Network error saving OCR.", "error");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "💾 Save OCR";
+      }
+    });
+  });
 }
 
 async function bubbleAction(action, btn) {

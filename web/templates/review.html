@@ -332,11 +332,15 @@
 
                 <!-- Source text column -->
                 <div class="bubble-source">
-                    <div class="bubble-source-text">{{ b.source_text }}</div>
-                    <div class="flex-gap-8 mt-8" style="align-items: center;">
+                    <div class="bubble-source-text ocr-display">{{ b.source_text }}</div>
+                    <textarea class="ocr-edit-area" rows="4" style="display:none; width:100%; font-size:0.85rem; background:var(--bg-card); color:var(--text-primary); border:1px solid var(--accent-purple); border-radius:6px; padding:6px; resize:vertical;">{{ b.source_text }}</textarea>
+                    <div class="flex-gap-8 mt-8" style="align-items: center; flex-wrap:wrap;">
                         <span class="badge badge-queued font-mono" style="font-size:0.7rem">{{ b.source_lang }}</span>
                         <span class="badge badge-{{ 'processing' if b.source == 'model' else 'done' }}"
                             style="font-size:0.7rem">{{ b.source | replace('_', ' ') }}</span>
+                        <button class="btn btn-outline btn-sm btn-ocr-edit" style="font-size:0.7rem; padding:2px 8px; margin-left:auto;" title="Fix wrong OCR text">✏️ Edit OCR</button>
+                        <button class="btn btn-success btn-sm btn-ocr-save" style="font-size:0.7rem; padding:2px 8px; display:none;">💾 Save OCR</button>
+                        <button class="btn btn-outline btn-sm btn-ocr-cancel" style="font-size:0.7rem; padding:2px 8px; display:none;">✕</button>
                     </div>
                 </div>
 

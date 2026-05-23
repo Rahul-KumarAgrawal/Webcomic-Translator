@@ -796,6 +796,45 @@ def edit_bubble():
         logger.error("Edit error: %s", exc)
         return jsonify({"error": str(exc)}), 500
 
+@app.route("/edit_ocr", methods=["POST"])
+def edit_ocr():
+    """Update the OCR source text for a bubble (e.g. to fix misread characters)."""
+    data           = request.json or {}
+    cbz_name       = data.get("cbz_name", "")
+    bubble_index   = data.get("bubble_index")
+    old_source     = data.get("old_source_text", "")
+    new_source     = data.get("new_source_text", "").strip()
+
+    if not cbz_name or not new_source:
+        return jsonify({"error": "Missing cbz_name or new_source_text"}), 400
+
+    session_path = os.path.join(SESSIONS_DIR, cbz_name.replace(".cbz", "") + ".json")
+    if not os.path.exists(session_path):
+        return jsonify({"error": "Session not found"}), 404
+
+    try:
+        with _session_lock:
+            with open(session_path, "r", encoding="utf-8") as f:
+                session_data = json.load(f)
+            bubbles = session_data.get("bubbles", [])
+
+            # Update by index (most reliable)
+            if bubble_index is not None and 0 <= int(bubble_index) < len(bubbles):
+                bubbles[int(bubble_index)]["source_text"] = new_source
+            else:
+                # Fallback: match by old source text
+                for b in bubbles:
+                    if b.get("source_text", "").strip() == old_source.strip():
+                        b["source_text"] = new_source
+                        break
+
+            with open(session_path, "w", encoding="utf-8") as f:
+                json.dump(session_data, f, ensure_ascii=False, indent=2)
+        return jsonify({"ok": True})
+    except Exception as exc:
+        logger.error("Edit OCR error: %s", exc)
+        return jsonify({"error": str(exc)}), 500
+
 @app.route("/ignore", methods=["POST"])
 def ignore_bubble():
     data        = request.json or {}
