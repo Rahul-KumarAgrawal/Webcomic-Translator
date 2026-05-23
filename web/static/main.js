@@ -1654,6 +1654,13 @@ async function initRemoteReviewLoader() {
       const newMain = doc.querySelector(".main-content");
       
       if (newMain) {
+        // Swap src to data-src before injecting to prevent 700+ Vercel 404s
+        const imgs = newMain.querySelectorAll('.bubble-crop img');
+        imgs.forEach(img => {
+          img.dataset.src = img.getAttribute('src');
+          img.removeAttribute('src');
+        });
+
         document.querySelector(".main-content").innerHTML = newMain.innerHTML;
         // Re-bind listeners for newly injected DOM
         initReviewProgress();
@@ -1661,27 +1668,35 @@ async function initRemoteReviewLoader() {
         initRerender();
         initBulkLLMTranslator();
 
-        // Fetch images bypassing ngrok warning
-        const imgs = document.querySelectorAll('.bubble-crop img');
-        imgs.forEach(async (img) => {
-          let originalSrc = img.getAttribute('src');
-          if (!originalSrc) return;
-          if (originalSrc.startsWith('/')) {
-            originalSrc = BACKEND_API_BASE + originalSrc;
-          }
-          
-          try {
-            const res = await originalFetch(originalSrc, {
-              headers: { "ngrok-skip-browser-warning": "true" }
-            });
-            if (res.ok) {
-              const blob = await res.blob();
-              img.src = window.URL.createObjectURL(blob);
+        // Fetch images lazily bypassing ngrok warning
+        const lazyImgs = document.querySelectorAll('.bubble-crop img');
+        const observer = new IntersectionObserver((entries, obs) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const img = entry.target;
+              obs.unobserve(img); // Load only once
+              
+              let targetSrc = img.dataset.src;
+              if (!targetSrc) return;
+              if (targetSrc.startsWith('/')) {
+                targetSrc = BACKEND_API_BASE + targetSrc;
+              }
+              
+              originalFetch(targetSrc, {
+                headers: { "ngrok-skip-browser-warning": "true" }
+              }).then(res => {
+                if (res.ok) return res.blob();
+                throw new Error("Failed");
+              }).then(blob => {
+                img.src = window.URL.createObjectURL(blob);
+              }).catch(err => {
+                console.warn("Lazy load failed:", err);
+              });
             }
-          } catch (err) {
-            console.error("Failed to load bubble crop image:", err);
-          }
-        });
+          });
+        }, { rootMargin: "300px" });
+
+        lazyImgs.forEach(img => observer.observe(img));
       }
     } catch (err) {
       console.error("Failed to load remote review data:", err);

@@ -163,8 +163,20 @@ def _auto_detect_language(images: list, logger: logging.Logger, cfg: dict = None
             # Waterfall loop: try each sample page until one has text
             for test_img_path in sample_pages:
                 logger.info("  Auto-detect: checking Page %d...", images.index(test_img_path) + 1)
-                with open(test_img_path, "rb") as f:
-                    img_bytes = f.read()
+                from PIL import Image
+                import io
+                try:
+                    with Image.open(test_img_path) as tmp_img:
+                        if tmp_img.mode != "RGB":
+                            tmp_img = tmp_img.convert("RGB")
+                        buf = io.BytesIO()
+                        # Compress to save API bandwidth and ensure compatibility (Groq requires JPEG/PNG)
+                        tmp_img.save(buf, format="JPEG", quality=80)
+                        img_bytes = buf.getvalue()
+                except Exception as img_err:
+                    logger.warning("  Auto-detect: failed to convert %s to JPEG (%s), falling back to raw bytes.", test_img_path, img_err)
+                    with open(test_img_path, "rb") as f:
+                        img_bytes = f.read()
                 
                 result = active_engine.detect(img_bytes)
                 if result.get("hasText") and result.get("languages"):

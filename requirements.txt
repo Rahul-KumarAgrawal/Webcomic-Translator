@@ -24,6 +24,7 @@ deepl>=1.16.0
 langdetect>=1.0.9
 easyocr>=1.7.1
 pillow>=10.0.0
+pillow-avif-plugin
 numpy==1.26.4
 tqdm>=4.66.1
 requests>=2.31.0

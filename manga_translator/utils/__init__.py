@@ -1,3 +1,4 @@
+import pillow_avif
 from .sort import *
 from .bubble import is_ignore
 from .generic import *

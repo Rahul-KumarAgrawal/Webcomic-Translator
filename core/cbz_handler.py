@@ -11,6 +11,7 @@ import tempfile
 import zipfile
 from pathlib import Path
 from typing import List, Tuple
+import pillow_avif
 
 logger = logging.getLogger(__name__)
 

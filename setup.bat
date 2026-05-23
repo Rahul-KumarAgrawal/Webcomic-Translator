@@ -159,7 +159,7 @@ echo [SETUP] Installing MIT/OCR components...
 REM -- Phase 4: Utilities & Elite Engines --
 echo [SETUP] Installing image processing and Elite Engines...
 "%PYTHON%" -m pip install pororo-ocr wget pytesseract
-"%PYTHON%" -m pip install scikit-image opencv-python Pillow ImageHash pyclipper shapely freetype-py git+https://github.com/facebookresearch/segment-anything.git
+"%PYTHON%" -m pip install scikit-image opencv-python Pillow pillow-avif-plugin ImageHash pyclipper shapely freetype-py git+https://github.com/facebookresearch/segment-anything.git
 "%PYTHON%" -m pip install transformers sentencepiece accelerate openai==1.63.0 tiktoken deepl groq google-genai py3langid==0.2.2 langdetect langcodes easyocr editdistance
 "%PYTHON%" -m pip install segmentation-models-pytorch safetensors
 "%PYTHON%" -m pip install google-genai pydantic>=2.9.0 httpx>=0.28.1
