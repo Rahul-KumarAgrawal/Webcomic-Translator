@@ -316,7 +316,7 @@
                 data-approved="{{ 'true' if b.approved else 'false' }}"
                 data-edited="{{ 'true' if b.edited else 'false' }}"
                 data-rejected="{{ 'true' if b.rejected else 'false' }}"
-                style="{% if b.skip_inpaint or b.rejected %}opacity: 0.5;{% endif %}">
+                style="{% if b.skip_inpaint or b.rejected or b.edited %}opacity: 0.5;{% endif %}">
 
                 <!-- Crop image column -->
                 <div class="bubble-crop">
@@ -357,9 +357,7 @@
 
                 <!-- Actions column -->
                 <div class="bubble-actions">
-                    <button class="btn btn-success btn-sm btn-approve">✅ Approve</button>
-                    <button class="btn btn-sm btn-outline btn-edit-save">💾 Save Edit</button>
-                    <button class="btn btn-danger btn-sm btn-reject">❌ Reject</button>
+                    <button class="btn btn-sm btn-outline btn-edit-save" style="width: 100%; margin-bottom: 4px;">💾 Save Edit</button>
                     {% if b.skip_inpaint %}
                     <button class="btn btn-info btn-sm btn-ignore" style="margin-top:4px;" data-action="undo_ignore">↺
                         Undo Ignore</button>

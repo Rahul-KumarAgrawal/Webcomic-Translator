@@ -728,7 +728,11 @@ async function bubbleAction(action, btn) {
         btn.classList.add("btn-warning");
         btn.dataset.action = "ignore";
       } else {
-        card.style.opacity = "1.0"; // Approved/Edited/Rejected remain fully bright
+        if (action === "edit") {
+          card.style.opacity = "0.5";
+        } else {
+          card.style.opacity = "1.0"; // Approved/Rejected remain fully bright
+        }
 
         // Reset Ignore button if it was in Undo state
         const ignoreBtn = card.querySelector(".btn-info");

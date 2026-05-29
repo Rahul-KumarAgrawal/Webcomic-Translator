@@ -444,6 +444,12 @@ threading.Thread(target=_process_queue_worker, daemon=True).start()
 
 
 def _run_job(job: dict):
+    # Rerender jobs are handled by their own thread (_do_rerender).
+    # We must explicitly ignore them here so the queue worker doesn't process them
+    # and accidentally overwrite session.json by rerunning process_cbz.
+    if job.get("translation_engine") == "Rerender":
+        return
+
     from core.batch_processor import process_cbz
     cfg = _load_cfg()
 
@@ -867,11 +873,17 @@ def edit_ocr():
 
             # Update by index (most reliable)
             if bubble_index is not None and 0 <= int(bubble_index) < len(bubbles):
-                bubbles[int(bubble_index)]["source_text"] = new_source
+                b = bubbles[int(bubble_index)]
+                # If the translation text was mirroring the old OCR text (e.g. manual engine), keep it mirrored
+                if b.get("translated_text", "").strip() == b.get("source_text", "").strip():
+                    b["translated_text"] = new_source
+                b["source_text"] = new_source
             else:
                 # Fallback: match by old source text
                 for b in bubbles:
                     if b.get("source_text", "").strip() == old_source.strip():
+                        if b.get("translated_text", "").strip() == b.get("source_text", "").strip():
+                            b["translated_text"] = new_source
                         b["source_text"] = new_source
                         break
 
@@ -1337,13 +1349,42 @@ def rerender_cbz(cbz_name: str):
                         filtered_regions = []
                         for region in detected_regions:
                             skip = False
+                            matched_sb = None
+
+                            # First try exact text match
                             for sb in page_bubbles:
                                 if region.source_text.strip() == sb.get("source_text", "").strip():
-                                    region.translated_text = sb.get("translated_text", "")
-                                    region.font_cfg = font_cfg
-                                    if sb.get("skip_inpaint"):
-                                        skip = True
+                                    matched_sb = sb
                                     break
+                            
+                            if not matched_sb:
+                                # Fallback to spatial matching (IoU) if text doesn't match exactly
+                                # (e.g. because user edited the OCR text manually or OCR jitter)
+                                best_iou = 0.0
+                                rx, ry, rw, rh = region.x, region.y, region.w, region.h
+                                for sb in page_bubbles:
+                                    sx, sy, sw, sh = sb.get("x", 0), sb.get("y", 0), sb.get("w", 0), sb.get("h", 0)
+                                    inter_x = max(rx, sx)
+                                    inter_y = max(ry, sy)
+                                    inter_w = max(0, min(rx + rw, sx + sw) - inter_x)
+                                    inter_h = max(0, min(ry + rh, sy + sh) - inter_y)
+                                    
+                                    if inter_w > 0 and inter_h > 0:
+                                        inter_area = inter_w * inter_h
+                                        union_area = rw * rh + sw * sh - inter_area
+                                        iou = inter_area / union_area if union_area > 0 else 0
+                                        if iou > best_iou:
+                                            best_iou = iou
+                                            matched_sb = sb
+                                            
+                                if best_iou < 0.3:
+                                    matched_sb = None
+
+                            if matched_sb:
+                                region.translated_text = matched_sb.get("translated_text", "")
+                                region.font_cfg = font_cfg
+                                if matched_sb.get("skip_inpaint"):
+                                    skip = True
                             else:
                                 region.font_cfg = font_cfg
                                 
