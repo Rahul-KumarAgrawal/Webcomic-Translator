@@ -23,3 +23,10 @@
         <span class="nav-icon">⚙️</span> Settings
     </a>
 </nav>
+<script>
+  // Injected by Flask — provides tunnel URL and auth token to main.js
+  window.__CBZ_CONFIG__ = {
+    tunnelUrl: {{ (tunnel_url or "")|tojson }},
+    authToken: {{ (tunnel_auth_token or "")|tojson }}
+  };
+</script>

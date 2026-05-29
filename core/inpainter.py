@@ -248,9 +248,9 @@ class Inpainter:
         elif str(ocr_engine).lower() == "ppocr-v5":
             try:
                 regions = self._run_ppocr_v5_ocr(image, regions)
-            except:
+            except Exception as e:
                 print("\n" + "!"*60)
-                print("⚠️  WARNING: PPOCR-v5 failed! Falling back to MIT Mayo (JPN)...")
+                print(f"⚠️  WARNING: PPOCR-v5 failed! Error: {e}. Falling back to MIT Mayo (JPN)...")
                 print("!"*60 + "\n")
                 regions = self._run_manga_ocr_on_regions(image, regions)
         elif str(ocr_engine).lower() == "manga-ocr":

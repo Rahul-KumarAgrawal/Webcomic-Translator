@@ -310,6 +310,25 @@
                         </div>
                     </div>
 
+                    <!-- Remote Access / Tunnel -->
+                    <div class="card" style="border-left: 3px solid var(--accent-blue);">
+                        <div class="card-title">🌐 Remote Access (Tunnel)</div>
+                        <div class="form-group">
+                            <label for="tunnel_url">Tunnel URL</label>
+                            <input type="url" id="tunnel_url" name="tunnel_url"
+                                placeholder="https://your-tunnel.ngrok-free.dev"
+                                value="{{ cfg.get('tunnel_url', '') }}">
+                            <small class="text-muted d-block mt-4">Your ngrok/Cloudflare tunnel URL. Leave blank for local-only access.</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Auth Token <small class="text-muted">(auto-generated, read-only)</small></label>
+                            <input type="text" value="{{ cfg.get('tunnel_auth_token', '') }}" readonly
+                                style="font-family:var(--font-mono); font-size:0.8rem; opacity:0.7; cursor:text;"
+                                onclick="this.select(); document.execCommand('copy'); showToast && showToast('Token copied!', 'success');">
+                            <small class="text-muted d-block mt-4">All remote requests must include this token. Copied to clipboard on click.</small>
+                        </div>
+                    </div>
+
                     <!-- Koharu & Pipeline Toggles -->
                     <div class="card">
                         <div class="card-title">Pipelines</div>

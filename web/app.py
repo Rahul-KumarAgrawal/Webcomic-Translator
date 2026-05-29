@@ -141,6 +141,48 @@ CORS(app, origins=[
     "https://*.ngrok-free.dev",
 ], supports_credentials=True)
 
+import secrets
+from functools import wraps
+from werkzeug.utils import secure_filename
+
+# Use env var or generate a secure random key if not overridden
+if app.secret_key == "cbz-translator-secret-key-change-me":
+    app.secret_key = os.environ.get("FLASK_SECRET_KEY", secrets.token_hex(32))
+
+def _ensure_auth_token():
+    cfg = _load_cfg()
+    token = cfg.get("tunnel_auth_token", "")
+    if not token:
+        token = secrets.token_urlsafe(32)
+        cfg["tunnel_auth_token"] = token
+        _save_cfg(cfg)
+    return token
+
+def _get_auth_token():
+    return _load_cfg().get("tunnel_auth_token", "")
+
+def require_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        remote = request.remote_addr or ""
+        if remote in ("127.0.0.1", "::1", "localhost"):
+            return f(*args, **kwargs)
+        expected = _get_auth_token()
+        if expected:
+            provided = request.headers.get("X-Auth-Token", "") or request.args.get("_auth", "")
+            if provided != expected:
+                return jsonify({"error": "Unauthorized"}), 401
+        return f(*args, **kwargs)
+    return decorated
+
+@app.context_processor
+def inject_tunnel_config():
+    cfg = _load_cfg()
+    return {
+        "tunnel_url": cfg.get("tunnel_url", ""),
+        "tunnel_auth_token": cfg.get("tunnel_auth_token", ""),
+    }
+
 # Use a standard logger for the web server itself to avoid triggering heavy imports early
 logger = logging.getLogger("web.app")
 if not logger.handlers:
@@ -500,6 +542,7 @@ def _run_job(job: dict):
 # ── Routes ────────────────────────────────────────────────────────────────────
 
 @app.route("/cancel_job/<job_id>", methods=["POST"])
+@require_auth
 def cancel_job(job_id):
     """Removes a job from the UI and signals the worker to abort."""
     logger.info("Cancelling job: %s", job_id)
@@ -715,6 +758,7 @@ def review(cbz_name: str):
 
 
 @app.route("/approve", methods=["POST"])
+@require_auth
 def approve_bubble():
     data       = request.json or {}
     memory_id  = data.get("memory_id")
@@ -743,6 +787,7 @@ def approve_bubble():
 
 
 @app.route("/reject", methods=["POST"])
+@require_auth
 def reject_bubble():
     data      = request.json or {}
     memory_id = data.get("memory_id")
@@ -771,6 +816,7 @@ def reject_bubble():
 
 
 @app.route("/edit", methods=["POST"])
+@require_auth
 def edit_bubble():
     data        = request.json or {}
     memory_id   = data.get("memory_id")
@@ -797,6 +843,7 @@ def edit_bubble():
         return jsonify({"error": str(exc)}), 500
 
 @app.route("/edit_ocr", methods=["POST"])
+@require_auth
 def edit_ocr():
     """Update the OCR source text for a bubble (e.g. to fix misread characters)."""
     data           = request.json or {}
@@ -836,6 +883,7 @@ def edit_ocr():
         return jsonify({"error": str(exc)}), 500
 
 @app.route("/ignore", methods=["POST"])
+@require_auth
 def ignore_bubble():
     data        = request.json or {}
     cbz_name    = data.get("cbz_name", "")
@@ -851,6 +899,7 @@ def ignore_bubble():
         return jsonify({"error": str(exc)}), 500
 
 @app.route("/undo_ignore", methods=["POST"])
+@require_auth
 def undo_ignore_bubble():
     data        = request.json or {}
     cbz_name    = data.get("cbz_name", "")
@@ -868,6 +917,7 @@ def undo_ignore_bubble():
 
 
 @app.route("/edit_bulk", methods=["POST"])
+@require_auth
 def edit_bubble_bulk():
     data_list = request.json or []
     from memory.memory_manager import MemoryManager
@@ -941,6 +991,7 @@ def memory_page():
 
 
 @app.route("/memory/edit", methods=["POST"])
+@require_auth
 def memory_edit():
     data      = request.json or {}
     row_id    = data.get("id")
@@ -969,6 +1020,7 @@ def memory_export():
 
 
 @app.route("/memory/series/delete", methods=["POST"])
+@require_auth
 def memory_series_delete():
     data = request.json or {}
     series = data.get("series")
@@ -1035,6 +1087,7 @@ def train_page():
 
 
 @app.route("/train/start", methods=["POST"])
+@require_auth
 def train_start():
     from memory.memory_manager import MemoryManager
     from model.trainer import Trainer
@@ -1104,6 +1157,7 @@ def backup_page():
 
 
 @app.route("/backup/now", methods=["POST"])
+@require_auth
 def backup_now():
     try:
         path = _run_backup(triggered_by="manual")
@@ -1114,6 +1168,7 @@ def backup_now():
 
 
 @app.route("/backup/restore", methods=["POST"])
+@require_auth
 def backup_restore():
     data = request.json or {}
     ts   = data.get("timestamp")
@@ -1141,6 +1196,7 @@ def session_crop(cbz_stem: str, filename: str):
 
 
 @app.route("/rerender/<cbz_name>", methods=["POST"])
+@require_auth
 def rerender_cbz(cbz_name: str):
     """Re-render the CBZ using reviewed/edited translations from the session JSON."""
     session_path = os.path.join(SESSIONS_DIR, cbz_name.replace(".cbz", "") + ".json")
@@ -1359,6 +1415,7 @@ def settings_data():
 
 
 @app.route("/settings/save", methods=["POST"])
+@require_auth
 def settings_save():
     cfg = _load_cfg()
     # Update output folder
@@ -1409,29 +1466,27 @@ def settings_save():
         pass
     # Translation engine
     cfg["translation_engine"] = request.form.get("translation_engine", "nllb").strip() or "nllb"
-    deepl_key = request.form.get("deepl_api_key", "").strip()
-    if deepl_key:  # only update if provided (don't wipe existing key with empty field)
-        cfg["deepl_api_key"] = deepl_key
-    google_key = request.form.get("google_api_key", "").strip()
-    if google_key:
-        cfg["google_api_key"] = google_key
-    
-    groq_key = request.form.get("groq_api_key", "").strip()
-    if groq_key:
-        cfg["groq_api_key"] = groq_key
+    # Tunnel URL (configurable from settings page)
+    tunnel_url = request.form.get("tunnel_url", "").strip()
+    if tunnel_url:
+        cfg["tunnel_url"] = tunnel_url
+
+    # API keys — skip redacted placeholders (••••) sent by the frontend
+    def _save_key(form_name, cfg_key):
+        val = request.form.get(form_name, "").strip()
+        if val and not val.startswith("••••"):
+            cfg[cfg_key] = val
+
+    _save_key("deepl_api_key", "deepl_api_key")
+    _save_key("google_api_key", "google_api_key")
+    _save_key("groq_api_key", "groq_api_key")
     
     # Save custom Gemini prompt
     cfg["google_system_prompt"] = request.form.get("google_system_prompt", "").strip()
     
-    baidu_app_id = request.form.get("baidu_app_id", "").strip()
-    if baidu_app_id:
-        cfg["baidu_app_id"] = baidu_app_id
-    baidu_secret_key = request.form.get("baidu_secret_key", "").strip()
-    if baidu_secret_key:
-        cfg["baidu_secret_key"] = baidu_secret_key
-    sarvam_key = request.form.get("sarvam_api_key", "").strip()
-    if sarvam_key:
-        cfg["sarvam_api_key"] = sarvam_key
+    _save_key("baidu_app_id", "baidu_app_id")
+    _save_key("baidu_secret_key", "baidu_secret_key")
+    _save_key("sarvam_api_key", "sarvam_api_key")
     # Ollama settings (always save — they have defaults)
     ollama_model = request.form.get("ollama_model", "").strip()
     if ollama_model:
@@ -1465,6 +1520,7 @@ def settings_save():
 
 
 @app.route("/settings/upload_font", methods=["POST"])
+@require_auth
 def upload_font():
     if "font_file" not in request.files:
         return jsonify({"error": "No file"}), 400
@@ -1659,6 +1715,9 @@ def _list_backups():
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
+
+# Ensure auth token is generated on startup
+_ensure_auth_token()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False, threaded=True)

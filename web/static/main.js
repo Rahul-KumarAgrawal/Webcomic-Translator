@@ -8,30 +8,40 @@
  * - Toast notifications
  */
 
-// ── Secure Local PC Backend Tunnel Redirect ───────────────────────────────────
-const BACKEND_API_BASE = "https://cod-concave-glucose.ngrok-free.dev";
+// ── Dynamic Backend Configuration ─────────────────────────────────────────────
+// Tunnel URL and auth token are injected by Flask templates via window.__CBZ_CONFIG__
+// When accessing locally (localhost:5000), no tunnel is needed — requests go to same origin.
+const _cbzCfg = window.__CBZ_CONFIG__ || {};
+const BACKEND_API_BASE = _cbzCfg.tunnelUrl || "";
+const _AUTH_TOKEN = _cbzCfg.authToken || "";
 
-// Automatically route relative fetch calls to our private backend tunnel
-// Also injects 'ngrok-skip-browser-warning' to bypass ngrok's interstitial page
+// Automatically route relative fetch calls to our backend (tunnel or same-origin)
+// Injects auth token and ngrok-skip-browser-warning headers
 const originalFetch = window.fetch;
 window.fetch = function (url, options) {
   if (typeof url === "string" && url.startsWith("/")) {
-    url = BACKEND_API_BASE + url;
+    if (BACKEND_API_BASE) {
+      url = BACKEND_API_BASE + url;
+    }
     options = options || {};
     options.headers = Object.assign({}, options.headers, {
       "ngrok-skip-browser-warning": "true"
     });
+    if (_AUTH_TOKEN) {
+      options.headers["X-Auth-Token"] = _AUTH_TOKEN;
+    }
   }
   return originalFetch(url, options);
 };
 
-// Automatically route relative SSE streams (EventSource) to the tunnel
-// Note: EventSource doesn't support custom headers natively,
-// so we append the bypass as a query param which Flask ignores safely.
+// Automatically route relative SSE streams (EventSource) to the backend
 const originalEventSource = window.EventSource;
 window.EventSource = function (url, options) {
   if (typeof url === "string" && url.startsWith("/")) {
-    url = BACKEND_API_BASE + url + (url.includes("?") ? "&" : "?") + "_ngrok_skip=1";
+    const base = BACKEND_API_BASE || "";
+    const authParam = _AUTH_TOKEN ? `_auth=${encodeURIComponent(_AUTH_TOKEN)}` : "";
+    const sep = url.includes("?") ? "&" : "?";
+    url = base + url + (authParam ? sep + authParam : "") + (authParam && BACKEND_API_BASE ? "&_ngrok_skip=1" : "");
   }
   return new originalEventSource(url, options);
 };
@@ -49,16 +59,17 @@ function showToast(message, type = "success") {
 
 // ── Fetch-based SSE helper (supports custom headers, works with ngrok) ────────
 async function connectSSE(path, onMessage, onError) {
-  const url = BACKEND_API_BASE + path;
+  const base = BACKEND_API_BASE || "";
+  const url = base + path;
   while (true) { // auto-reconnect loop
     try {
-      const resp = await originalFetch(url, {
-        headers: {
-          "Accept": "text/event-stream",
-          "ngrok-skip-browser-warning": "true",
-          "Cache-Control": "no-cache"
-        }
-      });
+      const headers = {
+        "Accept": "text/event-stream",
+        "ngrok-skip-browser-warning": "true",
+        "Cache-Control": "no-cache"
+      };
+      if (_AUTH_TOKEN) headers["X-Auth-Token"] = _AUTH_TOKEN;
+      const resp = await originalFetch(url, { headers });
       if (!resp.ok || !resp.body) throw new Error(`HTTP ${resp.status}`);
 
       const reader = resp.body.getReader();
@@ -216,9 +227,11 @@ async function downloadCBZ(cbzName, btn) {
     }
     showToast(`Downloading ${cbzName}... (This may take 10-15s for large files)`, "info");
     
-    const resp = await originalFetch(BACKEND_API_BASE + `/download/${encodeURIComponent(cbzName)}`, {
+    const downloadUrl = (BACKEND_API_BASE || "") + `/download/${encodeURIComponent(cbzName)}`;
+    const resp = await originalFetch(downloadUrl, {
       headers: {
-        "ngrok-skip-browser-warning": "true"
+        "ngrok-skip-browser-warning": "true",
+        ...((_AUTH_TOKEN) ? {"X-Auth-Token": _AUTH_TOKEN} : {})
       }
     });
     
@@ -933,7 +946,7 @@ function escHtml(s) {
     .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 function escAttr(s) {
-  return String(s).replace(/"/g, "&quot;");
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
 // ── Re-render CBZ ─────────────────────────────────────────────────────────────
@@ -1713,8 +1726,11 @@ async function initRemoteReviewLoader() {
   if (!document.querySelector(".bubble-grid")) {
     try {
       showToast(`Loading review data from tunnel...`, "success");
-      const resp = await originalFetch(BACKEND_API_BASE + `/review/${encodeURIComponent(cbzName)}`, {
-        headers: { "ngrok-skip-browser-warning": "true" }
+      const reviewUrl = (BACKEND_API_BASE || "") + `/review/${encodeURIComponent(cbzName)}`;
+      const reviewHeaders = { "ngrok-skip-browser-warning": "true" };
+      if (_AUTH_TOKEN) reviewHeaders["X-Auth-Token"] = _AUTH_TOKEN;
+      const resp = await originalFetch(reviewUrl, {
+        headers: reviewHeaders
       });
       if (!resp.ok) throw new Error("Backend returned " + resp.status);
       const html = await resp.text();
@@ -1749,11 +1765,13 @@ async function initRemoteReviewLoader() {
               let targetSrc = img.dataset.src;
               if (!targetSrc) return;
               if (targetSrc.startsWith('/')) {
-                targetSrc = BACKEND_API_BASE + targetSrc;
+                targetSrc = (BACKEND_API_BASE || "") + targetSrc;
               }
               
+              const imgHeaders = { "ngrok-skip-browser-warning": "true" };
+              if (_AUTH_TOKEN) imgHeaders["X-Auth-Token"] = _AUTH_TOKEN;
               originalFetch(targetSrc, {
-                headers: { "ngrok-skip-browser-warning": "true" }
+                headers: imgHeaders
               }).then(res => {
                 if (res.ok) return res.blob();
                 throw new Error("Failed");

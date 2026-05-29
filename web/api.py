@@ -13,7 +13,7 @@ app = FastAPI(title="Language Detection API")
 # Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:5000", "http://127.0.0.1:5000", "https://webcomic-translator.vercel.app"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -41,6 +41,8 @@ async def set_engine(req: SetEngineRequest):
 
 @app.get("/autodetect/test/{engine}")
 async def test_engine(engine: str, x_api_key: Optional[str] = Header(None)):
+    if engine not in manager.engines:
+        raise HTTPException(status_code=400, detail="Invalid detection engine specified.")
     if x_api_key:
         os.environ[f"{engine.upper()}_API_KEY"] = x_api_key
     

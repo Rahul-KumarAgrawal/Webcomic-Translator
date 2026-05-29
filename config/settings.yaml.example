@@ -1,0 +1,71 @@
+# CBZ Translator Settings
+# Copy this file to settings.yaml and fill in your values.
+# NEVER commit settings.yaml — it is gitignored.
+
+auto_detect_engine: gemini
+baidu_app_id: ''
+baidu_secret_key: ''
+chunk_height: 2500
+chunk_overlap: 250
+deepl_api_key: ''          # Get from: https://www.deepl.com/pro-api
+default_font:
+  color: auto
+  family: null
+  size: auto
+detection_confidence: 0.2
+detection_engine: mit
+enable_gap_filling: false
+enable_nuisance_filter: false
+font_detection_engine: default
+global_upscale: false
+global_upscale_impl: none
+google_api_key: ''         # Get from: https://aistudio.google.com/
+google_system_prompt: ''
+gpu_device: cuda
+groq_api_key: ''           # Get from: https://console.groq.com/
+inpaint_engine: lama
+memory:
+  confidence_threshold: 60
+  min_pairs_to_finetune: 10
+mit:
+  detector: default
+  inpainter: default
+  ocr: 48px
+  renderer: default
+  target_lang: ENG
+  translator: sugoi
+mit_api_keys:
+  deepl_api_key_mit: ''
+  gemini_api_key: ''
+  groq_api_key: ''
+  openai_api_key: ''
+ocr_engine: auto
+ocr_super_res: true
+ocr_upscale_factor: 2.0
+ollama_model: llama3:latest
+ollama_url: http://localhost:11434
+output_folder: ./output
+sarvam_api_key: ''         # Get from: https://sarvam.ai/
+series_fonts: null
+sfx_strictness: 0.55
+source_lang: ''
+target_lang: eng_Latn
+translation_engine: nllb
+tunnel_auth_token: ''    # Auto-generated on first run — do not share publicly
+tunnel_url: ''           # Your ngrok/Cloudflare tunnel URL (leave blank for local-only)
+training:
+  batch_size: 4
+  epochs: 3
+  learning_rate: 2e-4
+  lora_alpha: 16
+  lora_dropout: 0.1
+  lora_r: 8
+  max_seq_length: 256
+  target_modules:
+  - q_proj
+  - v_proj
+translation_engine: nllb
+use_koharu_pipeline: false
+use_mit_pipeline: false
+use_sam_masks: false
+webtoon_strip_height: 0
