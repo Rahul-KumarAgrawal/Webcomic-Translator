@@ -7,18 +7,7 @@
     <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">
         <span class="nav-icon">📤</span> Upload
     </a>
-    <a class="nav-link {% if '/review' in request.path %}active{% endif %}" href="/">
-        <span class="nav-icon">🔍</span> Review
-    </a>
-    <a class="nav-link {% if request.path == '/memory' %}active{% endif %}" href="/memory">
-        <span class="nav-icon">🧠</span> Memory
-    </a>
-    <a class="nav-link {% if request.path == '/train' %}active{% endif %}" href="/train">
-        <span class="nav-icon">⚡</span> Training
-    </a>
-    <a class="nav-link {% if request.path == '/backup' %}active{% endif %}" href="/backup">
-        <span class="nav-icon">💾</span> Backup
-    </a>
+
     <a class="nav-link {% if request.path == '/settings' %}active{% endif %}" href="/settings">
         <span class="nav-icon">⚙️</span> Settings
     </a>
