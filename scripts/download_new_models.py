@@ -75,7 +75,8 @@ repos = [
     ("mayocream/speech-bubble-segmentation", "mayo-bubble-seg"),
     ("mayocream/comic-text-detector", "mayo-text-classic"),
     ("ogkalu/comic-text-segmenter-yolov8m", "ogkalu-text-stable"),
-    ("ogkalu/comic-speech-bubble-detector-yolov8m", "ogkalu-bubble-stable"),
+    # We use the kitsumed model for our stable bubble segmentation
+    ("kitsumed/yolov8m_seg-speech-bubble", "ogkalu-bubble-stable"),
 ]
 
 print("\n--- [Core Engines] Downloading base models ---")
@@ -105,6 +106,19 @@ try:
         shutil.copy2(src_det, dst_det)
 except Exception as e:
     print(f"  Warning: Failed to copy detector_int8.onnx: {e}")
+
+# Rename kitsumed model.pt to what Ogkalu Stable Dual expects
+try:
+    bubble_dir = save_dir / "ogkalu-bubble-stable"
+    src_pt = bubble_dir / "model.pt"
+    dst_pt = bubble_dir / "comic-speech-bubble-detector.pt"
+    
+    if src_pt.exists() and not dst_pt.exists():
+        import shutil
+        print(f"Renaming {src_pt.name} to {dst_pt.name} for Ogkalu Stable Dual...")
+        shutil.copy2(src_pt, dst_pt)
+except Exception as e:
+    print(f"  Warning: Failed to rename kitsumed model.pt: {e}")
 
 
 print("\n[COMPLETE] All models and OCR engines are ready!")

@@ -434,12 +434,12 @@ class Inpainter:
                 if bubble_id != -1 and masks:
                     this_mask_pts = masks[bubble_id]
                 
-                    regions.append(BubbleRegion(
-                        x=x1, y=y1, w=x2 - x1, h=y2 - y1,
-                        source_text="",
-                        bubble_id=bubble_id,
-                        mask_pts=this_mask_pts
-                    ))
+                regions.append(BubbleRegion(
+                    x=x1, y=y1, w=x2 - x1, h=y2 - y1,
+                    source_text="",
+                    bubble_id=bubble_id,
+                    mask_pts=this_mask_pts
+                ))
         return regions
 
     def _run_ogkalu_combine_detect(self, image: Image.Image) -> List[BubbleRegion]:
@@ -868,23 +868,36 @@ class Inpainter:
 
         filtered = []
         for r in regions:
-            # Crop region and check variance of background
+            # Inside a detected bubble -> Keep it immediately to prevent dropping dialogue
+            if r.bubble_id != -1:
+                filtered.append(r)
+                continue
+
+            # Free-floating text (or MIT detector which sets bubble_id=-1 for everything)
             crop_pil = r.crop(image)
             crop_np = np.array(crop_pil.convert("L"))
             var = np.var(crop_np)
             
-            # Confidence-weighted score:
-            # Higher variance often means complex background art (SFX)
-            # Higher OCR confidence means it's likely real text
             score = r.confidence * 100 / (var + 1)
-            
             threshold = 0.5 * strictness
-            # Keep region if score is good, OR if it has a valid detection (conf=0 usually means OCR fail, not bad detection)
-            if score >= threshold or r.confidence > 0.85 or (r.w > 20 and r.h > 20):
+            text_len = len(r.source_text.strip()) if r.source_text else 0
+            
+            # If the text is a phrase (>= 3 chars), it's usually dialogue.
+            # We apply a moderate threshold to protect it, but it MUST pass to prevent hallucinated SFX.
+            if text_len >= 3:
+                if score >= threshold:
+                    filtered.append(r)
+                else:
+                    logger.info("[SFX Filter] Dropping hallucinated long text: '%s', score=%.2f", r.source_text, score)
+                continue
+
+            # Short text (1-2 chars). This is where most SFX noise lives.
+            # We strictly require a high score (clean background) to keep it.
+            if score >= (threshold * 2.0):
                 filtered.append(r)
             else:
-                logger.info("[SFX Filter] Dropping noise/SFX: score=%.2f, var=%.1f, conf=%.2f", 
-                            score, var, r.confidence)
+                logger.info("[SFX Filter] Dropping SFX/Noise: text='%s', score=%.2f, var=%.1f", 
+                            r.source_text, score, var)
         
         return filtered
 
@@ -913,8 +926,8 @@ class Inpainter:
             
             is_junk = (text_len <= 2 and all(c in junk_chars for c in r.source_text.strip() if c.strip()))
             
-            # If it's free-floating AND tiny AND (has no text OR has short/junk text)
-            if is_free_floating and is_tiny_area and (text_len == 0 or is_junk or text_len <= 2):
+            # If it's free-floating AND tiny AND (has no text OR is ONLY junk characters)
+            if is_free_floating and is_tiny_area and (text_len == 0 or is_junk):
                 logger.info(f"[Nuisance Filter] Dropping nuisance: text='{r.source_text}', size={r.w}x{r.h}, free-floating=True")
                 continue
                 

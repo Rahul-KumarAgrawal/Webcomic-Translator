@@ -217,20 +217,17 @@ def run_paddle_gap_filling(image: Image.Image, existing_regions: list, cfg: dict
         w, h = x2 - x1, y2 - y1
 
         # ── Adaptive Threshold Logic ──────────────────────────────────────
-        # Check background complexity to distinguish bubbles from SFX
+        # We use a low baseline threshold to ensure we don't accidentally drop long dialogue.
+        # The actual SFX deletion is safely handled downstream in inpainter.py's strictness filter.
         try:
-            # Crop the area and check variance
             crop = image.crop((x1, y1, x2, y2)).convert("L")
             stat = np.array(crop)
             variance = np.std(stat)
             
-            # Simple/Bubble/Transparent backgrounds have lower variance
-            # Busy Art/SFX backgrounds have high variance
             if variance < 40:
-                min_score = 0.15  # Very sensitive for bubbles/transparent areas
+                min_score = 0.15  # Very sensitive for clean bubbles
             else:
-                # Use user-defined strictness for busy backgrounds
-                min_score = cfg.get("sfx_strictness", 0.55)
+                min_score = 0.35  # Moderate for busy backgrounds (let inpainter.py filter the rest)
         except:
             min_score = 0.3
             

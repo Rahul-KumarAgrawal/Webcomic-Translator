@@ -974,7 +974,10 @@ def _process_pages_standard(
             # Filter non-empty and non-duplicate regions immediately
             valid_regions_for_page = []
             for b_idx, region in enumerate(regions):
-                if not region.source_text.strip(): continue
+                # Only drop empty text if it is also free-floating (no bubble shape detected)
+                if not region.source_text.strip() and region.bubble_id == -1: 
+                    continue
+                    
                 if chunk_meta and _is_duplicate_bubble(region.y, region.source_text, page_idx, chunk_meta, seen_bubbles):
                     continue
                 
