@@ -995,23 +995,17 @@ class Inpainter:
         Returns a new PIL Image with text erased.
         """
         engine = self.cfg.get("inpaint_engine", "lama").lower()
-        use_seg = "_segmented" in engine
-        base_engine = engine.replace("_segmented", "")
         
-        if base_engine == "aot":
-            return self._run_aot_inpaint(image, regions, use_segmentation=use_seg)
-        elif base_engine == "ogkalu":
-            return self._run_ogkalu_inpaint(image, regions, use_segmentation=use_seg)
-        elif base_engine == "panelcleaner":
-            return self._run_panelcleaner_inpaint(image, regions, use_segmentation=use_seg)
-        elif base_engine == "solid":
-            global_mask = None
-            if use_seg:
-                global_mask = self._generate_precise_text_mask(image, regions)
-                
+        if engine == "aot":
+            return self._run_aot_inpaint(image, regions)
+        elif engine == "ogkalu":
+            return self._run_ogkalu_inpaint(image, regions)
+        elif engine == "panelcleaner":
+            return self._run_panelcleaner_inpaint(image, regions)
+        elif engine == "solid":
             result = image.copy()
             for r in regions:
-                self._clean_region(result, r, use_segmentation=use_seg, global_mask=global_mask)
+                self._clean_region(result, r)
             return result
             
         return self._run_mit_inpaint(image, regions)

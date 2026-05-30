@@ -147,6 +147,69 @@ class PanelCleanerPipeline:
         mask = cv2.dilate(mask, kernel, iterations=3)
         return mask
 
+    def _detect_model_call_order(self):
+        """
+        Probe the TorchScript model once with a dummy tensor to discover
+        which argument order it expects: (img, mask) or (mask, img) or unified 4ch.
+        Caches the result so we only probe once per session.
+        
+        NOTE: LaMa models have 3 downsampling layers + FFT blocks, so the probe
+        must use at least 64x64 spatial dimensions. We use 256x256 to be safe.
+        """
+        if hasattr(self, '_call_order'):
+            return self._call_order
+
+        # Must be large enough for LaMa's architecture (3 downsamples + FFT)
+        probe_size = 256
+        dummy_img = torch.randn(1, 3, probe_size, probe_size, device=self.device)
+        dummy_mask = torch.zeros(1, 1, probe_size, probe_size, device=self.device)
+
+        # Strategy A: (img, mask) — standard order (mayo_panel_cleaner.pt uses this)
+        try:
+            with torch.inference_mode():
+                self.lama_model(dummy_img, dummy_mask)
+            self._call_order = 'img_mask'
+            logger.info("[PanelCleaner] Model call order detected: (image, mask)")
+            return self._call_order
+        except Exception:
+            pass
+
+        # Strategy B: (mask, img) — flipped order
+        try:
+            with torch.inference_mode():
+                self.lama_model(dummy_mask, dummy_img)
+            self._call_order = 'mask_img'
+            logger.info("[PanelCleaner] Model call order detected: (mask, image)")
+            return self._call_order
+        except Exception:
+            pass
+
+        # Strategy C: unified 4-channel input
+        try:
+            unified = torch.cat([dummy_img, dummy_mask], dim=1)
+            with torch.inference_mode():
+                self.lama_model(unified)
+            self._call_order = 'unified'
+            logger.info("[PanelCleaner] Model call order detected: unified 4ch input")
+            return self._call_order
+        except Exception:
+            pass
+
+        # Fallback — standard (image, mask) order is most common for traced LaMa
+        self._call_order = 'img_mask'
+        logger.warning("[PanelCleaner] Could not detect model call order, defaulting to (image, mask)")
+        return self._call_order
+
+    def _run_model(self, img_t, mask_t):
+        """Call the model with the previously detected argument order."""
+        order = self._detect_model_call_order()
+        if order == 'img_mask':
+            return self.lama_model(img_t, mask_t)
+        elif order == 'mask_img':
+            return self.lama_model(mask_t, img_t)
+        else:  # unified
+            return self.lama_model(torch.cat([img_t, mask_t], dim=1))
+
     def inpaint_lama(self, image: np.ndarray, mask: np.ndarray) -> np.ndarray:
         """
         Inpaint image given the mask using LaMa/AOT model.
@@ -171,32 +234,35 @@ class PanelCleanerPipeline:
         img_tensor = img_tensor.to(self.device)
         mask_tensor = mask_tensor.to(self.device)
 
-        with torch.inference_mode():
-            # 3. Model Inference with fallback for different architectures
-            try:
-                # Strategy A: Standard separate arguments (img, mask)
-                inpainted = self.lama_model(img_tensor, mask_tensor)
-            except Exception:
-                try:
-                    # Strategy B: Unified 4-channel input (Concatenate Image + Mask)
-                    unified_input = torch.cat([img_tensor, mask_tensor], dim=1)
-                    inpainted = self.lama_model(unified_input)
-                except Exception:
-                    # Strategy C: Flipped arguments (mask, img)
-                    inpainted = self.lama_model(mask_tensor, img_tensor)
+        # LaMa has 3 stride-2 downsample/upsample layers → needs dims divisible by 8
+        _, _, th, tw = img_tensor.shape
+        pad_h = (8 - th % 8) % 8
+        pad_w = (8 - tw % 8) % 8
+        if pad_h > 0 or pad_w > 0:
+            img_tensor = torch.nn.functional.pad(img_tensor, (0, pad_w, 0, pad_h), mode='reflect')
+            mask_tensor = torch.nn.functional.pad(mask_tensor, (0, pad_w, 0, pad_h), mode='reflect')
 
-            # 4. Handle output variations (Some models return (img, mask), some return just img)
+        with torch.inference_mode():
+            # Run model with the correct detected argument order
+            inpainted = self._run_model(img_tensor, mask_tensor)
+            
+            # Crop padding back off
+            if pad_h > 0 or pad_w > 0:
+                inpainted = inpainted[:, :, :th, :tw]
+
+            # Handle output variations (Some models return (img, mask), some return just img)
             if isinstance(inpainted, (list, tuple)):
                 inpainted = inpainted[0]
 
-            # 5. Robust Range Normalization
+            # Robust Range Normalization
             res = inpainted.detach().cpu().squeeze(0).permute(1, 2, 0).numpy()
             
             # If output is mostly zero or extremely small, it might expect 0-255 input
             if np.max(res) < 0.05:
-                # Re-run with 0-255 input if the 0-1 run failed
-                inpainted = self.lama_model(img_tensor * 255.0, mask_tensor)
+                inpainted = self._run_model(img_tensor * 255.0, mask_tensor)
                 if isinstance(inpainted, (list, tuple)): inpainted = inpainted[0]
+                if pad_h > 0 or pad_w > 0:
+                    inpainted = inpainted[:, :, :th, :tw]
                 res = inpainted.detach().cpu().squeeze(0).permute(1, 2, 0).numpy()
 
             # Final mapping to 0-255 uint8
