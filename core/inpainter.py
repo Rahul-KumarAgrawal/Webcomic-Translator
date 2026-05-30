@@ -187,6 +187,10 @@ class Inpainter:
         else:
             regions = self._run_mit_detect(image_path, image)
 
+        in_bubble = sum(1 for r in regions if r.bubble_id != -1)
+        free_float = sum(1 for r in regions if r.bubble_id == -1)
+        print(f"[PIPELINE] After DETECTION: {len(regions)} regions total ({in_bubble} in-bubble, {free_float} free-floating)")
+
         # ── 1b. Split oversized regions (Disabled to prevent vertical text fragmentation)
         # if str(det_engine).lower() not in ("yolo", "yolo_hybrid"):
         #     regions = self._split_tall_regions(image, regions)
@@ -268,6 +272,11 @@ class Inpainter:
         # ── 2b. Symbol-Only Fallback for Empty OCR Results ────────────
         regions = self._fallback_symbol_ocr(image, regions, str(ocr_engine).lower())
 
+        with_text = sum(1 for r in regions if r.source_text and r.source_text.strip())
+        empty = sum(1 for r in regions if not r.source_text or not r.source_text.strip())
+        free_with_text = sum(1 for r in regions if r.bubble_id == -1 and r.source_text and r.source_text.strip())
+        print(f"[PIPELINE] After OCR: {len(regions)} regions ({with_text} with text, {empty} empty, {free_with_text} free-floating WITH text)")
+
         # ── 3. Font Style Detection ─────────────────────────────────────
         # NOTE: Yuzumarker runs at RENDER time (inpaint/render phase), not here.
         # Running it here per-bubble during OCR is too early and wastes VRAM.
@@ -276,10 +285,15 @@ class Inpainter:
         regions = self._merge_nearby_regions(regions)
 
         # ── 4. SFX / Noise Filtering ───────────────────────────────────
+        pre_sfx = len(regions)
         regions = self._apply_sfx_strictness_filter(image, regions)
+        print(f"[PIPELINE] After SFX Filter: {len(regions)} regions (dropped {pre_sfx - len(regions)}, strictness={self.cfg.get('sfx_strictness', 0.55)})")
 
         # ── 5. Nuisance (Tiny Free-Floating) Filtering ─────────────────
+        pre_nui = len(regions)
         regions = self._apply_nuisance_filter(regions)
+        if pre_nui != len(regions):
+            print(f"[PIPELINE] After Nuisance Filter: {len(regions)} regions (dropped {pre_nui - len(regions)})")
         
 
 
@@ -474,10 +488,11 @@ class Inpainter:
             return self._run_mit_detect("", image)
 
         # 2. Run Text Inference
+        conf = float(self.cfg.get("detection_confidence", 0.20))
         try:
-            logger.info("[Modular] [VRAM] Loading Ogkalu Stable Text model...")
+            logger.info("[Modular] [VRAM] Loading Ogkalu Stable Text model (conf=%.2f)...", conf)
             text_model = YOLO(str(text_path))
-            text_res = text_model(image, verbose=False, conf=0.20)
+            text_res = text_model(image, verbose=False, conf=conf)
         except Exception as e:
             print("\n" + "!"*60)
             print(f"⚠️  WARNING: [Ogkalu Stable Dual] Text inference failed: {e}")
@@ -856,49 +871,44 @@ class Inpainter:
 
     def _apply_sfx_strictness_filter(self, image: Image.Image, regions: List[BubbleRegion]) -> List[BubbleRegion]:
         """
-        Filters out regions that are likely artistic noise/SFX based on 
-        the variance of the background pixels and OCR confidence.
+        Simple SFX filter for free-floating (outside-bubble) text:
+          - Always keep text inside a detected bubble.
+          - Drop free-floating text if it has ≤3 characters (short SFX noise).
+          - Drop free-floating text if the region is very large (big artistic SFX).
         """
-        if not self.cfg.get("enable_sfx_filter", True):
-            return regions
-            
-        strictness = float(self.cfg.get("sfx_strictness", 1.0))
-        if strictness <= 0:
-            return regions
+        page_area = image.size[0] * image.size[1]
+        # Max allowed area for free-floating text: 5% of page by default,
+        # scaled by strictness (lower strictness = more tolerant of large regions)
+        max_area_ratio = 0.08 - (0.05 * float(self.cfg.get("sfx_strictness", 0.55)))
 
         filtered = []
+        dropped = 0
         for r in regions:
-            # Inside a detected bubble -> Keep it immediately to prevent dropping dialogue
+            # Inside a detected bubble -> Always keep
             if r.bubble_id != -1:
                 filtered.append(r)
                 continue
 
-            # Free-floating text (or MIT detector which sets bubble_id=-1 for everything)
-            crop_pil = r.crop(image)
-            crop_np = np.array(crop_pil.convert("L"))
-            var = np.var(crop_np)
-            
-            score = r.confidence * 100 / (var + 1)
-            threshold = 0.5 * strictness
             text_len = len(r.source_text.strip()) if r.source_text else 0
-            
-            # If the text is a phrase (>= 3 chars), it's usually dialogue.
-            # We apply a moderate threshold to protect it, but it MUST pass to prevent hallucinated SFX.
-            if text_len >= 3:
-                if score >= threshold:
-                    filtered.append(r)
-                else:
-                    logger.info("[SFX Filter] Dropping hallucinated long text: '%s', score=%.2f", r.source_text, score)
+            region_area = r.w * r.h
+
+            # Rule 1: Drop short/empty text outside bubbles (≤4 chars = SFX like ドン, ゴゴ, etc.)
+            if text_len <= 4:
+                print(f"[SFX Filter] Dropping short/empty outside-bubble text: '{r.source_text}' ({text_len} chars), bbox=({r.x},{r.y},{r.w}x{r.h})")
+                dropped += 1
                 continue
 
-            # Short text (1-2 chars). This is where most SFX noise lives.
-            # We strictly require a high score (clean background) to keep it.
-            if score >= (threshold * 2.0):
-                filtered.append(r)
-            else:
-                logger.info("[SFX Filter] Dropping SFX/Noise: text='%s', score=%.2f, var=%.1f", 
-                            r.source_text, score, var)
+            # Rule 2: Drop oversized free-floating regions (big artistic SFX spanning large area)
+            if region_area > page_area * max_area_ratio:
+                print(f"[SFX Filter] Dropping oversized SFX: '{r.source_text[:30]}' area={region_area}px ({region_area*100/page_area:.1f}% of page)")
+                dropped += 1
+                continue
+
+            # Otherwise keep it — it's real dialogue outside a bubble
+            filtered.append(r)
         
+        if dropped > 0:
+            print(f"[SFX Filter] Kept {len(filtered)} / {len(regions)} regions (dropped {dropped})")
         return filtered
 
     def _apply_nuisance_filter(self, regions: List[BubbleRegion]) -> List[BubbleRegion]:
