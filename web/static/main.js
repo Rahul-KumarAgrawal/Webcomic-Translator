@@ -226,15 +226,15 @@ async function downloadCBZ(cbzName, btn) {
       btn.style.cursor = "wait";
     }
     showToast(`Downloading ${cbzName}... (This may take 10-15s for large files)`, "info");
-    
+
     const downloadUrl = (BACKEND_API_BASE || "") + `/download/${encodeURIComponent(cbzName)}`;
     const resp = await originalFetch(downloadUrl, {
       headers: {
         "ngrok-skip-browser-warning": "true",
-        ...((_AUTH_TOKEN) ? {"X-Auth-Token": _AUTH_TOKEN} : {})
+        ...((_AUTH_TOKEN) ? { "X-Auth-Token": _AUTH_TOKEN } : {})
       }
     });
-    
+
     if (!resp.ok) {
       throw new Error(`Download failed: HTTP ${resp.status}`);
     }
@@ -604,7 +604,7 @@ function initBubbleReview() {
       src.querySelector(".ocr-display").style.display = "none";
       src.querySelector(".ocr-edit-area").style.display = "block";
       btn.style.display = "none";
-      src.querySelector(".btn-ocr-save").style.display   = "inline-flex";
+      src.querySelector(".btn-ocr-save").style.display = "inline-flex";
       src.querySelector(".btn-ocr-cancel").style.display = "inline-flex";
       src.querySelector(".ocr-edit-area").focus();
     });
@@ -614,25 +614,25 @@ function initBubbleReview() {
     btn.addEventListener("click", () => {
       const src = btn.closest(".bubble-source");
       const display = src.querySelector(".ocr-display");
-      const area    = src.querySelector(".ocr-edit-area");
+      const area = src.querySelector(".ocr-edit-area");
       area.value = display.textContent; // reset to original
       area.style.display = "none";
       display.style.display = "";
-      src.querySelector(".btn-ocr-edit").style.display   = "inline-flex";
-      src.querySelector(".btn-ocr-save").style.display   = "none";
+      src.querySelector(".btn-ocr-edit").style.display = "inline-flex";
+      src.querySelector(".btn-ocr-save").style.display = "none";
       btn.style.display = "none";
     });
   });
 
   document.querySelectorAll(".btn-ocr-save").forEach(btn => {
     btn.addEventListener("click", async () => {
-      const src      = btn.closest(".bubble-source");
-      const card     = btn.closest(".bubble-card");
-      const grid     = card.closest(".bubble-grid");
-      const cbzName  = grid ? grid.dataset.cbzName : "";
-      const newOcr   = src.querySelector(".ocr-edit-area").value.trim();
-      const oldOcr   = card.dataset.sourceText;
-      const idx      = parseInt(card.dataset.bubbleNum) - 1;
+      const src = btn.closest(".bubble-source");
+      const card = btn.closest(".bubble-card");
+      const grid = card.closest(".bubble-grid");
+      const cbzName = grid ? grid.dataset.cbzName : "";
+      const newOcr = src.querySelector(".ocr-edit-area").value.trim();
+      const oldOcr = card.dataset.sourceText;
+      const idx = parseInt(card.dataset.bubbleNum) - 1;
 
       if (!newOcr) { showToast("OCR text cannot be empty.", "error"); return; }
       btn.disabled = true;
@@ -652,9 +652,9 @@ function initBubbleReview() {
           showToast("✅ OCR text updated!", "success");
           // Collapse back to display mode
           src.querySelector(".ocr-edit-area").style.display = "none";
-          src.querySelector(".ocr-display").style.display   = "";
-          src.querySelector(".btn-ocr-edit").style.display   = "inline-flex";
-          src.querySelector(".btn-ocr-save").style.display   = "none";
+          src.querySelector(".ocr-display").style.display = "";
+          src.querySelector(".btn-ocr-edit").style.display = "inline-flex";
+          src.querySelector(".btn-ocr-save").style.display = "none";
           src.querySelector(".btn-ocr-cancel").style.display = "none";
         } else {
           showToast("Failed to save OCR: " + (data.error || "Unknown error"), "error");
@@ -677,7 +677,7 @@ async function bubbleAction(action, btn) {
   const series = card.dataset.series;
   const srcText = card.dataset.sourceText;
   const srcLang = card.dataset.sourceLang;
-  const textarea = card.querySelector("textarea");
+  const textarea = card.querySelector(".bubble-translation textarea");
   const transText = textarea ? textarea.value.trim() : card.dataset.translatedText;
 
   const isIgnore = action === "ignore";
@@ -992,7 +992,8 @@ function initBulkLLMTranslator() {
 
       if (translated !== undefined) {
         matchedCount++;
-        const textarea = card.querySelector("textarea");
+        // Target the translation text box, NOT the hidden OCR edit box
+        const textarea = card.querySelector(".bubble-translation textarea");
         if (textarea) {
           textarea.value = translated;
           matches.push({ card, translated });
@@ -1055,6 +1056,23 @@ function initBulkLLMTranslator() {
                 reviewProgress.edited++;
                 m.card.dataset.currentState = "edit";
                 m.card.style.opacity = "1.0"; // Ensure bright after auto-fill
+              }
+
+              // Live badge update so user sees Edited badge without page reload
+              m.card.dataset.edited = "true";
+              m.card.dataset.approved = "false";
+              const metaDiv = m.card.querySelector(".bubble-meta");
+              if (metaDiv) {
+                // Remove stale Approved badge if present
+                const approvedBadge = metaDiv.querySelector(".badge-done");
+                if (approvedBadge) approvedBadge.remove();
+                // Add Edited badge if not already there
+                if (!metaDiv.querySelector(".badge-processing")) {
+                  const editedBadge = document.createElement("span");
+                  editedBadge.className = "badge badge-processing";
+                  editedBadge.textContent = "✏️ Edited";
+                  metaDiv.appendChild(editedBadge);
+                }
               }
             });
             updateReviewProgressUI();
@@ -1493,17 +1511,17 @@ async function initHomeDefaults() {
       }
     }
 
-    setById("ocr-engine-select",       cfg.ocr_engine);
-    setById("detection-engine-select",  cfg.detection_engine);
-    setById("inpaint-engine-select",    cfg.inpaint_engine);
-    setById("engine-select",            cfg.translation_engine);
-    setById("source-lang-select",       cfg.source_lang);
-    setById("target-lang-select",       cfg.target_lang);
-    setById("mit-translator-select",    cfg.mit?.translator);
-    setById("mit-target-lang-select",   cfg.mit?.target_lang);
+    setById("ocr-engine-select", cfg.ocr_engine);
+    setById("detection-engine-select", cfg.detection_engine);
+    setById("inpaint-engine-select", cfg.inpaint_engine);
+    setById("engine-select", cfg.translation_engine);
+    setById("source-lang-select", cfg.source_lang);
+    setById("target-lang-select", cfg.target_lang);
+    setById("mit-translator-select", cfg.mit?.translator);
+    setById("mit-target-lang-select", cfg.mit?.target_lang);
     setById("ocr-upscale-factor-select",
       cfg.ocr_upscale_factor !== undefined ? String(cfg.ocr_upscale_factor) : undefined);
-      
+
     // Inputs
     setById("chunk-height-input", cfg.chunk_height);
     setById("chunk-overlap-input", cfg.chunk_overlap);
@@ -1571,11 +1589,11 @@ async function initRemoteReviewLoader() {
       });
       if (!resp.ok) throw new Error("Backend returned " + resp.status);
       const html = await resp.text();
-      
+
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, "text/html");
       const newMain = doc.querySelector(".main-content");
-      
+
       if (newMain) {
         // Swap src to data-src before injecting to prevent 700+ Vercel 404s
         const imgs = newMain.querySelectorAll('.bubble-crop img');
@@ -1598,13 +1616,13 @@ async function initRemoteReviewLoader() {
             if (entry.isIntersecting) {
               const img = entry.target;
               obs.unobserve(img); // Load only once
-              
+
               let targetSrc = img.dataset.src;
               if (!targetSrc) return;
               if (targetSrc.startsWith('/')) {
                 targetSrc = (BACKEND_API_BASE || "") + targetSrc;
               }
-              
+
               const imgHeaders = { "ngrok-skip-browser-warning": "true" };
               if (_AUTH_TOKEN) imgHeaders["X-Auth-Token"] = _AUTH_TOKEN;
               originalFetch(targetSrc, {
