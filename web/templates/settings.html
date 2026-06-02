@@ -59,6 +59,7 @@
                                         🇰🇷 Pororo (KOR - Ogkalu)</option>
                                     <option value="ppocr-v5" {% if cfg.get('ocr_engine')=='ppocr-v5' %}selected{% endif
                                         %}>🔥 PaddleOCR (v5 - Latest / Ogkalu) (Supports: Ko, En, Latin)</option>
+                                    <option value="ppocr_v5_onnx" {% if cfg.get('ocr_engine')=='ppocr_v5_onnx' %}selected{% endif %}>⚡ PaddleOCR v5 (ONNX - Lightning Fast)</option>
                                     <option value="easyocr" {% if cfg.get('ocr_engine')=='easyocr' %}selected{% endif
                                         %}>🌐 EasyOCR (Multilingual)</option>
                                     <option value="mit" {% if cfg.get('ocr_engine','mit')=='mit' %}selected{% endif %}>
@@ -160,6 +161,59 @@
                             <label for="webtoon_strip_height">Webtoon Strip Height</label>
                             <input type="number" id="webtoon_strip_height" name="webtoon_strip_height"
                                 value="{{ cfg.get('webtoon_strip_height', 0) }}" placeholder="0 = disable">
+                        </div>
+                    </div>
+
+                    <!-- Auto-Selection Preferences -->
+                    <div class="card" style="border-left: 3px solid var(--accent-blue);">
+                        <div class="card-title">🤖 Auto-Selection Preferences</div>
+                        
+                        <div class="form-group">
+                            <label for="auto_ocr_asian">Default Auto OCR (Japanese / Chinese)</label>
+                            <select id="auto_ocr_asian" name="auto_ocr_asian">
+                                <option value="ogkalu_ocr" {% if cfg.get('auto_ocr_asian', 'ogkalu_ocr')=='ogkalu_ocr' %}selected{% endif %}>🏮 Ogkalu OCR (Recommended - Vertical JPN/CHN)</option>
+                                <option value="manga-ocr" {% if cfg.get('auto_ocr_asian')=='manga-ocr' %}selected{% endif %}>🌸 Manga-OCR (Standard)</option>
+                                <option value="ppocr_v5_onnx" {% if cfg.get('auto_ocr_asian')=='ppocr_v5_onnx' %}selected{% endif %}>⚡ PaddleOCR v5 (ONNX - Lightning Fast)</option>
+                                <option value="paddle" {% if cfg.get('auto_ocr_asian')=='paddle' %}selected{% endif %}>🇨🇳 PaddleOCR (v2.8)</option>
+                                <option value="pororo" {% if cfg.get('auto_ocr_asian')=='pororo' %}selected{% endif %}>🇰🇷 Pororo (KOR)</option>
+                                <option value="ppocr-v5" {% if cfg.get('auto_ocr_asian')=='ppocr-v5' %}selected{% endif %}>🔥 PaddleOCR (v5 - Latest)</option>
+                                <option value="easyocr" {% if cfg.get('auto_ocr_asian')=='easyocr' %}selected{% endif %}>🌐 EasyOCR</option>
+                                <option value="mit" {% if cfg.get('auto_ocr_asian')=='mit' %}selected{% endif %}>🛠️ MIT Mayo</option>
+                                <option value="tesseract" {% if cfg.get('auto_ocr_asian')=='tesseract' %}selected{% endif %}>🔠 Tesseract</option>
+                            </select>
+                            <small class="text-muted d-block mt-4">Used for Japanese, Chinese (Simplified), and Chinese (Traditional).</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="auto_ocr_korean">Default Auto OCR (Korean)</label>
+                            <select id="auto_ocr_korean" name="auto_ocr_korean">
+                                <option value="pororo" {% if cfg.get('auto_ocr_korean', 'pororo')=='pororo' %}selected{% endif %}>🇰🇷 Pororo (Recommended)</option>
+                                <option value="ogkalu_ocr" {% if cfg.get('auto_ocr_korean')=='ogkalu_ocr' %}selected{% endif %}>🏮 Ogkalu OCR (Vertical JPN/CHN)</option>
+                                <option value="manga-ocr" {% if cfg.get('auto_ocr_korean')=='manga-ocr' %}selected{% endif %}>🌸 Manga-OCR (Standard)</option>
+                                <option value="ppocr_v5_onnx" {% if cfg.get('auto_ocr_korean')=='ppocr_v5_onnx' %}selected{% endif %}>⚡ PaddleOCR v5 (ONNX - Lightning Fast)</option>
+                                <option value="paddle" {% if cfg.get('auto_ocr_korean')=='paddle' %}selected{% endif %}>🇨🇳 PaddleOCR (v2.8)</option>
+                                <option value="ppocr-v5" {% if cfg.get('auto_ocr_korean')=='ppocr-v5' %}selected{% endif %}>🔥 PaddleOCR (v5 - Latest)</option>
+                                <option value="easyocr" {% if cfg.get('auto_ocr_korean')=='easyocr' %}selected{% endif %}>🌐 EasyOCR</option>
+                                <option value="mit" {% if cfg.get('auto_ocr_korean')=='mit' %}selected{% endif %}>🛠️ MIT Mayo</option>
+                                <option value="tesseract" {% if cfg.get('auto_ocr_korean')=='tesseract' %}selected{% endif %}>🔠 Tesseract</option>
+                            </select>
+                            <small class="text-muted d-block mt-4">Used exclusively for Korean manhwa.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="auto_ocr_others">Default Auto OCR (Other Languages)</label>
+                            <select id="auto_ocr_others" name="auto_ocr_others">
+                                <option value="paddle" {% if cfg.get('auto_ocr_others', 'paddle')=='paddle' %}selected{% endif %}>🇨🇳 PaddleOCR (v2.8 - Recommended)</option>
+                                <option value="ogkalu_ocr" {% if cfg.get('auto_ocr_others')=='ogkalu_ocr' %}selected{% endif %}>🏮 Ogkalu OCR (Vertical JPN/CHN)</option>
+                                <option value="manga-ocr" {% if cfg.get('auto_ocr_others')=='manga-ocr' %}selected{% endif %}>🌸 Manga-OCR (Standard)</option>
+                                <option value="pororo" {% if cfg.get('auto_ocr_others')=='pororo' %}selected{% endif %}>🇰🇷 Pororo (KOR)</option>
+                                <option value="ppocr-v5" {% if cfg.get('auto_ocr_others')=='ppocr-v5' %}selected{% endif %}>🔥 PaddleOCR (v5 - Latest)</option>
+                                <option value="ppocr_v5_onnx" {% if cfg.get('auto_ocr_others')=='ppocr_v5_onnx' %}selected{% endif %}>⚡ PaddleOCR v5 (ONNX - Lightning Fast)</option>
+                                <option value="easyocr" {% if cfg.get('auto_ocr_others')=='easyocr' %}selected{% endif %}>🌐 EasyOCR</option>
+                                <option value="mit" {% if cfg.get('auto_ocr_others')=='mit' %}selected{% endif %}>🛠️ MIT Mayo</option>
+                                <option value="tesseract" {% if cfg.get('auto_ocr_others')=='tesseract' %}selected{% endif %}>🔠 Tesseract</option>
+                            </select>
+                            <small class="text-muted d-block mt-4">Used for English, French, Spanish, and all other supported languages.</small>
                         </div>
                     </div>
 

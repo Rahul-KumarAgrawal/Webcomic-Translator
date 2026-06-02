@@ -257,6 +257,12 @@ class Inpainter:
                 print(f"⚠️  WARNING: PPOCR-v5 failed! Error: {e}. Falling back to MIT Mayo (JPN)...")
                 print("!"*60 + "\n")
                 regions = self._run_manga_ocr_on_regions(image, regions)
+        elif str(ocr_engine).lower() == "ppocr_v5_onnx":
+            try:
+                regions = self._run_ppocr_v5_onnx_ocr(image, regions)
+            except Exception as e:
+                logger.error(f"Failed to run PPOCR v5 ONNX, falling back: {e}")
+                regions = self._run_ppocr_v5_ocr(image, regions)
         elif str(ocr_engine).lower() == "manga-ocr":
             regions = self._run_manga_ocr_on_regions(image, regions)
         elif str(ocr_engine).lower() == "ogkalu_ocr":
@@ -394,7 +400,7 @@ class Inpainter:
             if text:
                 # Sanitize the output:
                 text = text.replace('I', '!').replace('l', '!').replace('1', '!')
-                text = re.sub(r'[^\!\?\.\~\·\s]', '', text).strip()
+                text = re.sub(r'[^\!\?\.\~\·\,\;\'\"\(\)\[\]\{\}\-\—\–\¿\¡\«\»\‹\›\‽\⸘\。\、\・\！\？\：\；\「\」\『\』\【\】\《\》\〈\〉\〔\〕\❤\♡\♥\★\☆\♪\♫\✓\✔\✕\✖\✗\✘\s]', '', text).strip()
                 
                 if text:
                     r.source_text = text
@@ -655,9 +661,15 @@ class Inpainter:
     def _run_ppocr_v5_ocr(self, image: Image.Image, regions: List[BubbleRegion]) -> List[BubbleRegion]:
         """Ultra-modern PaddleOCR v4/v5 logic."""
         from paddleocr import PaddleOCR
-        if not hasattr(self, '_ppocr_v5') or self._ppocr_v5 is None:
-            lang = 'japan' if self.cfg.get("source_lang") == "jpn_Jpan" else 'korean'
-            self._ppocr_v5 = PaddleOCR(use_angle_cls=True, lang=lang, use_gpu=True)
+        from core.paddleocr_wrapper import map_lang_to_paddle
+        
+        lang_code = self.cfg.get("source_lang_override") or self.cfg.get("source_lang", "eng_Latn")
+        paddle_lang = map_lang_to_paddle(lang_code)
+        
+        # In case the lang changes between jobs, we should recreate the model if the lang doesn't match
+        if not hasattr(self, '_ppocr_v5') or getattr(self, '_ppocr_v5_lang', None) != paddle_lang:
+            self._ppocr_v5 = PaddleOCR(use_angle_cls=True, lang=paddle_lang, use_gpu=True)
+            self._ppocr_v5_lang = paddle_lang
         
         import numpy as np
         for region in regions:
@@ -667,6 +679,80 @@ class Inpainter:
                 texts = [line[1][0] for line in res[0]]
                 region.source_text = " ".join(texts)
         return regions
+
+    def _run_ppocr_v5_onnx_ocr(self, image: Image.Image, regions: List[BubbleRegion]) -> List[BubbleRegion]:
+        """⚡ PaddleOCR v5 (ONNX) Engine via RapidOCR."""
+        from rapidocr_onnxruntime import RapidOCR
+        import numpy as np
+        
+        try:
+            ppocr_dir = self._models_dir / "OCR" / "ppocr-v5-onnx"
+            lang_code = self.cfg.get("source_lang", "eng_Latn")
+            
+            # Map NLLB/system language codes to PPOCRv5 ONNX models
+            lang = 'en'
+            if lang_code == "kor_Hang":
+                lang = 'korean'
+            elif lang_code in ["zho_Hans", "zho_Hant", "zho"]:
+                lang = 'ch'
+            elif lang_code in ["spa_Latn", "fra_Latn", "por_Latn", "ita_Latn", "deu_Latn", "latin"]:
+                lang = 'latin'
+            elif lang_code in ["rus_Cyrl", "ukr_Cyrl", "eslav"]:
+                lang = 'eslav'
+            
+            # Map languages to the ONNX models
+            model_map = {
+                'korean': ('korean_PP-OCRv5_rec_mobile_infer.onnx', 'ppocrv5_korean_dict.txt'),
+                'en': ('en_PP-OCRv5_rec_mobile_infer.onnx', 'ppocrv5_en_dict.txt'),
+                'ch': ('ch_PP-OCRv5_rec_mobile_infer.onnx', 'ppocrv5_dict.txt'),
+                'latin': ('latin_PP-OCRv5_rec_mobile_infer.onnx', 'ppocrv5_latin_dict.txt'),
+                'eslav': ('eslav_PP-OCRv5_rec_mobile_infer.onnx', 'ppocrv5_eslav_dict.txt'),
+            }
+                
+            model_name, dict_name = model_map[lang]
+            rec_model_path = ppocr_dir / model_name
+            rec_keys_path = ppocr_dir / dict_name
+
+            if not rec_model_path.exists() or not rec_keys_path.exists():
+                logger.warning(f"[PPOCR v5 ONNX] Models missing at {ppocr_dir}. Falling back to standard PPOCR-v5.")
+                return self._run_ppocr_v5_ocr(image, regions)
+
+            # Initialize RapidOCR engine just for this language
+            if not hasattr(self, f'_rapidocr_{lang}') or getattr(self, f'_rapidocr_{lang}') is None:
+                logger.info(f"[Modular] [VRAM] Loading PPOCR v5 ONNX ({lang})...")
+                det_model_path = ppocr_dir / 'ch_PP-OCRv5_mobile_det.onnx'
+                setattr(self, f'_rapidocr_{lang}', RapidOCR(
+                    rec_model_path=str(rec_model_path), 
+                    rec_keys_path=str(rec_keys_path),
+                    det_model_path=str(det_model_path) if det_model_path.exists() else None,
+                    cls_model_path=None
+                ))
+            
+            engine = getattr(self, f'_rapidocr_{lang}')
+            
+            for region in regions:
+                try:
+                    # RapidOCR expects BGR numpy array
+                    crop = np.array(region.crop(image).convert("RGB"))
+                    crop = crop[:, :, ::-1] # RGB to BGR
+                    
+                    rec_res, _ = engine(crop)
+                    if rec_res:
+                        texts = [line[1] for line in rec_res]
+                        # Calculate average confidence
+                        confidences = [float(line[2]) for line in rec_res if len(line) > 2]
+                        region.source_text = " ".join(texts)
+                        region.confidence = sum(confidences) / len(confidences) if confidences else 0.8
+                    else:
+                        region.source_text = ""
+                        region.confidence = 0.0
+                except Exception as e:
+                    logger.warning(f"[PPOCR v5 ONNX] Region processing failed: {e}")
+                    region.source_text = ""
+            return regions
+        except Exception as e:
+            logger.error(f"[PPOCR v5 ONNX] Engine runtime failed: {e}")
+            return self._run_ppocr_v5_ocr(image, regions)
 
     def _run_ogkalu_ocr_onnx(self, image: Image.Image, regions: List[BubbleRegion]) -> List[BubbleRegion]:
         """🏮 Ogaklu OCR (CHN+JPN vertical) ONNX implementation."""

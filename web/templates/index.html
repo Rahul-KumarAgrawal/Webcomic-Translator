@@ -46,7 +46,8 @@
               <option value="manga-ocr" {% if cfg.get('ocr_engine','manga-ocr')=='manga-ocr' %}selected{% endif %}>🌸 Manga-OCR (JPN & CHN)</option>
               <option value="ogkalu_ocr" {% if cfg.get('ocr_engine')=='ogkalu_ocr' %}selected{% endif %}>🏮 Ogkalu OCR (CHN+JPN vertical)</option>
               <option value="pororo" {% if cfg.get('ocr_engine')=='pororo' %}selected{% endif %}>🇰🇷 Pororo (KOR - Ogkalu)</option>
-              <option value="ppocr-v5" {% if cfg.get('ocr_engine')=='ppocr-v5' %}selected{% endif %}>🔥 PaddleOCR (v5 - Latest / Ogkalu) (Supports: Ko, En, Latin)</option>
+              <option value="ppocr-v5" {% if cfg.get('ocr_engine')=='ppocr-v5' %}selected{% endif %}>🔥 PaddleOCR (v5 - Latest / Ogkalu)</option>
+              <option value="ppocr_v5_onnx" {% if cfg.get('ocr_engine')=='ppocr_v5_onnx' %}selected{% endif %}>⚡ PaddleOCR v5 (ONNX - Lightning Fast)</option>
               <option value="none" {% if cfg.get('ocr_engine')=='none' %}selected{% endif %}>❌ None (Skip OCR)</option>
             </select>
           </div>

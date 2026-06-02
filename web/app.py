@@ -1258,6 +1258,9 @@ def settings_save():
     cfg["detection_engine"] = request.form.get("detection_engine", "mit").strip()
     cfg["inpaint_engine"] = request.form.get("inpaint_engine", "lama").strip()
     cfg["auto_detect_engine"] = request.form.get("auto_detect_engine", "gemini").strip()
+    cfg["auto_ocr_asian"] = request.form.get("auto_ocr_asian", "ogkalu_ocr").strip()
+    cfg["auto_ocr_korean"] = request.form.get("auto_ocr_korean", "pororo").strip()
+    cfg["auto_ocr_others"] = request.form.get("auto_ocr_others", "paddle").strip()
     
     try:
         cfg["webtoon_strip_height"] = int(request.form.get("webtoon_strip_height", 0))

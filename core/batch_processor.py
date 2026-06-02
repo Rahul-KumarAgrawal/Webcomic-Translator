@@ -618,11 +618,11 @@ def process_cbz(
         if cfg.get("ocr_engine") == "auto":
             src = cfg.get("source_lang_override") or cfg.get("source_lang")
             if src == "jpn_Jpan" or (src and "zho" in src):
-                selected_ocr = "manga-ocr"
+                selected_ocr = cfg.get("auto_ocr_asian", "ogkalu_ocr")
             elif src == "kor_Hang":
-                selected_ocr = "pororo"
+                selected_ocr = cfg.get("auto_ocr_korean", "pororo")
             else:
-                selected_ocr = "paddle"
+                selected_ocr = cfg.get("auto_ocr_others", "paddle")
             
             logger.info(f"  ✨ Smart OCR Selection: source language is '{src}', choosing engine '{selected_ocr}'")
             cfg["ocr_engine"] = selected_ocr

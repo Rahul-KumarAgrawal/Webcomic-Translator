@@ -15,7 +15,7 @@ for d in [save_dir, ocr_dir, inpainting_dir, inpainting_dir_koharu, detector_dir
 # 1. Base Detection Models
 models = [
     ("ogkalu/comic-text-and-bubble-detector", "detector.onnx"),
-    ("ogkalu/comic-text-and-bubble-detector", "detector_int8.onnx"),
+    ("ogkalu/comic-text-and-bubble-detector", "detector-v4-s_int8.onnx"),
     ("kitsumed/yolov8m_seg-speech-bubble", "model.pt"),
     ("ogkalu/comic-text-segmenter-yolov8m", "comic-text-segmenter.pt"),
 ]
@@ -71,6 +71,7 @@ except Exception as e:
 repos = [
     ("ogkalu/pororo", "pororo"),
     ("ogkalu/ppocr-v5-torch", "ppocr-v5-torch"),
+    ("ogkalu/ppocr-v5-onnx", "ppocr-v5-onnx"),
     ("ogkalu/yuzumarker-font-detection-onnx", "font-detection"),
     ("mayocream/speech-bubble-segmentation", "mayo-bubble-seg"),
     ("mayocream/comic-text-detector", "mayo-text-classic"),
@@ -95,7 +96,7 @@ for repo_id, folder_name in repos:
 
 # Overwrite MIT CTD with Ogkalu Combine INT8
 try:
-    src_det = save_dir / "detector_int8.onnx"
+    src_det = save_dir / "detector-v4-s_int8.onnx"
     mit_det_dir = _ROOT / "models" / "detection"
     mit_det_dir.mkdir(parents=True, exist_ok=True)
     dst_det = mit_det_dir / "comictextdetector.pt.onnx"
