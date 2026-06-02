@@ -899,7 +899,8 @@ class Inpainter:
                 continue
 
             # Rule 2: Drop oversized free-floating regions (big artistic SFX spanning large area)
-            if region_area > page_area * max_area_ratio:
+            # Exception: Keep if the text is greater than 13 characters, as it is likely dialogue.
+            if region_area > page_area * max_area_ratio and text_len <= 13:
                 print(f"[SFX Filter] Dropping oversized SFX: '{r.source_text[:30]}' area={region_area}px ({region_area*100/page_area:.1f}% of page)")
                 dropped += 1
                 continue
