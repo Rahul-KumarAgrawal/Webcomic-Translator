@@ -77,6 +77,9 @@
                                     <option value="groq" {% if cfg.get('auto_detect_engine')=='groq' %}selected{% endif
                                         %}>
                                         ⚡ GROQ (Llama 4 Scout - Ultra Fast)</option>
+                                    <option value="groq_qwen" {% if cfg.get('auto_detect_engine')=='groq_qwen' %}selected{% endif
+                                        %}>
+                                        ⚡ GROQ Qwen (Qwen3.6 27B)</option>
                                     <option value="google" {% if cfg.get('auto_detect_engine')=='google' %}selected{%
                                         endif %}>
                                         🌐 Google Cloud Vision</option>
@@ -345,7 +348,7 @@
                                 value="{{ cfg.get('google_api_key', '') }}">
                         </div>
                         <div class="form-group">
-                            <label for="groq_api_key">Groq API Key (Llama 4 Scout)</label>
+                            <label for="groq_api_key">Groq API Key (Llama 4 Scout / Qwen)</label>
                             <input type="password" id="groq_api_key" name="groq_api_key" placeholder="gsk_..."
                                 value="{{ cfg.get('groq_api_key', '') }}">
                         </div>

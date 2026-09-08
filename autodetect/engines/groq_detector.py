@@ -5,16 +5,19 @@ import requests
 from autodetect.base import BaseDetector
 
 class GroqDetector(BaseDetector):
+    name = "groq"
+    model = "meta-llama/llama-4-scout-17b-16e-instruct"
+
     def __init__(self):
         super().__init__()
-        self.name = "groq"
+        self.name = type(self).name
+        self.model = type(self).model
         self.requires_api_key = True
         self.is_free = False
-        self.model = "meta-llama/llama-4-scout-17b-16e-instruct"
         self.url = "https://api.groq.com/openai/v1/chat/completions"
 
     def _get_api_key(self):
-        return os.environ.get("GROQ_API_KEY", "")
+        return os.environ.get(f"{self.name.upper()}_API_KEY", "") or os.environ.get("GROQ_API_KEY", "")
 
     def detect(self, image_bytes: bytes) -> dict:
         api_key = self._get_api_key()
@@ -35,15 +38,20 @@ class GroqDetector(BaseDetector):
         }
 
         prompt = (
-            "Analyze the following image and detect the primary language(s) of the text. "
+            "Analyze the image and detect the primary language of the visible text. "
+            "First read/transcribe the most legible text, then identify the language from the actual letters, "
+            "diacritics, words, and script shown in the image. Do not guess from art style, names, country, "
+            "or genre. Carefully distinguish related languages and scripts when they look similar. "
+            "Use the ISO 639-1 language code when possible, with zh-cn or zh-tw for Chinese variants. "
             "Return ONLY a JSON object with the following structure: "
             "{\n"
             "  \"languages\": [\n"
-            "    { \"name\": \"Language Name\", \"script\": \"Script Name\", \"confidence\": \"high/medium/low\" }\n"
+            "    { \"name\": \"Language Name\", \"iso_code\": \"ISO code such as pt/en/ja/zh-cn\", \"script\": \"Script Name\", \"confidence\": \"high/medium/low\", \"evidence\": \"short visible-text evidence\" }\n"
             "  ],\n"
             "  \"hasText\": true,\n"
+            "  \"transcription\": \"Most readable visible text\",\n"
             "  \"summary\": \"Brief description of what you see\",\n"
-            "  \"engine\": \"groq\"\n"
+            f"  \"engine\": \"{self.name}\"\n"
             "}"
         )
 
@@ -95,7 +103,7 @@ class GroqDetector(BaseDetector):
         try:
             # We can try to list models or just a tiny chat completion without image
             test_payload = {
-                "model": "llama3-8b-8192", # Use a cheaper model for connection test if possible, or same
+                "model": self.model,
                 "messages": [{"role": "user", "content": "test"}],
                 "max_tokens": 1
             }
@@ -103,3 +111,8 @@ class GroqDetector(BaseDetector):
             return resp.status_code == 200
         except Exception:
             return False
+
+
+class GroqQwenDetector(GroqDetector):
+    name = "groq_qwen"
+    model = "qwen/qwen3.6-27b"

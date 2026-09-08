@@ -564,8 +564,10 @@ class Inpainter:
             logger.info("[Modular] [VRAM] Loading MangaOCR model...")
             self._mocr = MangaOCR(str(model_path) if model_path.exists() else None)
         
+        from PIL import ImageOps
         for region in regions:
             crop = region.crop(image)
+            crop = ImageOps.expand(crop, border=20, fill='white')
             region.source_text = self._mocr(crop)
             # Manga-OCR doesn't return confidence, use heuristic:
             # - If text is detected: 0.85 confidence (generally reliable)
@@ -598,8 +600,10 @@ class Inpainter:
                 self._pororo_brain_sess = ort.InferenceSession(str(brain_path), sess_options, providers=providers)
                 self._pororo_craft_sess = ort.InferenceSession(str(craft_path), sess_options, providers=providers)
 
+            from PIL import ImageOps
             for region in regions:
                 crop = region.crop(image).convert("L")
+                crop = ImageOps.expand(crop, border=20, fill='white')
                 w, h = crop.size
                 # Elite BrainOCR expects 64px height
                 new_w = int(w * (64 / h))
@@ -651,9 +655,12 @@ class Inpainter:
             self._mocr_model = MangaOcr(str(model_path))
             logger.info("[Modular] MangaOCR loaded.")
 
+        from PIL import ImageOps
         for region in regions:
             try:
-                region.source_text = self._mocr_model(region.crop(image))
+                crop = region.crop(image)
+                crop = ImageOps.expand(crop, border=20, fill='white')
+                region.source_text = self._mocr_model(crop)
             except Exception as e:
                 logger.warning(f"[MangaOCR] Failed: {e}")
         return regions
@@ -668,13 +675,16 @@ class Inpainter:
         
         # In case the lang changes between jobs, we should recreate the model if the lang doesn't match
         if not hasattr(self, '_ppocr_v5') or getattr(self, '_ppocr_v5_lang', None) != paddle_lang:
-            self._ppocr_v5 = PaddleOCR(use_angle_cls=True, lang=paddle_lang, use_gpu=True)
+            self._ppocr_v5 = PaddleOCR(use_angle_cls=False, lang=paddle_lang, use_gpu=True)
             self._ppocr_v5_lang = paddle_lang
         
         import numpy as np
+        from PIL import ImageOps
         for region in regions:
-            crop = np.array(region.crop(image))
-            res = self._ppocr_v5.ocr(crop, cls=True)
+            crop_pil = region.crop(image)
+            crop_pil = ImageOps.expand(crop_pil, border=20, fill='white')
+            crop = np.array(crop_pil)
+            res = self._ppocr_v5.ocr(crop, cls=False)
             if res and res[0]:
                 texts = [line[1][0] for line in res[0]]
                 region.source_text = " ".join(texts)
@@ -730,10 +740,13 @@ class Inpainter:
             
             engine = getattr(self, f'_rapidocr_{lang}')
             
+            from PIL import ImageOps
             for region in regions:
                 try:
                     # RapidOCR expects BGR numpy array
-                    crop = np.array(region.crop(image).convert("RGB"))
+                    crop_pil = region.crop(image).convert("RGB")
+                    crop_pil = ImageOps.expand(crop_pil, border=20, fill='white')
+                    crop = np.array(crop_pil)
                     crop = crop[:, :, ::-1] # RGB to BGR
                     
                     rec_res, _ = engine(crop)
@@ -783,11 +796,14 @@ class Inpainter:
                 with open(vocab_path, "r", encoding="utf-8") as f:
                     self._ogkalu_ocr_vocab = [line.strip() for line in f.readlines()]
 
+            from PIL import ImageOps
             for region in regions:
                 try:
                     # 2. Preprocess
                     # TrOCR typically expects 224x224 RGB
-                    crop = region.crop(image).convert("RGB").resize((224, 224), Image.LANCZOS)
+                    crop = region.crop(image).convert("RGB")
+                    crop = ImageOps.expand(crop, border=20, fill='white')
+                    crop = crop.resize((224, 224), Image.LANCZOS)
                     img_np = np.array(crop).astype(np.float32) / 255.0
                     # Normalization (standard ViT)
                     img_np = (img_np - 0.5) / 0.5

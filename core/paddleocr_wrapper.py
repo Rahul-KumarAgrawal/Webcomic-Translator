@@ -76,7 +76,7 @@ def get_paddle_ocr(lang="japan"):
         logger.info(f"[VRAM] Loading PaddleOCR (Stable 2.8.1) model for language: {lang}...")
         # Stable 2.x arguments
         _paddle_ocr_instances[lang] = PaddleOCR(
-            use_angle_cls=True, 
+            use_angle_cls=False,  # Disabled to prevent 180-degree hallucination flips (MI -> IW)
             lang=lang, 
             show_log=False, 
             use_gpu=True, 
@@ -134,8 +134,14 @@ def run_paddle_ocr_on_regions(image: Image.Image, regions: list, cfg: dict, forc
     upscale_factor = float(cfg.get("ocr_upscale_factor", 2.0))
     
     for region in regions:
-        # Crop the region
+        # Crop the region exactly to the YOLO bounding box
         crop_pil = image.crop(region.bbox)
+        
+        # Safe Artificial Padding: Add a pure white border to the crop.
+        # DBNet cannot detect text that touches the very edges of the image.
+        # By adding artificial white padding, we fix the small text OCR issues 
+        # without risking pulling in adjacent text from the original page.
+        crop_pil = ImageOps.expand(crop_pil, border=20, fill='white')
         
         if super_res:
             w_c, h_c = crop_pil.size
@@ -153,7 +159,7 @@ def run_paddle_ocr_on_regions(image: Image.Image, regions: list, cfg: dict, forc
         crop = np.array(crop_pil)
             
         # Run PaddleOCR (Stable 2.x format)
-        result = ocr.ocr(crop, cls=True)
+        result = ocr.ocr(crop, cls=False) # cls=False prevents random 180-degree flips
         
         if result and result[0]:
             # With the rotation trick, PaddleOCR's default result order (Top-to-Bottom rows)

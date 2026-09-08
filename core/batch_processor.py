@@ -133,6 +133,70 @@ LANGDETECT_TO_NLLB = {
     "tl": "tgl_Latn",
 }
 
+DETECTED_CODE_ALIASES = {
+    "jpn": "ja", "japanese": "ja",
+    "zho": "zh-cn", "chi": "zh-cn", "cmn": "zh-cn", "zh": "zh-cn",
+    "zh-hans": "zh-cn", "zh_cn": "zh-cn", "zh-cn": "zh-cn",
+    "zh-hant": "zh-tw", "zh_tw": "zh-tw", "zh-tw": "zh-tw",
+    "kor": "ko", "korean": "ko",
+    "eng": "en", "english": "en",
+    "spa": "es", "spanish": "es",
+    "fra": "fr", "fre": "fr", "french": "fr",
+    "deu": "de", "ger": "de", "german": "de",
+    "ita": "it", "italian": "it",
+    "por": "pt", "pt-br": "pt", "pt-pt": "pt", "portuguese": "pt",
+    "rus": "ru", "russian": "ru",
+    "nld": "nl", "dut": "nl", "dutch": "nl",
+    "swe": "sv", "swedish": "sv",
+    "dan": "da", "danish": "da",
+    "fin": "fi", "finnish": "fi",
+    "nor": "no", "nob": "no", "norwegian": "no",
+    "pol": "pl", "polish": "pl",
+    "ces": "cs", "cze": "cs", "czech": "cs",
+    "slk": "sk", "slo": "sk", "slovak": "sk",
+    "ron": "ro", "rum": "ro", "romanian": "ro",
+    "hun": "hu", "hungarian": "hu",
+    "hrv": "hr", "croatian": "hr",
+    "bul": "bg", "bulgarian": "bg",
+    "ukr": "uk", "ukrainian": "uk",
+    "bel": "be", "belarusian": "be",
+    "srp": "sr", "serbian": "sr",
+    "ara": "ar", "arabic": "ar",
+    "fas": "fa", "per": "fa", "pes": "fa", "persian": "fa",
+    "urd": "ur", "urdu": "ur",
+    "hin": "hi", "hindi": "hi",
+    "ben": "bn", "bengali": "bn",
+    "guj": "gu", "gujarati": "gu",
+    "tam": "ta", "tamil": "ta",
+    "tel": "te", "telugu": "te",
+    "kan": "kn", "kannada": "kn",
+    "mal": "ml", "malayalam": "ml",
+    "mar": "mr", "marathi": "mr",
+    "nep": "ne", "nepali": "ne",
+    "tur": "tr", "turkish": "tr",
+    "vie": "vi", "vietnamese": "vi",
+    "ind": "id", "indonesian": "id",
+    "afr": "af", "afrikaans": "af",
+    "sqi": "sq", "alb": "sq", "albanian": "sq",
+    "swa": "sw", "swahili": "sw",
+    "tgl": "tl", "fil": "tl", "tagalog": "tl", "filipino": "tl",
+}
+
+def _normalize_detected_iso(value: str) -> Optional[str]:
+    if not value:
+        return None
+    code = str(value).strip().lower().replace("_", "-")
+    if not code:
+        return None
+    code = DETECTED_CODE_ALIASES.get(code, code)
+    if code in LANGDETECT_TO_NLLB:
+        return code
+    base = code.split("-")[0]
+    base = DETECTED_CODE_ALIASES.get(base, base)
+    if base in LANGDETECT_TO_NLLB:
+        return base
+    return None
+
 def _auto_detect_language(images: list, logger: logging.Logger, cfg: dict = None) -> Tuple[Optional[str], float]:
     """
     Identifies the language of the comic.
@@ -154,11 +218,16 @@ def _auto_detect_language(images: list, logger: logging.Logger, cfg: dict = None
         
         if engine_name in manager.engines:
             active_engine = manager.engines[engine_name]
-            logger.info("  Auto-detect: using engine '%s'...", active_engine.name)
+            model_name = getattr(active_engine, "model", "unknown")
+            logger.info("  Auto-detect: using engine '%s' with model '%s'...", active_engine.name, model_name)
             
             key = cfg.get(f"{engine_name}_api_key")
+            if not key and engine_name.startswith("groq"):
+                key = cfg.get("groq_api_key")
             if key:
                 os.environ[f"{engine_name.upper()}_API_KEY"] = key
+                if engine_name.startswith("groq"):
+                    os.environ["GROQ_API_KEY"] = key
 
             # Waterfall loop: try each sample page until one has text
             for test_img_path in sample_pages:
@@ -179,11 +248,15 @@ def _auto_detect_language(images: list, logger: logging.Logger, cfg: dict = None
                         img_bytes = f.read()
                 
                 result = active_engine.detect(img_bytes)
+                if result.get("error"):
+                    logger.warning("  Auto-detect: engine '%s' failed on Page %d: %s", active_engine.name, images.index(test_img_path) + 1, result.get("error"))
+                    continue
                 if result.get("hasText") and result.get("languages"):
                     top_lang = result["languages"][0]
-                    lang_name = top_lang["name"].lower()
+                    lang_name = str(top_lang.get("name", "")).lower()
+                    detected_iso = _normalize_detected_iso(top_lang.get("iso_code") or top_lang.get("code") or top_lang.get("language_code"))
                     
-                    # Map common names to ISO/NLLB
+                    # Fall back to model-provided language name when no ISO code is returned.
                     name_to_iso = {
                         "japanese": "ja", "chinese": "zh-cn", "chinese (simplified)": "zh-cn",
                         "chinese (traditional)": "zh-tw", "traditional chinese": "zh-tw",
@@ -191,7 +264,8 @@ def _auto_detect_language(images: list, logger: logging.Logger, cfg: dict = None
                         "spanish": "es", "french": "fr", "german": "de", "italian": "it",
                         "portuguese": "pt", "russian": "ru"
                     }
-                    detected_iso = name_to_iso.get(lang_name)
+                    if not detected_iso:
+                        detected_iso = _normalize_detected_iso(name_to_iso.get(lang_name) or lang_name)
                     
                     script = top_lang.get("script", "").lower()
                     if lang_name == "chinese":
@@ -203,8 +277,13 @@ def _auto_detect_language(images: list, logger: logging.Logger, cfg: dict = None
                     if detected_iso:
                         conf_map = {"high": 1.0, "medium": 0.8, "low": 0.5}
                         prob = conf_map.get(top_lang.get("confidence", "medium"), 0.8)
-                        logger.info("  Auto-detect: '%s' detected '%s' on Page %d", 
-                                    active_engine.name, lang_name, images.index(test_img_path) + 1)
+                        evidence = top_lang.get("evidence") or result.get("transcription") or result.get("summary") or ""
+                        if evidence:
+                            logger.info("  Auto-detect: '%s' (%s) detected '%s' [%s] on Page %d; evidence: %s",
+                                        active_engine.name, model_name, lang_name, detected_iso, images.index(test_img_path) + 1, str(evidence)[:160])
+                        else:
+                            logger.info("  Auto-detect: '%s' (%s) detected '%s' [%s] on Page %d",
+                                        active_engine.name, model_name, lang_name, detected_iso, images.index(test_img_path) + 1)
                         return detected_iso, prob
                 else:
                     logger.info("  Auto-detect: no text found on Page %d, trying next...", images.index(test_img_path) + 1)

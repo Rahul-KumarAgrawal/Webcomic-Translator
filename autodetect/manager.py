@@ -42,7 +42,8 @@ class DetectorManager:
             # Check if API key is present in env if required
             env_key = f"{name.upper()}_API_KEY"
             is_configured = True
-            if engine.requires_api_key and not os.environ.get(env_key):
+            fallback_key = "GROQ_API_KEY" if name.startswith("groq") else None
+            if engine.requires_api_key and not (os.environ.get(env_key) or (fallback_key and os.environ.get(fallback_key))):
                 is_configured = False
             
             result.append({
